@@ -17,10 +17,11 @@
 #hero .hero-stage { transition: transform 0.8s cubic-bezier(.4,0,.2,1); }
 /* phase 2: wider browser slides left so its right edge stays on-screen */
 body.hero-p2 #hero .hero-stage { transform: translateX(-5vw); }
-body.hero-p3 #hero .hero-stage { transform: translateX(calc(-5vw - 2%)); }
-/* P4 keeps the P3 stage position — the window doesn't move, the dock slides
-   in inside it; also keeps the long "talks back" headline clear of the window */
-body.hero-p4 #hero .hero-stage { transform: translateX(calc(-5vw - 2%)); }
+body.hero-p3 #hero .hero-stage { transform: translateX(calc(-5vw - 2%)) translateY(-14px); }
+/* P4: shift right + rise — browser moves noticeably between phases */
+body.hero-p4 #hero .hero-stage { transform: translateX(calc(-5vw + 1.5%)) translateY(-28px); }
+/* P5: shift left + drop */
+body.hero-p5 #hero .hero-stage { transform: translateX(calc(-5vw - 4.5%)) translateY(12px); }
 
 #hero .browser {
   position: relative;                /* tpanel + discuss dock anchor to the browser viewport */
@@ -28,21 +29,17 @@ body.hero-p4 #hero .hero-stage { transform: translateX(calc(-5vw - 2%)); }
   transform-origin: 50% 50%;
   transition: transform 0.8s cubic-bezier(.4,0,.2,1);
 }
-/* ONE window size for every phase — no width/height morphing between screens.
-   The P4 chat floats over the article as a popup now, so the window only
-   needs the article itself: ~66ch lines, height = title + lead + the
-   simplify paragraph. The 46vw guard keeps the right edge on-screen on
-   narrow desktops. !important beats the base .browser max-width:560 cap
-   and the hero-p2 660px override in lantern-v3.css. */
 #hero .browser,
 body.hero-p2 #hero .browser,
 body.hero-p3 #hero .browser,
 body.hero-p4 #hero .browser {
-  width: min(616px, 41.4vw) !important;   /* −10% width */
+  width: min(678px, 45.5vw) !important;
   max-width: none !important;
-  min-height: 490px;
 }
-body.hero-p2 #hero .browser { transform: perspective(1300px) rotateY(0deg) !important; }   /* straighten on scroll into P2+ */
+body.hero-p2 #hero .browser { transform: perspective(1300px) rotateY(0deg) !important; }
+body.hero-p3 #hero .browser { transform: perspective(1300px) rotateY(0deg) rotate(-2deg) !important; }
+body.hero-p4 #hero .browser { transform: perspective(1300px) rotateY(0deg) rotate(1.2deg) !important; }
+body.hero-p5 #hero .browser { transform: perspective(1300px) rotateY(0deg) rotate(-1deg) !important; }
 
 #hero .hero-copy {
   transition: opacity 0.5s ease, transform 0.65s cubic-bezier(.4,0,.2,1);
@@ -117,6 +114,11 @@ body.hero-p2 .hero-extra {
 .scroll-cue { transition: opacity 0.3s ease; }
 body.hero-p2 .scroll-cue { opacity: 0; }
 
+/* mobile-only bottom nav cluster — hidden on desktop (shown in the ≤920px block) */
+.m-navcluster { display: none; }
+/* mobile-only relocated CTA clone — hidden on desktop */
+.hcta-m { display: none; }
+
 /* worddeck: lift at-hero suppression in phase 2 */
 body.hero-p2 #worddeck {
   opacity: 1 !important;
@@ -152,10 +154,19 @@ body.hero-p2.at-hero .pill {
   display: flex; align-items: center; gap: 9px;
   cursor: pointer; background: none; border: none; padding: 0;
 }
+.m-nav-slot {
+  width: 15px; height: 15px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
 .m-dot {
   width: 7px; height: 7px; border-radius: 50%;
-  background: rgba(26,23,20,.25); flex-shrink: 0;
-  transition: background 0.3s ease, transform 0.3s ease;
+  background: rgba(26,23,20,.25);
+  transition: background 0.25s ease;
+}
+.m-icon {
+  width: 15px; height: 15px; display: none;
+  fill: var(--amber, #ef8e1c); stroke: var(--amber, #ef8e1c);
+  stroke-width: 1; stroke-linecap: round; stroke-linejoin: round;
 }
 .m-dot-lbl {
   font-family: var(--mono, monospace); font-size: 10px;
@@ -163,10 +174,11 @@ body.hero-p2.at-hero .pill {
   color: rgba(26,23,20,.35); white-space: nowrap;
   opacity: 0; transition: color 0.3s ease, opacity 0.2s ease;
 }
-/* active tab — orange icon */
-.m-dot-wrap.on .m-dot { background: var(--amber, #ef8e1c); transform: scale(1.5); }
+/* active tab — hide dot, show filled icon */
+.m-dot-wrap.on .m-dot { display: none; }
+.m-dot-wrap.on .m-icon { display: block; }
 .m-dot-wrap.on .m-dot-lbl { color: var(--amber-deep, #c96b00); }
-/* hover (non-active) — darken to black */
+/* hover (non-active) */
 .m-dot-wrap:not(.on):hover .m-dot { background: var(--ink, #1a1714); }
 .m-dot-wrap:not(.on):hover .m-dot-lbl { color: var(--ink, #1a1714); }
 
@@ -197,7 +209,8 @@ body.hero-p3 #hero-simp-dot { pointer-events: none !important; }
 /* ===== HERO PHASE 3 — Translate ===== */
 
 /* All three article layers stay position:absolute — simultaneous crossfade, no layout shifts */
-#hero .browser .page { min-height: 320px; }
+#hero .browser .page { min-height: 220px; transition: min-height 1s cubic-bezier(.4,0,.2,1) 0.12s; }
+body.hero-p2 #hero .browser .page { min-height: 300px; }
 
 #hero .page-en {
   position: absolute; top: 0; left: 0; right: 0;
@@ -360,6 +373,8 @@ body.hero-p4 #hero .tr-page .sel { pointer-events: none; }
 .m-dotnav { transition: opacity 0.3s ease; }
 body.at-close .m-dotnav { opacity: 0; pointer-events: none; }
 body.past-hero #worddeck { opacity: 0 !important; pointer-events: none !important; transition: opacity 0.3s ease; }
+/* snap departing phase copy out instantly — kills double-exposure overlap between phases */
+#hero .phase-exit { transition: opacity 0.09s ease, transform 0.09s ease !important; }
 
 /* ===== HERO SIMP STATE — departure-board after simplification completes ===== */
 
@@ -555,15 +570,504 @@ body.ph-cta.at-hero.vocab-on #worddeck {
 /* hero CTA → full pill, matching the topbar pill and the final install button
    (base .btn-install is a 14px rounded-rect; main.html only, index stays as-is) */
 #hero .btn-install { border-radius: 999px; }
-/* the persistent browser window is cropped 20% shorter in EVERY phase (consistent
-   size — it never grows back). A flat 90° cut reads as broken, so the clip keeps
-   ROUNDED corners (round 16px). clip-path eats the (downward) box shadow, so it's
-   re-cast as a drop-shadow on .floatwrap (which now wraps only the browser — the
-   Discuss chat was lifted out to .float), hugging the rounded cut silhouette.
-   The chat + translate panels float OUTSIDE the window, so the crop never touches
-   their buttons. #hero scope keeps the morph clones (in body) full + unclipped. */
-#hero .browser { clip-path: inset(0 0 20% round 16px); box-shadow: none !important; }
 #hero .floatwrap { filter: drop-shadow(0 36px 50px rgba(58,36,2,.20)) drop-shadow(0 10px 22px rgba(26,23,20,.12)); }
+#hero #hero-disc-fab { bottom: 16px; }
+body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z-index: 2; }
+
+/* ═══════════════════════════════════════════════════════
+   MOBILE (≤920px) — reveal hero stage, scale browser,
+   swipe-navigable phases, bottom progress dots
+   ═══════════════════════════════════════════════════════ */
+@media (max-width: 920px) {
+  /* un-hide stage (lantern-v3.css sets display:none at 920px) */
+  #hero .hero-stage {
+    display: block !important;
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+    height: auto !important;
+    margin-right: 0 !important;
+    overflow: visible !important;
+    transform: none !important;
+  }
+  /* neutralise all desktop stage horizontal slides */
+  body.hero-p2 #hero .hero-stage,
+  body.hero-p3 #hero .hero-stage,
+  body.hero-p3 #hero.panel-open .hero-stage,
+  body.hero-p4 #hero .hero-stage,
+  body.hero-p5 #hero .hero-stage { transform: none !important; }
+
+  /* two-row hero: copy (auto) above, stage (remaining) below */
+  #hero .hero-inner {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto auto auto 1fr !important;  /* copy · browser · CTA · spacer */
+    align-items: start !important;
+    gap: 14px !important;
+    height: 100% !important;
+  }
+
+  /* all phase copies: row 1 */
+  #hero .hero-copy,
+  #hero .hero-copy-p2,
+  #hero .hero-copy-p3,
+  #hero .hero-copy-p4,
+  #hero .hero-copy-p5,
+  #hero .hero-copy-simp {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    padding: 0 16px;
+    min-width: 0;
+  }
+
+  /* compact copy on mobile */
+  #hero .hero-copy h1 { font-size: clamp(30px, 9vw, 46px) !important; line-height: 1.08; margin-bottom: 8px; }
+  #hero .hero-copy .hero-eyebrow { font-size: 11px; margin-bottom: 10px; }
+  #hero .hero-copy .hsub,
+  #hero .hero-copy-p2 .p2-sub,
+  #hero .hero-copy-p3 .p2-sub,
+  #hero .hero-copy-p4 .p2-sub,
+  #hero .hero-copy-p5 .p2-sub { display: none; }
+  #hero .hero-copy .hcta { margin-top: 10px; }
+  #hero .hero-copy-p2 h2,
+  #hero .hero-copy-p3 h2,
+  #hero .hero-copy-p4 h2,
+  #hero .hero-copy-p5 h2 { font-size: clamp(24px, 7vw, 38px) !important; margin-bottom: 0; line-height: 1.1; }
+  #hero .hero-copy-p2 .p2-eyebrow,
+  #hero .hero-copy-p3 .p2-eyebrow,
+  #hero .hero-copy-p4 .p2-eyebrow { font-size: 10px; letter-spacing: .18em; margin-bottom: 10px; }
+  #hero .hero-copy-simp .sc-h { font-size: clamp(22px, 7vw, 36px) !important; }
+  #hero .hero-copy-simp .sc-pre { font-size: 14px; margin-bottom: 10px; }
+
+  /* exit: vertical nudge instead of desktop horizontal slide */
+  body.hero-p2 #hero .hero-copy { transform: translateY(-12px) !important; }
+  body.hero-p3 #hero .hero-copy-p2 { transform: translateY(-12px) !important; }
+  body.hero-p4 #hero .hero-copy-p3 { transform: translateY(-12px) !important; }
+  body.hero-p5 #hero .hero-copy-p3 { transform: translateY(-12px) !important; }
+
+  /* hero: don't vertical-centre — let copy + stage stack from top */
+  #hero { align-items: flex-start !important; padding: 0 var(--gut, 20px) 60px !important; }
+  #hero .hero-inner {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    align-self: stretch !important;
+    min-height: calc(100vh - var(--nav, 56px));
+    padding: calc(var(--nav, 56px) + 14px) 0 calc(env(safe-area-inset-bottom,0px) + 120px) !important;
+  }
+
+  /* float: lantern-v3.css sets display:none at 920px — un-hide and make static */
+  #hero .float { display: block !important; position: static !important; top: auto !important; left: auto !important; z-index: auto !important; }
+  #hero .floatwrap { animation: none !important; transform: none !important; filter: none !important; }
+
+  /* browser: flat, full-width, no 3D perspective, no bottom crop */
+  #hero .browser,
+  body.hero-p2 #hero .browser,
+  body.hero-p3 #hero .browser,
+  body.hero-p4 #hero .browser {
+    position: relative !important;
+    width: 90% !important; max-width: none !important; min-height: 0 !important;  /* 10% narrower, centred */
+    margin-left: auto !important; margin-right: auto !important;
+    transform: none !important; clip-path: none !important;
+    box-shadow: 0 10px 28px -8px rgba(26,23,20,.18) !important;
+  }
+
+  /* browser page: smaller font; keep min-height (children are position:absolute) */
+  #hero .browser .page { font-size: 14px !important; line-height: 1.65 !important; padding: 16px !important; min-height: 220px !important; }
+  #hero .browser .page > p:first-child,
+  #hero .browser .page h3 { font-size: 15px !important; }
+  /* reserve the 2nd-paragraph height from the start (phase 1) so the window is
+     already sized for it — the simplify para fits fully on screen 2, no clip.
+     Bumped for the narrower 90% browser, where the text wraps to more lines. */
+  #hero .hero-extra { max-height: 250px !important; }
+
+  /* the page children are position:absolute, so .page never grows on its own —
+     grow the window WITH the extra paragraph reveal or .browser overflow:hidden
+     clips the simplify demo mid-sentence */
+  #hero .browser .page { transition: min-height 1s cubic-bezier(.4,0,.2,1) 0.12s; }
+  body.hero-p2 #hero .browser .page { min-height: 330px !important; }
+
+  /* the fake article should read like a real page — left-aligned, not centred
+     (the marketing headline + CTA stay centred; only the browser content resets) */
+  #hero .browser .page { text-align: left !important; }
+
+  /* CTA relocates BELOW the browser on mobile.
+     Desktop keeps the in-copy button (copy+CTA centre as one stacked unit);
+     on phones the copy button is hidden and a sibling clone sits under the browser. */
+  #hero .hero-copy .hcta { display: none !important; }
+  #hero .hcta-m {
+    display: block; grid-column: 1; grid-row: 3;
+    margin-top: 100px; transition: opacity 0.4s ease;
+  }
+  /* compact word cards on mobile */
+  #hero .hw-card .wordcard { padding: 12px 14px !important; }
+  #hero .hw-card .wordcard .w { font-size: 18px !important; }
+  #hero .hw-card .wordcard .ph { font-size: 10.5px !important; margin-top: 3px !important; }
+  #hero .hw-card .wordcard .tr { font-size: 14px !important; margin-top: 7px !important; }
+  /* only on the Home phase; fades away once the user swipes on */
+  body.hero-p2   #hero .hcta-m,
+  body.hero-p3   #hero .hcta-m,
+  body.hero-p4   #hero .hcta-m,
+  body.hero-p5   #hero .hcta-m,
+  body.hero-simp #hero .hcta-m,
+  body.ph-ev     #hero .hcta-m,
+  body.ph-cta    #hero .hcta-m { opacity: 0; pointer-events: none; }
+
+  /* translate panel: fixed bottom sheet */
+  #hero .tpanel {
+    position: fixed !important;
+    left: 12px !important; right: 12px !important; width: auto !important;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 120px) !important; top: auto !important;
+    transform: none !important;
+  }
+  #hero .tpanel.show { transform: none !important; }
+
+  /* discuss dock: fixed bottom panel */
+  #hero-dock {
+    position: fixed !important;
+    left: 12px !important; right: 12px !important; width: auto !important;
+    top: auto !important; bottom: calc(env(safe-area-inset-bottom, 0px) + 120px) !important;
+    max-height: 44vh !important;
+    transform-origin: bottom right !important;
+  }
+
+  /* word deck: hide (too complex for mobile, not needed for the core demo) */
+  #worddeck { display: none !important; }
+
+  /* left nav dots: hidden */
+  .m-dotnav { display: none !important; }
+
+  /* scroll-cue arrow: hidden */
+  .scroll-cue { display: none; }
+
+  /* bottom phase-nav cluster: visible */
+  .m-navcluster { display: flex; }
+
+  /* ═══ bottom phase-nav cluster — council verdict "The Folio Index" ═══
+     raised off the floor; hint → caption → uniform dot rail, stacked.
+     active state carried by colour + a non-layout halo, never by size. */
+  .m-navcluster {
+    position: fixed; left: 50%;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 20px);
+    transform: translateX(-50%);
+    z-index: 71; pointer-events: none;
+    display: flex; flex-direction: column; align-items: center;
+  }
+
+  /* (1) phase caption — meaning lives in type, not in 6px pictograms */
+  .m-phase-caption {
+    font-family: var(--mono, monospace); font-size: 11px;
+    letter-spacing: .14em; text-transform: uppercase; white-space: nowrap;
+    color: var(--ink, #1a1714); opacity: .55;
+    margin-bottom: 2px;
+    transition: opacity .18s ease;
+  }
+
+  /* (2) scrubber — drag the bead anywhere; the demo plays every phase on the
+     way there at a capped speed. Generous vertical padding = fat hit target. */
+  .m-scrub {
+    pointer-events: auto;
+    width: min(78vw, 320px);
+    padding: 14px 0 10px;
+    touch-action: none;            /* the track owns its gestures */
+  }
+  .m-scrub-track {
+    position: relative; height: 3px; border-radius: 2px;
+    background: rgba(26,23,20,.12);
+  }
+  /* notches: 7 phase stops, built by lantern-scrub.js */
+  .m-scrub-tick {
+    position: absolute; top: 50%; width: 5px; height: 5px;
+    border-radius: 50%; transform: translate(-50%,-50%);
+    background: var(--paper, #f7f6f3);
+    border: 1px solid rgba(26,23,20,.30); box-sizing: border-box;
+  }
+  .m-scrub-tick.passed { background: var(--amber, #ef8e1c); border-color: var(--amber, #ef8e1c); }
+  /* amber read-trail behind the bead */
+  .m-scrub-fill {
+    position: absolute; left: 0; top: 0; bottom: 0; width: 0;
+    border-radius: 2px;
+    background: linear-gradient(90deg, rgba(239,142,28,.45), var(--amber, #ef8e1c));
+    transition: width .45s cubic-bezier(.3,.1,.25,1);
+  }
+  /* the bead — our pulsing dot, same DNA as the desktop hero dot */
+  .m-scrub-ball {
+    position: absolute; left: 0; top: 50%;
+    width: 18px; height: 18px; border-radius: 50%;
+    transform: translate(-50%,-50%);
+    background: var(--amber, #ef8e1c);
+    border: 2.5px solid #fff; box-sizing: border-box;
+    box-shadow: 0 2px 8px rgba(26,23,20,.30), 0 0 0 1px rgba(26,23,20,.08);
+    transition: left .45s cubic-bezier(.3,.1,.25,1);
+  }
+  /* finger down: no easing (1:1 tracking) + the pulse ring */
+  .m-scrub.drag .m-scrub-ball { transition: none; }
+  .m-scrub.drag .m-scrub-fill { transition: none; }
+  .m-scrub.drag .m-scrub-ball::after {
+    content: ""; position: absolute; inset: -2.5px; border-radius: 50%;
+    animation: scrub-pulse 1.1s ease-out infinite;
+  }
+  @keyframes scrub-pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(239,142,28,.50); }
+    100% { box-shadow: 0 0 0 14px rgba(239,142,28,0); }
+  }
+  /* a hollow ring marks where you let go while the demo catches up */
+  .m-scrub-goal {
+    position: absolute; top: 50%; width: 14px; height: 14px;
+    border-radius: 50%; transform: translate(-50%,-50%);
+    border: 2px solid var(--amber-deep, #c96b00); box-sizing: border-box;
+    opacity: 0; transition: opacity .25s ease;
+  }
+  .m-scrub.chasing .m-scrub-goal { opacity: .8; }
+  @media (prefers-reduced-motion: reduce) {
+    .m-scrub.drag .m-scrub-ball::after { animation: none; }
+  }
+
+  /* ── CTA screen (#ev-close) mobile ─────────────────────────────── */
+
+  /* solid paper background so the section properly covers the Everywhere
+     screen during and after the phase transition */
+  #ev-close { background: var(--paper, #f7f6f3); }
+
+  /* lantern-v3.css:1558 sets .d1-track{display:flex} after the mobile display:none
+     at line 684, so the later rule wins — re-hide here where this style block wins */
+  .d1-track, .d1-fine { display: none !important; }
+
+  /* topbar install pill is useless on mobile (Chrome Web Store rejects it) */
+  .topbar .pill { display: none !important; }
+
+  /* topbar is hidden on P7 — reclaim its padding-top for content room */
+  body.ph-cta #ev-close { padding-top: 0 !important; }
+
+  /* P1 inline share prompt */
+  .m-hcta-note {
+    font-size: 12px; margin: 0 0 10px;
+    color: var(--ink-45, rgba(26,23,20,.45));
+    letter-spacing: .01em;
+  }
+  /* smaller outlined share button for P1 */
+  .m-share-sm {
+    background: transparent !important;
+    color: var(--ink, #1a1714) !important;
+    border: 1.5px solid rgba(26,23,20,.22) !important;
+    box-shadow: none !important;
+    font-size: 14px !important;
+    padding: 10px 20px !important;
+    border-radius: 999px !important;
+  }
+  .m-share-sm svg { stroke: var(--ink, #1a1714) !important; width: 15px; height: 15px; }
+
+  /* email fallback link in P7 CTA */
+  .m-email-link {
+    display: block; margin-top: 14px;
+    font-size: 13px; font-family: var(--mono, monospace); letter-spacing: .04em;
+    color: var(--ink-45, rgba(26,23,20,.45));
+    text-decoration: underline; text-underline-offset: 3px;
+  }
+
+  /* push Everywhere content below the fixed topbar */
+  #finale { padding-top: calc(var(--nav, 72px) + 16px) !important; }
+
+  /* the day-streak echo row (1 · 2 · 3 … 10) only makes sense next to the
+     install button — hide it on mobile where the button is already hidden */
+  #ev-close .d1-echo { display: none !important; }
+
+  /* hide nav on CTA — full vertical space for the 3+3+button layout */
+  body.ph-cta .topbar { opacity: 0 !important; pointer-events: none !important; transition: opacity .3s; }
+  /* …and reclaim its height: the topbar is gone, so no nav offset */
+  #ev-close { padding-top: 0 !important; }
+
+  /* compact footer: one line, with room for the scrubber riding above it */
+  #ev-close footer {
+    padding: 10px var(--gut, 20px) calc(env(safe-area-inset-bottom, 0px) + 88px);
+    font-size: 13px;
+  }
+
+  /* tighten the eyebrow letter-spacing so it doesn't wrap mid-word on
+     narrow phones (320–375px) */
+  #ev-close .d1-kick { letter-spacing: .12em; font-size: 11px; }
+
+  /* the share button IS the primary CTA on mobile — amber = "the action" */
+  .m-share-btn {
+    background: var(--amber, #ef8e1c);
+    color: #fff;
+    box-shadow: 0 16px 36px -14px rgba(239,142,28,.55), 0 3px 8px -4px rgba(26,23,20,.2);
+  }
+  .m-share-btn:active { opacity: .88; }
+  /* …except on the CTA screen, where it starts INK and the bead arrivals
+     heat it to amber (inline background-color from lantern-cta-charge.js) */
+  #ev-close .m-share-btn {
+    background: var(--ink, #1a1714);
+    position: relative; overflow: hidden;
+    box-shadow: 0 12px 28px -12px rgba(26,23,20,.45);
+    transition: background-color .45s ease, box-shadow .45s ease, opacity .15s;
+  }
+  #ev-close .m-share-btn > span:not(.d1-warm),
+  #ev-close .m-share-btn > svg { position: relative; z-index: 2; }
+  #ev-close .m-share-btn.blazing {
+    box-shadow: 0 18px 40px -12px rgba(239,142,28,.65), 0 4px 10px -4px rgba(26,23,20,.25);
+  }
+  /* мобайл: скасувати підйом (clip-path вже none на мобайлі) */
+  #hero #hero-disc-fab { bottom: 16px; }
+  body.hero-p5 #hero .hx-hud { position: relative; bottom: auto; left: auto; right: auto; }
+
+  /* ── P1 word demo on mobile: un-gate the cards + the demo "cursor" ──
+     lantern-v3.css hides .hw-card/.hw-cursor under 1000px; the mobile
+     demo (lantern-hero-words.js MOBILE mode) needs both back */
+  .hw-card { display: block !important; }
+  .hw-cursor { display: block !important; }
+  /* the pointer is a fingertip, not a mouse arrow */
+  .hw-cursor .hwc-ico svg { display: none; }
+  .hw-cursor .hwc-ico::before {
+    content: ""; position: absolute; left: -11px; top: -11px;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: rgba(26,23,20,.30);
+    border: 1.5px solid rgba(255,255,255,.9);
+    box-shadow: 0 2px 8px rgba(26,23,20,.25);
+  }
+
+  /* ── P3: the sentence lifts off the page as a 3D card and translates
+     in place — no separate panel window on mobile ────────────────── */
+  #hero .tr-page .sel {
+    transition: transform .5s cubic-bezier(.2,.8,.25,1), box-shadow .5s ease,
+                background .3s ease, color .22s ease;
+  }
+  #hero .tr-page .sel.m-lift {
+    display: inline-block;
+    position: relative; z-index: 5;
+    background: #fff;
+    padding: 12px 14px; border-radius: 12px;
+    transform: perspective(700px) rotateX(3deg) rotateY(-4deg) scale(1.06);
+    transform-origin: 100% 50%;            /* anchored to the right edge */
+    box-shadow: 0 22px 44px -18px rgba(26,23,20,.38), 0 4px 12px -6px rgba(26,23,20,.16);
+  }
+  /* the swap beat: words dissolve, then return in your language */
+  #hero .tr-page .sel.m-swap { color: transparent; }
+  /* language chip rides the lifted card's corner */
+  #hero .tr-page .sel.m-lift::after {
+    content: attr(data-langchip);
+    position: absolute; top: -10px; right: 10px;
+    font-family: var(--mono, monospace); font-size: 9.5px; font-weight: 600;
+    line-height: 1; letter-spacing: .08em;
+    background: var(--amber, #ef8e1c); color: #fff;
+    padding: 4px 7px; border-radius: 999px;
+    box-shadow: 0 3px 8px -3px rgba(201,107,0,.5);
+    opacity: 0; transform: translateY(4px);
+    transition: opacity .25s ease, transform .25s ease;
+  }
+  #hero .tr-page .sel.m-uk::after { opacity: 1; transform: none; }
+
+  /* ── P5: comic beats for the self-playing exercise ───────────────── */
+  .ex-bubble {
+    position: absolute; bottom: calc(100% + 8px); left: 50%;
+    z-index: 30; white-space: nowrap;
+    font-family: var(--sans, 'General Sans', sans-serif);
+    font-weight: 700; font-size: 13px; letter-spacing: .01em;
+    background: #fff; color: #c43c3c;
+    border: 2px solid #1a1714; border-radius: 11px;
+    padding: 6px 11px;
+    box-shadow: 3px 3px 0 rgba(26,23,20,.85);
+    transform: translateX(-50%) scale(.5) rotate(-4deg);
+    opacity: 0;
+    transition: transform .22s cubic-bezier(.2,1.6,.35,1), opacity .15s ease;
+    pointer-events: none;
+  }
+  .ex-bubble::after {                /* the comic tail */
+    content: ""; position: absolute; bottom: -6px; left: 50%;
+    width: 9px; height: 9px; transform: translateX(-50%) rotate(45deg);
+    background: #fff; border-right: 2px solid #1a1714; border-bottom: 2px solid #1a1714;
+  }
+  .ex-bubble.show { transform: translateX(-50%) scale(1) rotate(-4deg); opacity: 1; }
+
+  .ex-success {
+    position: fixed; left: 50%; top: 42%;
+    z-index: 320; text-align: center;
+    background: #fff; border: 2px solid #1a1714; border-radius: 20px;
+    padding: 22px 34px 20px;
+    box-shadow: 5px 6px 0 rgba(26,23,20,.85), 0 30px 60px -20px rgba(26,23,20,.35);
+    transform: translate(-50%,-50%) scale(.55) rotate(2deg);
+    opacity: 0;
+    transition: transform .3s cubic-bezier(.2,1.5,.35,1), opacity .18s ease;
+    pointer-events: none;
+  }
+  .ex-success.show { transform: translate(-50%,-50%) scale(1) rotate(0deg); opacity: 1; }
+  .ex-success .exs-ic {
+    width: 44px; height: 44px; margin: 0 auto 10px;
+    border-radius: 50%; background: var(--green, #2f9e5f); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .ex-success .exs-ic svg { width: 24px; height: 24px; }
+  .ex-success .exs-h {
+    font-family: var(--sans, 'General Sans', sans-serif);
+    font-weight: 700; font-size: 26px; letter-spacing: -.02em; color: var(--ink, #1a1714);
+  }
+  .ex-success .exs-sub {
+    font-size: 13px; color: var(--ink-45, rgba(26,23,20,.55)); margin-top: 3px;
+  }
+
+  /* ── Everywhere screen: logo + title + domain on mobile ────────── */
+
+  /* hide only the article body text; keep bar (logo+domain) and pg-head title */
+  .pg-stack { display: none; }
+  .pg-body { padding: 10px 13px 12px; }
+  .pg-head { font-size: 13px; line-height: 1.28; margin-bottom: 0; }
+  /* drop the "News / Thread / Paper" kind label — logo+domain is enough */
+  .pg-kind { display: none; }
+  /* compact card sized for 2-column layout */
+  .pg {
+    width: clamp(130px, 42vw, 158px);
+    box-shadow: 0 8px 18px -10px rgba(26,23,20,.35);
+  }
+  /* show all 6 (overrides the ≤600px display:none in lantern-v3.css) */
+  .pg-float:nth-child(n+5) { display: block; }
+  /* 2-column wall */
+  .ev-wall { gap: 12px !important; max-width: 380px !important; }
+
+  /* ── CTA screen: 3 cards → button → 3 cards, with amber wire lines ─ */
+
+  /* dock becomes a 3-column grid; JS inserts .m-close-cta between row 1 & row 2 */
+  #ev-close .cta-dock {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px 8px;
+    position: relative !important;     /* anchors the .ev-wires overlay */
+    inset: auto !important;
+    width: 100%;
+    z-index: 1 !important;
+    pointer-events: none;
+  }
+  /* button block spans the full middle row — above the wire overlay, so
+     wire tails slip UNDER the pill exactly like the desktop install button */
+  #ev-close .cta-dock > .m-close-cta {
+    grid-column: 1 / -1;
+    order: 0;
+    position: relative; z-index: 4;
+    pointer-events: auto;
+    display: flex !important;
+    margin: 4px 0;
+  }
+  /* cards: relative so ::before/::after can anchor to them */
+  #ev-close .dk-card {
+    position: relative !important;
+    left: auto !important; top: auto !important;
+    transform: none !important;
+    animation: none !important;
+    width: auto !important;
+  }
+  /* compact: icon + label only */
+  #ev-close .dk-in  { padding: 10px 10px 8px; }
+  #ev-close .dk-top { margin-bottom: 0; }
+  #ev-close .dk-prev { display: none; }
+
+  /* the REAL wires: the desktop SVG bead engine, vertical geometry —
+     absolute overlay across the whole 3+button+3 grid */
+  #ev-close .ev-wires {
+    display: block !important;       /* lantern-v3.css hides it under 980px */
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100%; height: 100%;
+    overflow: visible;
+    pointer-events: none;
+    z-index: 3;
+  }
+}
 </style>
 <script>
 (function () {
@@ -604,25 +1108,32 @@ body.ph-cta.at-hero.vocab-on #worddeck {
 <!-- NAV DOTS -->
 <nav class="m-dotnav" aria-label="Hero screens">
   <button class="m-dot-wrap on" id="m-dot-1" aria-label="Home">
-    <span class="m-dot"></span><span class="m-dot-lbl">Home</span>
+    <span class="m-nav-slot"><span class="m-dot"></span><svg class="m-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3L2 12h3v9h5v-5h4v5h5v-9h3L12 3z"/></svg></span>
+    <span class="m-dot-lbl">Home</span>
   </button>
   <button class="m-dot-wrap" id="m-dot-2" aria-label="Simplify">
-    <span class="m-dot"></span><span class="m-dot-lbl">Simplify</span>
+    <span class="m-nav-slot"><span class="m-dot"></span><svg class="m-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4V2"/><path d="M15 16v-2"/><path d="M8 9h2"/><path d="M20 9h2"/><path d="M17.8 11.8 19 13"/><path d="M15 9h.01"/><path d="M17.8 6.2 19 5"/><path d="m3 21 9-9"/><path d="M12.2 6.2 11 5"/></svg></span>
+    <span class="m-dot-lbl">Simplify</span>
   </button>
   <button class="m-dot-wrap" id="m-dot-3" aria-label="Translate">
-    <span class="m-dot"></span><span class="m-dot-lbl">Translate</span>
+    <span class="m-nav-slot"><span class="m-dot"></span><svg class="m-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 8 6 6"/><path d="M4 14l6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="M22 22 17 12l-5 10"/><path d="M14 18h6"/></svg></span>
+    <span class="m-dot-lbl">Translate</span>
   </button>
   <button class="m-dot-wrap" id="m-dot-4" aria-label="Discuss">
-    <span class="m-dot"></span><span class="m-dot-lbl">Discuss</span>
+    <span class="m-nav-slot"><span class="m-dot"></span><svg class="m-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+    <span class="m-dot-lbl">Discuss</span>
   </button>
   <button class="m-dot-wrap" id="m-dot-5" aria-label="Practice">
-    <span class="m-dot"></span><span class="m-dot-lbl">Practice</span>
+    <span class="m-nav-slot"><span class="m-dot"></span><svg class="m-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></span>
+    <span class="m-dot-lbl">Practice</span>
   </button>
   <button class="m-dot-wrap" id="m-dot-ev" aria-label="Everywhere">
-    <span class="m-dot"></span><span class="m-dot-lbl">Everywhere</span>
+    <span class="m-nav-slot"><span class="m-dot"></span><svg class="m-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10A15.3 15.3 0 0 1 12 2z"/><line x1="2" y1="12" x2="22" y2="12"/></svg></span>
+    <span class="m-dot-lbl">Everywhere</span>
   </button>
   <button class="m-dot-wrap" id="m-dot-6" aria-label="Get Lantern">
-    <span class="m-dot"></span><span class="m-dot-lbl">Install</span>
+    <span class="m-nav-slot"><span class="m-dot"></span><svg class="m-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2z"/></svg></span>
+    <span class="m-dot-lbl">Install</span>
   </button>
 </nav>
 
@@ -648,12 +1159,11 @@ body.ph-cta.at-hero.vocab-on #worddeck {
       <div class="float" data-speed="-0.08" style="top:8%;left:-1%;z-index:1">
         <div class="floatwrap" style="--dur:8s;--del:0s">
           <div class="browser" style="box-shadow:0 72px 124px -46px rgba(58,36,2,.22),0 18px 38px -20px rgba(26,23,20,.16)">
-            <div class="bbar"><div class="bdots"><i></i><i></i><i></i></div><div class="url">nationalgeographic.com</div></div>
+            <div class="bbar"><div class="bdots"><i></i><i></i><i></i></div><div class="url">nationalgeographic.com</div><span style="display:flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:7px;background:#f0ebe3;flex-shrink:0"><span class="lmark" style="width:15px;height:15px"></span></span></div>
             <div class="page" style="font-size:16.5px;line-height:1.72;position:relative">
               <!-- English content — Phase 1 & 2 -->
               <div class="page-en" style="padding:26px 32px">
-                <p style="font-family:'General Sans',sans-serif;font-weight:700;font-size:21px;margin:0 0 4px">The Atlantic Road</p>
-                <p style="font-size:12px;color:var(--ink-45);margin:0 0 16px">National Geographic · Travel · 6 min</p>
+                <p style="font-family:'General Sans',sans-serif;font-weight:700;font-size:21px;margin:0 0 14px;text-align:center">The Atlantic Road</p>
                 <p style="margin:0">The coastal <span class="hl" data-w="route" data-ph="/ruːt/" data-cls="blue" data-cefr="B1" data-tr="маршрут" data-tr-uk="маршрут" data-tr-es="ruta" data-tr-fr="itinéraire" data-tr-de="Route" data-tr-pt="rota" data-tr-en="path">route</span> threads along an exposed stretch of Norwegian <span class="hl" data-w="coast" data-ph="/kəʊst/" data-cls="green" data-cefr="B1" data-tr="узбережжя" data-tr-uk="узбережжя" data-tr-es="costa" data-tr-fr="côte" data-tr-de="Küste" data-tr-pt="costa" data-tr-en="shore">coast</span>, where <span class="hl" data-w="rugged" data-ph="/ˈrʌɡ.ɪd/" data-cls="red" data-cefr="B2" data-tr="скелястий" data-tr-uk="скелястий" data-tr-es="escarpado" data-tr-fr="escarpé" data-tr-de="zerklüftet" data-tr-pt="escarpado" data-tr-en="rocky">rugged</span> cliffs meet the open sea and low bridges leap from one <span class="hl" data-w="remote" data-ph="/rɪˈməʊt/" data-cls="violet" data-cefr="B1" data-tr="віддалений" data-tr-uk="віддалений" data-tr-es="remoto" data-tr-fr="éloigné" data-tr-de="abgelegen" data-tr-pt="remoto" data-tr-en="far-off">remote</span> island to the next.</p>
                 <!-- revealed in phase 2 — the dense paragraph that simplifies -->
                 <div class="hero-extra">
@@ -665,8 +1175,7 @@ body.ph-cta.at-hero.vocab-on #worddeck {
               </div>
               <!-- English content — Phase 3 (sentences clickable for translation) -->
               <div class="tr-page">
-                <p style="font-family:'General Sans',sans-serif;font-weight:700;font-size:21px;margin:0 0 4px">The Atlantic Road</p>
-                <p style="font-size:12px;color:var(--ink-45);margin:0 0 16px">National Geographic · Travel · 6 min</p>
+                <p style="font-family:'General Sans',sans-serif;font-weight:700;font-size:21px;margin:0 0 14px;text-align:center">The Atlantic Road</p>
                 <!-- same text as page-en, sentence-wrapped — the P2→P3 swap changes
                      the affordance (words → sentences), never the text position -->
                 <p style="margin:0"><span class="sel" data-tr="s1" tabindex="0" role="button">The coastal route threads along an exposed stretch of Norwegian coast, where rugged cliffs meet the open sea and low bridges leap from one remote island to the next.</span></p>
@@ -674,8 +1183,7 @@ body.ph-cta.at-hero.vocab-on #worddeck {
               </div>
               <!-- Phase 5 — same text, exercise gaps instead of sentence-selects -->
               <div class="ex-page" style="padding:26px 32px">
-                <p style="font-family:'General Sans',sans-serif;font-weight:700;font-size:21px;margin:0 0 4px">The Atlantic Road</p>
-                <p style="font-size:12px;color:var(--ink-45);margin:0 0 16px">National Geographic · Travel · 6 min</p>
+                <p style="font-family:'General Sans',sans-serif;font-weight:700;font-size:21px;margin:0 0 14px;text-align:center">The Atlantic Road</p>
                 <p style="margin:0">The coastal <span class="exw" data-a="route" data-o="route|storm|path">route</span> threads along an exposed stretch of Norwegian <span class="exw" data-a="coast" data-o="coast|cliff|sea">coast</span>, where <span class="exw" data-a="rugged" data-o="rugged|gentle|steep">rugged</span> cliffs meet the open sea and low bridges leap from one <span class="exw" data-a="remote" data-o="remote|distant|local">remote</span> island to the next.</p>
                 <p style="margin:14px 0 0">Every autumn, storms drive waves across the roadway — sometimes shutting the road for days.</p>
               </div>
@@ -736,6 +1244,15 @@ body.ph-cta.at-hero.vocab-on #worddeck {
 
     </div>
 
+    <!-- MOBILE-ONLY CTA — relocated below the browser on phones (desktop keeps the in-copy one) -->
+    <div class="hcta-m">
+      <p class="m-hcta-note">Desktop extension — send it to yourself</p>
+      <button class="m-share-btn m-share-sm" data-m-share aria-label="Send this page to yourself">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+        <span>Send to yourself →</span>
+      </button>
+    </div>
+
     <!-- PHASE 2 COPY — slides into col 1 -->
     <div class="hero-copy-p2">
       <div class="p2-eyebrow">Save &amp; Simplify</div>
@@ -760,8 +1277,8 @@ body.ph-cta.at-hero.vocab-on #worddeck {
     <!-- PHASE 5 COPY — Practice -->
     <div class="hero-copy-p5">
       <div class="p2-eyebrow" style="font-family:var(--mono,'JetBrains Mono',monospace);font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber-deep,#c96b00);margin-bottom:22px">Practice</div>
-      <h2 style="font-weight:700;letter-spacing:-.035em;font-size:clamp(36px,4vw,56px);line-height:1.04;margin:0 0 26px">Your words,<br>hidden in the page.</h2>
-      <p class="p2-sub">Flip a switch and your saved words fly into the text as gaps — practice woven into the reading. Tap a gap and choose the right word.</p>
+      <h2 style="font-weight:700;letter-spacing:-.035em;font-size:clamp(36px,4vw,56px);line-height:1.04;margin:0 0 26px">Any text.<br>Instant exercises.</h2>
+      <p class="p2-sub">Your saved words fly into the page as gaps — <strong>any article, any text, wired to your words</strong>. Watch it happen.</p>
     </div>
 
     <!-- SIMP DONE COPY — departure-board reveal after word stream finishes -->
@@ -876,7 +1393,16 @@ body.ph-cta.at-hero.vocab-on #worddeck {
     <div class="d1-track">
       <button class="d1-install" id="close-cta" data-cta type="button" aria-label="Add Lantern to Chrome — free to start, no account needed."></button>
     </div>
-    <div class="d1-fine">Free to start · no account needed</div>
+    <div class="d1-fine d-only">Free to start · no account needed</div>
+    <div class="m-only m-close-cta">
+      <p class="m-close-note">Lantern is a Chrome extension —<br>open on your Mac or PC to install.</p>
+      <button class="m-share-btn" data-m-share aria-label="Send to desktop">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+        <span>Send to desktop</span>
+      </button>
+      <a class="m-email-link" href="" aria-label="Email myself the link">✉ Email myself the link</a>
+      <p class="m-hero-hint">Free to start &middot; no account needed</p>
+    </div>
   </div>
   <footer style="width:100%;flex-shrink:0">
     <div class="fb"><span class="lmark"></span>Lantern</div>
@@ -884,6 +1410,15 @@ body.ph-cta.at-hero.vocab-on #worddeck {
   </footer>
 </section>
 
+<div class="m-navcluster">
+  <div class="m-phase-caption" id="m-phase-caption">01 · HOME</div>
+  <div class="m-scrub" id="m-scrub" aria-hidden="true">
+    <div class="m-scrub-track">
+      <div class="m-scrub-fill"></div>
+      <div class="m-scrub-ball"></div>
+    </div>
+  </div>
+</div>
 <div id="flame"></div>
 <script src="lantern-v3.js"></script>
 <script src="lantern-v3-act1.js"></script>
@@ -891,6 +1426,7 @@ body.ph-cta.at-hero.vocab-on #worddeck {
 <script src="lantern-v3-act2.js"></script>
 <script src="lantern-everywhere.js"></script>
 <script src="lantern-morph.js"></script>
+<script src="lantern-v3-morph-feat.js"></script>
 <script src="lantern-hero-words.js"></script>
 <script src="lantern-v3-close.js"></script>
 <script src="lantern-cta-charge.js"></script>
@@ -936,13 +1472,19 @@ body.ph-cta.at-hero.vocab-on #worddeck {
   };
 })();
 
+/* email-myself link — populate href dynamically so it carries the current URL */
+(function () {
+  var el = document.querySelector('.m-email-link');
+  if (el) el.href = 'mailto:?subject=Install%20Lantern&body=' + encodeURIComponent(location.href);
+})();
+
 /* ============================================================
    Phase controller — P1=Hero  P2=Simplify  P3=Translate
    ============================================================ */
 (function () {
   var HERO_WORDS = ['route', 'coast', 'rugged', 'remote'];
   var phase = 0;
-  var wheelLock = false;
+  var wheelLock = false, wheelLockTimer = 0, wheelLockStart = 0;
   var RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   var dot1        = document.getElementById('m-dot-1');
@@ -1018,10 +1560,68 @@ body.ph-cta.at-hero.vocab-on #worddeck {
   function closeTPanel() {
     if (activeSel) activeSel.classList.remove('on');
     activeSel = null;
+    mobTranslateReset();
     if (heroTpanel) {
+      heroTpanel.style.transition = 'none';
       heroTpanel.classList.remove('show');
+      void heroTpanel.offsetHeight;
+      heroTpanel.style.transition = '';
       document.getElementById('hero').classList.remove('panel-open');
     }
+  }
+
+  /* ── mobile P3: no side panel — the sentence ITSELF lifts off the page
+     (3D card, anchored right), its text morphs to the visitor's language,
+     holds, then settles back to English. Chains to the second sentence. ── */
+  var mobGen = 0;
+  function mobTranslateReset() {
+    mobGen++;
+    document.querySelectorAll('#hero .tr-page .sel').forEach(function (s) {
+      s.classList.remove('m-lift', 'm-swap', 'm-uk');
+      var d = TR[s.dataset.tr];
+      if (d) s.textContent = d.en;
+    });
+  }
+  function mobTranslate(sel, chainNext) {
+    var gen = ++mobGen;
+    var data = TR[sel.dataset.tr];
+    if (!data) return;
+    var lang = userLang();
+    var tgt  = data[lang] || data.uk;
+    sel.dataset.langchip = 'EN → ' + (data[lang] ? lang : 'uk').toUpperCase();
+    function alive() { return gen === mobGen && phase === 2; }
+    sel.classList.add('on');
+    setTimeout(function () {
+      if (!alive()) return;
+      sel.classList.add('m-lift');
+      setTimeout(function () {
+        if (!alive()) return;
+        sel.classList.add('m-swap');                       /* text fades out */
+        setTimeout(function () {
+          if (!alive()) return;
+          sel.textContent = tgt;                           /* …and returns translated */
+          sel.classList.add('m-uk');
+          sel.classList.remove('m-swap');
+          setTimeout(function () {                         /* hold, then come home */
+            if (!alive()) return;
+            sel.classList.add('m-swap');
+            setTimeout(function () {
+              if (!alive()) return;
+              sel.textContent = data.en;
+              sel.classList.remove('m-swap', 'm-uk');
+              setTimeout(function () {
+                if (!alive()) return;
+                sel.classList.remove('m-lift', 'on');
+                if (chainNext) {
+                  var sels = document.querySelectorAll('#hero .tr-page .sel');
+                  if (sels[1]) setTimeout(function () { if (gen === mobGen && phase === 2) mobTranslate(sels[1], false); }, 700);
+                }
+              }, 550);
+            }, 240);
+          }, 3000);
+        }, 240);
+      }, 650);
+    }, 650);
   }
 
   function openTPanel(sel) {
@@ -1056,10 +1656,16 @@ body.ph-cta.at-hero.vocab-on #worddeck {
 
   if (heroTpClose) heroTpClose.addEventListener('click', closeTPanel);
   document.querySelectorAll('#hero .tr-page .sel').forEach(function (sel) {
-    sel.addEventListener('click', function () { if (phase === 2) openTPanel(sel); });
+    sel.addEventListener('click', function () {
+      if (phase !== 2) return;
+      if (window.matchMedia('(max-width: 920px)').matches) { mobTranslateReset(); mobTranslate(sel, false); }
+      else openTPanel(sel);
+    });
   });
 
   /* ---- dots ---- */
+  var M_PHASE_NAMES = ['HOME', 'SIMPLIFY', 'TRANSLATE', 'DISCUSS', 'PRACTICE', 'EVERYWHERE', 'INSTALL'];
+  var mCaption = document.getElementById('m-phase-caption');
   function setDots(p) {
     if (dot1)  dot1.classList.toggle('on', p === 0);
     if (dot2)  dot2.classList.toggle('on', p === 1);
@@ -1068,6 +1674,15 @@ body.ph-cta.at-hero.vocab-on #worddeck {
     if (dot5)  dot5.classList.toggle('on', p === 4);
     if (dotEv) dotEv.classList.toggle('on', p === 5);   /* Everywhere */
     if (dot6)  dot6.classList.toggle('on', p === 6);    /* Install / CTA */
+    /* mobile rail: uniform dots — colour-only states, no size jump */
+    document.querySelectorAll('#m-progress .m-progress-dot').forEach(function (d, i) {
+      d.classList.toggle('on', i === p);
+      d.classList.toggle('passed', i < p);
+    });
+    /* mobile caption names the current phase */
+    if (mCaption && M_PHASE_NAMES[p]) {
+      mCaption.textContent = ('0' + (p + 1)) + ' · ' + M_PHASE_NAMES[p];
+    }
   }
 
   /* ── ONE-SCREEN phases 5 (Everywhere) & 6 (CTA): no scroll, no screen swap —
@@ -1129,8 +1744,30 @@ body.ph-cta.at-hero.vocab-on #worddeck {
   }
 
   /* ---- transitions ---- */
+
+  /* fast-exit: snap the currently-visible phase copy out in 90ms before the
+     incoming copy fades in — eliminates double-exposure text overlap */
+  var PHASE_SELS = [
+    '#hero .hero-copy',
+    '#hero .hero-copy-p2',
+    '#hero .hero-copy-p3',
+    '#hero .hero-copy-p4',
+    '#hero .hero-copy-p5'
+  ];
+  function fastExitCurrent() {
+    var els = [];
+    if (document.body.classList.contains('hero-simp')) els.push(document.querySelector('#hero .hero-copy-simp'));
+    if (phase >= 0 && phase < PHASE_SELS.length) els.push(document.querySelector(PHASE_SELS[phase]));
+    els.forEach(function (e) {
+      if (!e) return;
+      e.classList.add('phase-exit');
+      setTimeout(function () { e.classList.remove('phase-exit'); }, 200);
+    });
+  }
+
   function toP1() {
     if (phase === 0) return;
+    fastExitCurrent();
     phase = 0;
     exitOverlays();
     cardsIn();
@@ -1144,11 +1781,12 @@ body.ph-cta.at-hero.vocab-on #worddeck {
 
   function toP2() {
     if (phase === 1) return;
+    fastExitCurrent();
     var wasAbove = (phase >= 2);
     phase = 1;
     exitOverlays();
     document.body.classList.add('hero-p2');
-    document.body.classList.remove('hero-p3', 'hero-p4', 'hero-p5');
+    document.body.classList.remove('hero-p3', 'hero-p4', 'hero-p5', 'hero-simp');
     leaveDiscuss();
     if (wasAbove) {
       closeTPanel();
@@ -1158,10 +1796,21 @@ body.ph-cta.at-hero.vocab-on #worddeck {
        skip this and silently degrade the simplify demo to plain text */
     if (!window.Shelf || !window.Shelf.has('coast')) setTimeout(populateShelf, 400);
     setDots(1);
+    /* mobile: nobody hunts for a 13px dot with a thumb — the paragraph
+       simplifies itself once the reveal lands */
+    if (window.matchMedia('(max-width: 920px)').matches) {
+      setTimeout(function () {
+        if (phase !== 1) return;
+        if (document.body.classList.contains('hero-simp')) return;
+        var d = document.getElementById('hero-simp-dot');
+        if (d) d.click();
+      }, 1700);
+    }
   }
 
   function toP3() {
     if (phase === 2) return;
+    fastExitCurrent();
     phase = 2;
     exitOverlays();
     document.body.classList.add('hero-p2', 'hero-p3');
@@ -1171,13 +1820,23 @@ body.ph-cta.at-hero.vocab-on #worddeck {
     if (window._heroSimpReset) window._heroSimpReset();
     setDots(2);
     setTimeout(function () {
+      if (phase !== 2) return;
       var first = document.querySelector('#hero .tr-page .sel');
-      if (phase === 2 && first && !first.classList.contains('on')) first.classList.add('cand-pulse');
-    }, 700);
+      if (!first) return;
+      /* auto-translate: scroll already = "look at this" — open the panel automatically.
+         fires at 1600ms so the phase-entry animation lands before the panel slides in,
+         and simultaneously clears wheelLock so the next scroll advances to P4.
+         mobile: no panel — the sentence lifts and translates in place. */
+      if (window.matchMedia('(max-width: 920px)').matches) mobTranslate(first, true);
+      else openTPanel(first);
+      wheelLock = false;
+      clearTimeout(wheelLockTimer);
+    }, 1600);
   }
 
   function toP4() {
     if (phase === 3) return;
+    fastExitCurrent();
     phase = 3;
     exitOverlays();
     document.body.classList.add('hero-p2', 'hero-p3', 'hero-p4');
@@ -1191,6 +1850,7 @@ body.ph-cta.at-hero.vocab-on #worddeck {
 
   function toP5() {
     if (phase === 4) return;
+    fastExitCurrent();
     phase = 4;
     exitOverlays();
     document.body.classList.add('hero-p2', 'hero-p3', 'hero-p5');
@@ -1227,7 +1887,13 @@ body.ph-cta.at-hero.vocab-on #worddeck {
   function pinDock() { if (dockBody) dockBody.scrollTop = dockBody.scrollHeight; }
   function leaveDiscuss() {
     dockGen++; dockBusy = false;
-    if (dock) { dock.classList.remove('show'); dock.setAttribute('aria-hidden', 'true'); }
+    if (dock) {
+      dock.style.transition = 'none';
+      dock.classList.remove('show');
+      dock.setAttribute('aria-hidden', 'true');
+      void dock.offsetHeight;
+      dock.style.transition = '';
+    }
     if (discFab) discFab.classList.remove('show', 'beckon', 'press', 'gone');
     document.querySelectorAll('#hero .tr-page .sel').forEach(function (s) { s.classList.remove('cite'); });
   }
@@ -1361,7 +2027,7 @@ body.ph-cta.at-hero.vocab-on #worddeck {
     bot.className = 'cw-bot';
     bot.innerHTML = '<span class="cw-typing"><i></i><i></i><i></i></span>';
     dockBody.appendChild(bot); pinDock();
-    await wait(560); if (!aliveD(gen)) { dockBusy = false; return; }
+    await wait(260); if (!aliveD(gen)) { dockBusy = false; return; }
     bot.innerHTML = '';
     var queue = buildWords(bot, ASK.a);
     pinDock();
@@ -1504,14 +2170,22 @@ body.ph-cta.at-hero.vocab-on #worddeck {
        Backward 6→0 walks the same chain in reverse. */
     e.preventDefault();
     e.stopImmediatePropagation();
-    if (wheelLock) return;
+    /* while locked: refresh the window on every event so inertial scroll can't outlast it */
+    if (wheelLock) {
+      /* absolute cap: inertial scroll can't hold the lock past 2500ms */
+      if (performance.now() - wheelLockStart > 2500) { wheelLock = false; }
+      else {
+        clearTimeout(wheelLockTimer);
+        wheelLockTimer = setTimeout(function () { wheelLock = false; }, 900);
+        return;
+      }
+    }
     /* a split/reassembly in flight owns the screen — swallow gestures until it lands */
     var le0 = LE();
     if (le0 && le0.busy && le0.busy()) return;
-    wheelLock = true;
-    /* one gesture = one phase: the lock must outlive the tween (the split morph
-       is the longest, ~1.5s) so an inertial flick can't skip a phase mid-flight */
-    setTimeout(function () { wheelLock = false; }, 1100);
+    wheelLock = true; wheelLockStart = performance.now();
+    clearTimeout(wheelLockTimer);
+    wheelLockTimer = setTimeout(function () { wheelLock = false; }, 1500);
     if (e.deltaY > 0) {
       if (phase === 0) toP2();
       else if (phase === 1) toP3();
@@ -1534,6 +2208,97 @@ body.ph-cta.at-hero.vocab-on #worddeck {
      with the phase (cheap, and covers any stray scroll/restore) */
   function onScroll() { setDots(phase); }
   window.addEventListener('scroll', onScroll, { passive: true });
+
+  /* ── mobile: populate progress dots (7 phases) ─────────────────────────────
+     lantern-v3.js also touches #m-progress on mobile (section pager for
+     index.html); clear whatever it added, then build our 7-phase dots. */
+  (function () {
+    var nav = document.getElementById('m-progress');
+    if (!nav) return;
+    while (nav.firstChild) nav.removeChild(nav.firstChild);
+    for (var i = 0; i < 7; i++) {
+      var d = document.createElement('div');
+      d.className = 'm-progress-dot';
+      nav.appendChild(d);
+    }
+    setDots(phase);
+  })();
+
+  /* ── mobile: touch swipe = same phase logic as wheel ── */
+  var touchStartY = 0, touchStartX = 0, touchStartT = 0;
+  document.addEventListener('touchstart', function (e) {
+    var t = e.touches[0];
+    touchStartY = t.clientY; touchStartX = t.clientX; touchStartT = performance.now();
+  }, { passive: true });
+  document.addEventListener('touchend', function (e) {
+    if (!document.body.classList.contains('at-hero')) return;
+    if (window.scrollY > window.innerHeight * 0.5) return;
+    /* the scrubber owns its own gestures */
+    if (e.target && e.target.closest && e.target.closest('.m-scrub')) return;
+    var t = e.changedTouches[0];
+    var dy = touchStartY - t.clientY;
+    var dx = Math.abs(touchStartX - t.clientX);
+    if (performance.now() - touchStartT > 700) return;
+    if (Math.abs(dy) < 45) return;
+    if (dx > Math.abs(dy) * 0.7) return;
+    /* don't capture swipes inside a scrollable chat body */
+    var cw = e.target && e.target.closest ? e.target.closest('.cw-body') : null;
+    if (cw && cw.scrollHeight > cw.clientHeight + 1) return;
+    if (wheelLock) return;
+    var le0 = LE();
+    if (le0 && le0.busy && le0.busy()) return;
+    wheelLock = true; wheelLockStart = performance.now();
+    clearTimeout(wheelLockTimer);
+    wheelLockTimer = setTimeout(function () { wheelLock = false; }, 1500);
+    if (dy > 0) {
+      if (phase === 0) toP2();
+      else if (phase === 1) toP3();
+      else if (phase === 2) toP4();
+      else if (phase === 3) toP5();
+      else if (phase === 4) toEverywhere();
+      else if (phase === 5) toCTA();
+    } else {
+      if (phase === 6) toEverywhere();
+      else if (phase === 5) backToHero();
+      else if (phase === 4) toP4();
+      else if (phase === 3) toP3();
+      else if (phase === 2) toP2();
+      else toP1();
+    }
+  }, { passive: true });
+
+  /* ── public phase API — lantern-scrub.js drives the demo through this.
+     step() is ONE rate-limited move; the scrubber's chase engine calls it
+     repeatedly so a long drag still plays every phase on the way. ── */
+  window.LanternPhases = {
+    get: function () { return phase; },
+    busy: function () {
+      var le0 = LE();
+      return !!(le0 && le0.busy && le0.busy());
+    },
+    step: function (dir) {
+      var le0 = LE();
+      if (le0 && le0.busy && le0.busy()) return false;
+      if (dir > 0) {
+        if (phase === 0) toP2();
+        else if (phase === 1) toP3();
+        else if (phase === 2) toP4();
+        else if (phase === 3) toP5();
+        else if (phase === 4) toEverywhere();
+        else if (phase === 5) toCTA();
+        else return false;
+      } else {
+        if (phase === 6) toEverywhere();
+        else if (phase === 5) backToHero();
+        else if (phase === 4) toP4();
+        else if (phase === 3) toP3();
+        else if (phase === 2) toP2();
+        else if (phase === 1) toP1();
+        else return false;
+      }
+      return true;
+    }
+  };
 })();
 
 /* ============================================================
@@ -1586,7 +2351,7 @@ body.ph-cta.at-hero.vocab-on #worddeck {
       if (m > fm) { fm = m; fi = i; }
     }
     if (near <= 0.02) lastFocus = -1;
-    else if (fi !== lastFocus) { if (fi >= 0) tick(); lastFocus = fi; }
+    else if (fi !== lastFocus) { lastFocus = fi; }
   }
 
   document.addEventListener('pointerdown', unlockAudio);
@@ -1628,6 +2393,7 @@ body.ph-cta.at-hero.vocab-on #worddeck {
   ];
 
   var simplified = false, busy = false;
+  var simpGen    = 0;     /* bumped by every phase change — aborts an in-flight word stream */
   var origNodes  = null;  /* saved DOM nodes on first simplify (preserves .hl listeners) */
 
   function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
@@ -1675,9 +2441,12 @@ body.ph-cta.at-hero.vocab-on #worddeck {
   }
 
   async function swapIn(spans) {
+    var g = simpGen;
     /* fire the left-copy departure board when the word stream is almost done */
     var boardAt = Math.max(0, spans.length - 3);
     for (var i = 0; i < spans.length; i++) {
+      /* the visitor moved on mid-stream — never fire the board over another phase */
+      if (g !== simpGen) return;
       if (i === boardAt && window._heroToP3) window._heroToP3();
       var s = spans[i];
       if (s.classList.contains('saved') && window.flyShelfCardTo && window.Shelf && window.Shelf.has(s.dataset.w)) {
@@ -1698,6 +2467,7 @@ body.ph-cta.at-hero.vocab-on #worddeck {
     busy = true;
 
     if (!simplified) {
+      var g = simpGen;
       /* save original nodes before first swap */
       if (!origNodes) origNodes = Array.prototype.slice.call(body.childNodes);
       simplified = true;
@@ -1708,12 +2478,15 @@ body.ph-cta.at-hero.vocab-on #worddeck {
       lvl.classList.add('show');                 // badge enters showing C1 (the dense level)
       body.classList.add('fade');
       await wait(188);
+      if (g !== simpGen) { busy = false; return; }   // phase changed mid-fade
       var spans = buildSimpleSpans();
       body.classList.remove('fade');
       await wait(320);                           // brief hold so C1 reads before it ticks
+      if (g !== simpGen) { busy = false; return; }
       lvl.classList.add('rolled', 'pulse');      // C1 → B2 with a green pulse + "now at your level"
       setTimeout(function () { lvl.classList.remove('pulse'); }, 760);
       await wait(280);
+      if (g !== simpGen) { busy = false; return; }
       await swapIn(spans);
     } else {
       simplified = false;
@@ -1735,8 +2508,9 @@ body.ph-cta.at-hero.vocab-on #worddeck {
   /* phase changes restore the original paragraph instantly, so a later return
      to P2 never shows simplified text desynced from the left copy */
   window._heroSimpReset = function () {
-    if (!simplified || busy) return;
-    simplified = false;
+    simpGen++;                        /* abort any in-flight word stream */
+    if (!simplified) return;
+    simplified = false; busy = false; /* force-release: swapIn saw the gen bump and bailed */
     para.classList.remove('simplified');
     dot.style.animation = '';
     if (levelEl) levelEl.classList.remove('show', 'rolled', 'pulse');
@@ -1859,12 +2633,89 @@ body.ph-cta.at-hero.vocab-on #worddeck {
 
   if (hxToggle) hxToggle.addEventListener('click', enable);
 
-  window._heroExOnEnter = function () {
-    if (!enabled && hxToggle) {
-      setTimeout(function () { hxToggle.classList.add('beckon'); }, 600);
+  /* ── mobile: the exercise plays ITSELF — gap by gap, quicker each time:
+     right, right, WRONG (comic "Oops!" bubble + shake), then right —
+     and a success card pops when the page is solved. ── */
+  function bubble(exw, txt, cls) {
+    var b = document.createElement('span');
+    b.className = 'ex-bubble ' + cls;
+    b.textContent = txt;
+    exw.appendChild(b);
+    requestAnimationFrame(function () { b.classList.add('show'); });
+    setTimeout(function () {
+      b.classList.remove('show');
+      setTimeout(function () { if (b.parentNode) b.parentNode.removeChild(b); }, 300);
+    }, 1150);
+  }
+  function successWin() {
+    var w = document.createElement('div');
+    w.className = 'ex-success';
+    w.innerHTML =
+      '<div class="exs-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>' +
+      '<div class="exs-h">4 / 4</div>' +
+      '<div class="exs-sub">Your words, locked in.</div>';
+    document.body.appendChild(w);
+    requestAnimationFrame(function () { w.classList.add('show'); });
+    /* leaves with its phase: don't linger over Everywhere if the visitor moves on */
+    var guard = setInterval(function () {
+      if (!document.body.classList.contains('hero-p5')) hide();
+    }, 180);
+    var hidden = false;
+    function hide() {
+      if (hidden) return; hidden = true;
+      clearInterval(guard);
+      w.classList.remove('show');
+      setTimeout(function () { if (w.parentNode) w.parentNode.removeChild(w); }, 400);
     }
+    setTimeout(hide, 2300);
+  }
+  function autoplay() {
+    function alive() { return document.body.classList.contains('hero-p5'); }
+    var t = 0;
+    function step(d, fn) { t += d; setTimeout(function () { if (alive()) fn(); }, t); }
+    function open(i) {
+      var g = targets[i];
+      if (!g || g.dataset.done || !g.classList.contains('formed')) return;
+      targets.forEach(function (o) { o.classList.remove('open'); });
+      g.classList.add('open');
+    }
+    function pick(i, correct) {
+      var g = targets[i];
+      if (!g || g.dataset.done) return;
+      var a = g.dataset.answer, btn = null;
+      Array.prototype.forEach.call(g.querySelectorAll('.menu button'), function (b) {
+        var hit = (b.textContent.trim() === a);
+        if (correct ? hit : (!hit && !btn)) btn = b;
+      });
+      if (!btn) return;
+      btn.click();
+      if (!correct) bubble(g, 'Oops!', 'oops');
+    }
+    /* the cadence speeds up — the page is learning your hand */
+    step(500,  function () { open(0); });
+    step(750,  function () { pick(0, true); });
+    step(950,  function () { open(1); });
+    step(650,  function () { pick(1, true); });
+    step(850,  function () { open(2); });
+    step(550,  function () { pick(2, false); });   /* …WRONG — Oops! */
+    step(1400, function () { pick(2, true); });    /* recovered */
+    step(750,  function () { open(3); });
+    step(550,  function () { pick(3, true); });
+    step(900,  function () { if (solved >= targets.length) successWin(); });
+  }
+
+  window._heroExOnEnter = function () {
+    if (enabled) return;
+    /* show the text for 1.2s so the viewer sees it as normal — then MAGIC */
+    setTimeout(function () {
+      if (enabled || !document.body.classList.contains('hero-p5')) return;
+      enable();
+      /* mobile: gaps form (~220ms stagger + card flights), then the auto-hand plays */
+      if (window.matchMedia('(max-width: 920px)').matches) setTimeout(autoplay, 1900);
+    }, 1200);
   };
 })();
 </script>
+<script src="lantern-scrub.js"></script>
 </body>
 </html>
