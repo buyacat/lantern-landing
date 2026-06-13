@@ -25,7 +25,7 @@ body.hero-p5 #hero .hero-stage { transform: translateX(calc(-5vw - 4.5%)) transl
 
 #hero .browser {
   position: relative;                /* tpanel + discuss dock anchor to the browser viewport */
-  transform: perspective(1300px) rotateY(-4.4deg);
+  transform: perspective(1300px) rotateY(-4.4deg) scale(0.9);
   transform-origin: 50% 50%;
   transition: transform 0.8s cubic-bezier(.4,0,.2,1), box-shadow 0.6s ease;
 }
@@ -39,7 +39,7 @@ body.hero-p3 #hero.tr-active .browser {
 body.hero-p2 #hero .browser,
 body.hero-p3 #hero .browser,
 body.hero-p4 #hero .browser {
-  width: min(678px, 45.5vw) !important;
+  width: min(644px, 43.2vw) !important;
   max-width: none !important;
 }
 body.hero-p2 #hero .browser { transform: perspective(1300px) rotateY(0deg) !important; }
@@ -93,7 +93,7 @@ body.hero-p2 #hero .hero-copy-p2 { opacity: 1; transform: none; pointer-events: 
 #hero .hero-copy-p3 h2,
 #hero .hero-copy-p4 h2 {
   font-weight: 700; letter-spacing: -.035em;
-  font-size: clamp(36px, 4vw, 56px); line-height: 1.04; margin: 0 0 26px;
+  font-size: clamp(32px, 3.5vw, 50px); line-height: 1.04; margin: 0 0 26px;
 }
 #hero .hero-copy-p2 .p2-sub,
 #hero .hero-copy-p3 .p2-sub,
@@ -247,6 +247,7 @@ body.hero-p2.at-hero .pill {
     cursor: pointer; touch-action: none; border-radius: 8px;
   }
   .d-scrub:focus-visible { outline: 2px solid var(--amber, #ef8e1c); outline-offset: 2px; }
+  .d-scrub.drag:focus-visible, .d-scrub.drag:focus { outline: none; }
   .d-track { position: relative; height: 3px; border-radius: 2px; background: rgba(26,23,20,.12); }
   .d-tick {
     position: absolute; top: 50%; width: 5px; height: 5px; border-radius: 50%;
@@ -290,11 +291,58 @@ body.hero-p3 #hero-simp-dot { pointer-events: none !important; }
 #hero .sv-para.simp { border-radius: 9px; transition: background 0.25s ease; }
 #hero .sv-para.simp:has(#hero-simp-dot:hover) { background: rgba(239,142,28,0.10); }
 
+/* "simplify ↓" hint lives inside .url — pushes right, fades in on P2 entry, out before tap */
+.bbar-simp-hint {
+  font-family: var(--mono,'JetBrains Mono',monospace);
+  font-size: 9px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--amber-deep, #c96b00); white-space: nowrap;
+  margin-left: auto; opacity: 0; pointer-events: none;
+}
+body.hero-p2 .bbar-simp-hint { animation: simpHintFade 4.5s ease 1.3s forwards; }
+body.hero-simp .bbar-simp-hint,
+body.hero-p3 .bbar-simp-hint { opacity: 0 !important; animation: none !important; }
+@keyframes simpHintFade {
+  0%,100% { opacity: 0; }
+  18% { opacity: 1; }
+  72% { opacity: 1; }
+}
+
+/* level badge C1↓B2 — vertical 3-row pill inside .url, right-aligned */
+.url .simp-level {
+  position: static !important; transform: none !important;
+  bottom: auto !important; left: auto !important;
+  margin-left: auto; flex-shrink: 0;
+  display: flex; flex-direction: column; align-items: center; gap: 1px;
+  opacity: 0; transition: opacity 0.35s ease; pointer-events: none;
+}
+.url .simp-level.show { opacity: 1; }
+.url .simp-level .sl-was,
+.url .simp-level .sl-now {
+  font-family: var(--mono,'JetBrains Mono',monospace);
+  font-size: 8.5px; font-weight: 700; letter-spacing: .04em; line-height: 1.3;
+  padding: 1px 5px; border-radius: 99px;
+  transition: background .35s ease, color .35s ease, border-color .35s ease;
+}
+.url .simp-level .sl-was {
+  color: var(--amber-deep,#c96b00); background: rgba(176,106,44,.10);
+  border: 1px solid rgba(176,106,44,.3);
+}
+.url .simp-level.rolled .sl-was {
+  color: var(--ink-45); background: rgba(26,23,20,.06);
+  border-color: rgba(26,23,20,.12); text-decoration: line-through;
+}
+.url .simp-level .sl-dn { font-size: 7px; color: var(--ink-30,rgba(26,23,20,.3)); line-height: 1.1; }
+.url .simp-level .sl-now { color: var(--ink-45); background: rgba(26,23,20,.06); border: 1px solid rgba(26,23,20,.12); }
+.url .simp-level.rolled .sl-now { color: #fff; background: var(--green,#5a9e5f); border-color: var(--green,#5a9e5f); }
+.url .simp-level.rolled.pulse .sl-now { animation: slpulse .72s ease; }
+
 /* ===== HERO PHASE 3 — Translate ===== */
 
 /* All three article layers stay position:absolute — simultaneous crossfade, no layout shifts */
 #hero .browser .page { min-height: 220px; transition: min-height 1s cubic-bezier(.4,0,.2,1) 0.12s; }
-body.hero-p2 #hero .browser .page { min-height: 420px; }
+/* P2: let .page-en flow normally so the browser height = content + equal padding */
+body.hero-p2 #hero .browser .page { min-height: 0; }
+body.hero-p2 #hero .page-en { position: relative; top: auto; left: auto; right: auto; }
 
 #hero .page-en {
   position: absolute; top: 0; left: 0; right: 0;
@@ -343,15 +391,18 @@ body.hero-p3 #hero .hero-copy-p3 { opacity: 1; transform: none; pointer-events: 
 /* .tcard = the fixed-positioned, gently-floating shell (left/top set in JS).
    The float lives here as a transform animation; the one-time pop-in lives on
    .tc-pop inside — two elements so the two transforms never fight. The card
-   floats ~3px on a SHORTER 4.5s cycle than the page browser's ~1px / 8s, so it
-   drifts on its own beat instead of moving in lockstep with the background. */
+   floats on its own gentle cycle while, in Translate, the page browser is frozen
+   (see the rule below) — so the card is the ONLY thing moving, not the reverse. */
 .tcard {
   position: fixed; left: 0; top: 0; z-index: 60;
   width: 312px; max-width: min(340px, 86vw);
   pointer-events: none;
   animation: tcbob 4.5s ease-in-out infinite;
 }
-@keyframes tcbob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+@keyframes tcbob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+/* Translate = the card is the live element: freeze the browser's bob so it sits
+   dead still and only the card floats (the opposite of every other phase). */
+body.hero-p3 #hero .floatwrap { animation: none !important; transform: none !important; }
 
 .tc-pop {
   background: rgba(255,255,255,.94);
@@ -398,6 +449,30 @@ body.hero-p3 #hero .hero-copy-p3 { opacity: 1; transform: none; pointer-events: 
   display: inline-block; opacity: 0; transform: translateY(6px);
   animation: twWave 0.5s cubic-bezier(.2,.7,.2,1) both;
 }
+
+/* "go next" pill — sits under the card; left/top set in JS, fades in + gently
+   bobs once the translation has played. Click (or scroll) → next screen. */
+.tc-next {
+  position: fixed; left: 0; top: 0; z-index: 60;
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 9px 17px;
+  font-family: var(--sans); font-size: 13px; font-weight: 600; letter-spacing: .01em;
+  color: var(--ink, #1a1714);
+  background: rgba(255,255,255,.94);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4); backdrop-filter: blur(16px) saturate(1.4);
+  border: 1px solid var(--line); border-radius: 999px;
+  box-shadow: 0 12px 26px -14px rgba(26,23,20,.42), 0 2px 8px -4px rgba(26,23,20,.16);
+  cursor: pointer;
+  opacity: 0; transform: translateY(6px);
+  transition: opacity .3s ease, transform .4s cubic-bezier(.2,1.05,.3,1), box-shadow .2s ease;
+  pointer-events: none;
+}
+.tc-next.show { opacity: 1; pointer-events: auto; animation: tcNextBob 2.4s ease-in-out infinite; }
+.tc-next:hover { box-shadow: 0 14px 30px -14px rgba(26,23,20,.5), 0 2px 8px -4px rgba(26,23,20,.18); }
+.tc-next .arr { color: var(--amber, #ef8e1c); font-weight: 700; transition: transform .25s ease; }
+.tc-next:hover .arr { transform: translateX(3px); }
+@keyframes tcNextBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+@media (prefers-reduced-motion: reduce) { .tc-next.show { animation: none; } }
 
 /* ===== HERO PHASE 4 — Discuss (the page talks back) =====
    The floating tilted chat is retired: a side panel docks INSIDE the browser
@@ -552,16 +627,23 @@ body.hero-simp #hero .hero-copy-simp .sc-h   { animation: board-in 0.26s cubic-b
   font-size: clamp(32px, 3.8vw, 52px); line-height: 1.08; margin: 0;
 }
 
-/* "first" — collapses to zero-width initially so "We invented" reads naturally,
-   then the gap spreads open and "first" appears inside it */
-#hero .hero-copy-simp .sc-first {
-  display: inline-block; overflow: hidden;
-  max-width: 0; opacity: 0; vertical-align: baseline;
-  color: var(--amber-deep, #c96b00);
+/* verb cycle: made → built → created → invented (3 departure-board flips) */
+@keyframes verb-out    { to   { transform:rotateX(-90deg); opacity:0; } }
+@keyframes verb-in-mid { from { transform:rotateX(80deg);  opacity:0; } }
+@keyframes verb-in-end {
+  0%   { transform:rotateX(80deg); opacity:0; }
+  60%  { transform:rotateX(-8deg); opacity:1; }
+  80%  { transform:rotateX(3deg); }
+  100% { transform:rotateX(0deg); }
 }
-body.hero-simp #hero .hero-copy-simp .sc-first {
-  animation: first-spread 0.68s cubic-bezier(.3,1,.4,1) 0.55s both;
+#hero .hero-copy-simp .sc-verb {
+  display:inline-block; vertical-align:baseline; overflow:hidden;
+  max-width:0; opacity:0; color:var(--amber-deep,#c96b00);
 }
+body.hero-simp #hero .hero-copy-simp .sc-verb       { animation:first-spread 0.68s cubic-bezier(.3,1,.4,1) 0.55s both; }
+body.hero-simp #hero .hero-copy-simp .sc-verb.v-out { animation:verb-out     0.22s ease-in  both !important; }
+body.hero-simp #hero .hero-copy-simp .sc-verb.v-mid { animation:verb-in-mid  0.28s ease-out both !important; }
+body.hero-simp #hero .hero-copy-simp .sc-verb.v-end { animation:verb-in-end  0.45s ease-out both !important; }
 
 /* ===== HERO PHASE 5 — In-page exercises ===== */
 
@@ -746,20 +828,33 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
 
 /* ── P3: sentences — hover tint, lift = translateY+shadow only, zero scale/rotate ── */
 #hero .tr-page .sel {
-  display: inline-block;
+  display: inline;                    /* inline, NOT inline-block — sentences flow as one paragraph */
+  -webkit-box-decoration-break: clone; box-decoration-break: clone;  /* bg/underline wrap per line */
   box-shadow: none !important;        /* kill the blue inset-underline from .page .sel */
-  transition: background .2s ease, border-radius .2s ease,
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+  text-shadow: .35px 0 transparent, -.35px 0 transparent;
+  transition: background .2s ease, text-decoration-color .2s ease, text-shadow .2s ease,
+              border-radius .2s ease,
               transform .38s cubic-bezier(.2,.8,.25,1), box-shadow .38s ease,
               opacity .15s ease, padding .38s cubic-bezier(.2,.8,.25,1);
 }
+/* hover: underline the sentence + a smooth nudge toward a heavier weight — faked
+   with a paired text-shadow so the glyph advance (and the layout) never shifts;
+   no change to font size or family, so nothing reflows */
 #hero .tr-page .sel:hover {
-  background: rgba(239,142,28,.07); border-radius: 6px;
-  box-shadow: none !important; cursor: pointer;
+  cursor: pointer;
+  background: transparent;        /* kill the blue .page .sel:hover wash */
+  text-decoration-color: rgba(239,142,28,.85);
+  text-shadow: .35px 0 currentColor, -.35px 0 currentColor;
 }
-/* active sentence (being translated): warm amber wash, not the blue .page .sel.on */
+/* active sentence (being translated): same cue + a faint wash to mark it */
 #hero .tr-page .sel.on {
-  background: rgba(239,142,28,.14); border-radius: 6px;
-  box-shadow: inset 0 -2px 0 rgba(239,142,28,.55) !important;
+  background: rgba(239,142,28,.09); border-radius: 5px;
+  text-decoration-color: var(--amber, #ef8e1c);
+  text-shadow: .35px 0 currentColor, -.35px 0 currentColor;
 }
 #hero .tr-page .sel.m-lift {
   position: relative; z-index: 5;
@@ -1119,6 +1214,8 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
     padding: 14px 0 10px;
     touch-action: none;            /* the track owns its gestures */
   }
+  .m-scrub:focus, .m-scrub:focus-visible,
+  .m-scrub *:focus, .m-scrub *:focus-visible { outline: none; }
   .m-scrub-track {
     position: relative; height: 3px; border-radius: 2px;
     background: rgba(26,23,20,.12);
@@ -1532,10 +1629,10 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
 
     <!-- COLUMN 2 — browser (stays through both phases) -->
     <div class="hero-stage">
-      <div class="float" data-speed="-0.08" style="top:8%;left:-1%;z-index:1">
+      <div class="float" data-speed="-0.08" style="top:8%;left:-8%;z-index:1">
         <div class="floatwrap" style="--dur:8s;--del:0s">
           <div class="browser" style="box-shadow:0 72px 124px -46px rgba(58,36,2,.22),0 18px 38px -20px rgba(26,23,20,.16)">
-            <div class="bbar"><div class="bdots"><i></i><i></i><i></i></div><div class="url">rollingstone.com</div></div>
+            <div class="bbar"><div class="bdots"><i></i><i></i><i></i></div><div class="url">rollingstone.com<span class="bbar-simp-hint" aria-hidden="true">simplify ↓</span></div></div>
             <div class="page" style="font-size:16.5px;line-height:1.72;position:relative">
               <!-- English content — Phase 1 & 2 -->
               <div class="page-en" style="padding:26px 32px">
@@ -1545,7 +1642,7 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
                 <div class="hero-extra">
                   <p class="sv-para simp" id="hero-simp-para" style="margin:18px 0 0">
                     <button class="simp-dot" id="hero-simp-dot" aria-label="Simplify this paragraph"><span class="sd-core"></span></button>
-                    <span class="simp-body" id="hero-simp-body">Her unprecedented commercial dominance — spanning every genre from country to pop to indie folk — has left critics asking whether today's music industry can even accommodate a phenomenon of her scale. Few artists have built such a devoted following while crossing this many style boundaries.</span>
+                    <span class="simp-body" id="hero-simp-body">Her commercial dominance — spanning every genre from country to pop to indie folk — has left critics asking whether today's music industry can accommodate a phenomenon of her scale.</span>
                   </p>
                 </div>
               </div>
@@ -1555,7 +1652,7 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
                 <!-- same text as page-en, sentence-wrapped — the P2→P3 swap changes
                      the affordance (words → sentences), never the text position -->
                 <p style="margin:0"><span class="sel" data-tr="s1" tabindex="0" role="button">Few musicians branch out across so many genre walls and keep every audience.</span> <span class="sel" data-tr="s1b" tabindex="0" role="button">Taylor Swift moved from country to pop to folk without losing her devoted fans — a cultural phenomenon who left a legacy no one had predicted.</span></p>
-                <p style="margin:18px 0 0"><span class="sel" data-tr="s4" tabindex="0" role="button">Her unprecedented commercial dominance — spanning every genre from country to pop to indie folk — has left critics asking whether today's music industry can even accommodate a phenomenon of her scale. Few artists have built such a devoted following while crossing this many style boundaries.</span></p>
+                <p style="margin:18px 0 0"><span class="sel" data-tr="s4" tabindex="0" role="button">Her unprecedented commercial dominance — spanning every genre from country to pop to indie folk — has left critics asking whether today's music industry can even accommodate a phenomenon of her scale.</span> <span class="sel" data-tr="s4b" tabindex="0" role="button">Few artists have built such a devoted following while crossing this many style boundaries.</span></p>
               </div>
               <!-- Phase 5 — same text, exercise gaps instead of sentence-selects -->
               <div class="ex-page" style="padding:26px 32px">
@@ -1620,6 +1717,9 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
           </div>
         </div>
       </div>
+      <!-- "go next" pill — fades in under the translate card once the translation
+           has played; reparented to <body> in JS (viewport-fixed, like the card) -->
+      <button class="tc-next" id="hero-tc-next" type="button" aria-hidden="true" tabindex="-1">Next: Discuss <span class="arr" aria-hidden="true">→</span></button>
 
     </div>
 
@@ -1663,7 +1763,7 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
     <!-- SIMP DONE COPY — departure-board reveal after word stream finishes -->
     <div class="hero-copy-simp">
       <p class="sc-pre">Your words come back.</p>
-      <p class="sc-h">We<span class="sc-first"> first</span> invented<br>the living dictionary.</p>
+      <p class="sc-h">We<span class="sc-verb">&nbsp;made</span><br>the living dictionary.</p>
     </div>
 
   </div>
@@ -1926,9 +2026,11 @@ window.LanternPlaying = false;
 
   /* ---- translation panel ---- */
   var heroTpanel  = document.getElementById('hero-tpanel');
-  /* lift the card to <body> so its position:fixed is viewport-relative — inside
-     .hero-stage (which is transformed) fixed would anchor to the stage instead */
+  var heroTcNext  = document.getElementById('hero-tc-next');
+  /* lift the card (and its "next" pill) to <body> so position:fixed is viewport-
+     relative — inside .hero-stage (transformed) fixed would anchor to the stage */
   if (heroTpanel && heroTpanel.parentNode !== document.body) document.body.appendChild(heroTpanel);
+  if (heroTcNext && heroTcNext.parentNode !== document.body) document.body.appendChild(heroTcNext);
   var heroTpSrc   = document.getElementById('hero-tp-src');
   var heroTpTgt   = document.getElementById('hero-tp-tgt');
   var heroTpClose = document.getElementById('hero-tp-close');
@@ -1942,12 +2044,20 @@ window.LanternPlaying = false;
 
   var TR = {
     s1: {
-      en: "Few musicians branch out across so many genre walls and keep every audience. Taylor Swift moved from country to pop to folk without losing her devoted fans — a cultural phenomenon who left a legacy no one had predicted.",
-      uk: "Небагато музикантів розвиваються в стількох жанрових напрямках і при цьому зберігають кожну аудиторію. Тейлор Свіфт перейшла від кантрі до попу та фолку, не втративши відданих шанувальників — культурне явище, що залишило спадщину, якої ніхто не очікував.",
-      es: "Pocos músicos se ramifican en tantos estilos y mantienen a cada audiencia. Taylor Swift pasó del country al pop y al folk sin perder a sus fans devotos — un fenómeno cultural que dejó un legado que nadie había predicho.",
-      fr: "Peu de musiciens s'étendent à travers autant de styles et gardent chaque public. Taylor Swift est passée du country à la pop et au folk sans perdre ses fans dévoués — un phénomène culturel qui a laissé un héritage que personne n'avait prévu.",
-      de: "Wenige Musiker verzweigen sich in so viele Genres und halten dabei jedes Publikum. Taylor Swift wechselte vom Country über Pop zum Folk, ohne ihre treuen Fans zu verlieren — ein kulturelles Phänomen, das ein Erbe hinterließ, das niemand vorhergesagt hatte.",
-      pt: "Poucos músicos se expandem por tantos estilos e mantêm cada público. Taylor Swift passou do country ao pop e ao folk sem perder seus fãs devotados — um fenômeno cultural que deixou um legado que ninguém havia previsto."
+      en: "Few musicians branch out across so many genre walls and keep every audience.",
+      uk: "Небагато музикантів розвиваються в стількох жанрових напрямках і при цьому зберігають кожну аудиторію.",
+      es: "Pocos músicos se ramifican en tantos estilos y mantienen a cada audiencia.",
+      fr: "Peu de musiciens s'étendent à travers autant de styles et gardent chaque public.",
+      de: "Wenige Musiker verzweigen sich in so viele Genres und halten dabei jedes Publikum.",
+      pt: "Poucos músicos se expandem por tantos estilos e mantêm cada público."
+    },
+    s1b: {
+      en: "Taylor Swift moved from country to pop to folk without losing her devoted fans — a cultural phenomenon who left a legacy no one had predicted.",
+      uk: "Тейлор Свіфт перейшла від кантрі до попу та фолку, не втративши відданих шанувальників — культурне явище, що залишило спадщину, якої ніхто не очікував.",
+      es: "Taylor Swift pasó del country al pop y al folk sin perder a sus fans devotos — un fenómeno cultural que dejó un legado que nadie había predicho.",
+      fr: "Taylor Swift est passée du country à la pop et au folk sans perdre ses fans dévoués — un phénomène culturel qui a laissé un héritage que personne n'avait prévu.",
+      de: "Taylor Swift wechselte vom Country über Pop zum Folk, ohne ihre treuen Fans zu verlieren — ein kulturelles Phänomen, das ein Erbe hinterließ, das niemand vorhergesagt hatte.",
+      pt: "Taylor Swift passou do country ao pop e ao folk sem perder seus fãs devotados — um fenômeno cultural que deixou um legado que ninguém havia previsto."
     },
     s2: {
       en: "Every autumn, storms drive waves across the roadway — sometimes shutting the road for days.",
@@ -1966,12 +2076,20 @@ window.LanternPlaying = false;
       pt: "Os engenheiros levaram sete anos para construir esta travessia, lutando contra o mar em cada etapa."
     },
     s4: {
-      en: "Her unprecedented commercial dominance — spanning every genre from country to pop to indie folk — has left critics asking whether today's music industry can even accommodate a phenomenon of her scale. Few artists have built such a devoted following while crossing this many style boundaries.",
-      uk: "Її безпрецедентне комерційне домінування — у кожному жанрі від кантрі до попу та інді-фолку — змусило критиків запитати, чи взагалі може сучасна музична індустрія вмістити явище такого масштабу. Небагато артистів здобули таку віддану аудиторію, перетинаючи стільки жанрових меж.",
-      es: "Su dominio comercial sin precedentes — abarcando cada género desde el country hasta el pop y el indie folk — ha dejado a los críticos preguntándose si la industria musical actual puede acomodar un fenómeno de su escala. Pocas artistas han construido una base tan devota cruzando tantos estilos.",
-      fr: "Sa domination commerciale sans précédent — couvrant chaque genre du country à la pop et à l'indie folk — a laissé les critiques se demander si l'industrie musicale actuelle peut accueillir un phénomène de son envergure. Peu d'artistes ont bâti un public aussi dévoué en traversant autant de styles.",
-      de: "Ihre beispiellose kommerzielle Dominanz — die jedes Genre vom Country über Pop bis Indie-Folk umspannt — hat Kritiker dazu gebracht zu fragen, ob die heutige Musikindustrie ein Phänomen ihrer Größenordnung aufnehmen kann. Wenige Künstler haben eine so treue Fangemeinde aufgebaut und dabei so viele Stilgrenzen überschritten.",
-      pt: "Seu domínio comercial sem precedentes — abrangendo cada gênero do country ao pop e ao indie folk — deixou os críticos questionando se a indústria musical atual pode acomodar um fenômeno de sua escala. Poucas artistas construíram um público tão devotado cruzando tantos estilos."
+      en: "Her unprecedented commercial dominance — spanning every genre from country to pop to indie folk — has left critics asking whether today's music industry can even accommodate a phenomenon of her scale.",
+      uk: "Її безпрецедентне комерційне домінування — у кожному жанрі від кантрі до попу та інді-фолку — змусило критиків запитати, чи взагалі може сучасна музична індустрія вмістити явище такого масштабу.",
+      es: "Su dominio comercial sin precedentes — abarcando cada género desde el country hasta el pop y el indie folk — ha dejado a los críticos preguntándose si la industria musical actual puede acomodar un fenómeno de su escala.",
+      fr: "Sa domination commerciale sans précédent — couvrant chaque genre du country à la pop et à l'indie folk — a laissé les critiques se demander si l'industrie musicale actuelle peut accueillir un phénomène de son envergure.",
+      de: "Ihre beispiellose kommerzielle Dominanz — die jedes Genre vom Country über Pop bis Indie-Folk umspannt — hat Kritiker dazu gebracht zu fragen, ob die heutige Musikindustrie ein Phänomen ihrer Größenordnung aufnehmen kann.",
+      pt: "Seu domínio comercial sem precedentes — abrangendo cada gênero do country ao pop e ao indie folk — deixou os críticos questionando se a indústria musical atual pode acomodar um fenômeno de sua escala."
+    },
+    s4b: {
+      en: "Few artists have built such a devoted following while crossing this many style boundaries.",
+      uk: "Небагато артистів здобули таку віддану аудиторію, перетинаючи стільки жанрових меж.",
+      es: "Pocas artistas han construido una base tan devota cruzando tantos estilos.",
+      fr: "Peu d'artistes ont bâti un public aussi dévoué en traversant autant de styles.",
+      de: "Wenige Künstler haben eine so treue Fangemeinde aufgebaut und dabei so viele Stilgrenzen überschritten.",
+      pt: "Poucas artistas construíram um público tão devotado cruzando tantos estilos."
     }
   };
 
@@ -1979,6 +2097,7 @@ window.LanternPlaying = false;
     if (activeSel) activeSel.classList.remove('on');
     activeSel = null;
     mobTranslateReset();
+    hideNextPill();
     if (heroTpanel) {
       heroTpanel.style.transition = 'none';
       heroTpanel.classList.remove('show');
@@ -1987,6 +2106,34 @@ window.LanternPlaying = false;
       document.getElementById('hero').classList.remove('panel-open');
     }
   }
+
+  /* the "go next" pill: sits centred under the card, fades in once the
+     translation has played; click (like a scroll) walks on to Discuss */
+  function placeNextPill() {
+    if (!heroTcNext || !heroTpanel) return;
+    var cl = parseFloat(heroTpanel.style.left) || 0;
+    var ct = parseFloat(heroTpanel.style.top) || 0;
+    var cw = heroTpanel.offsetWidth, ch = heroTpanel.offsetHeight;
+    var pw = heroTcNext.offsetWidth || 150;
+    heroTcNext.style.left = Math.round(cl + cw / 2 - pw / 2) + 'px';
+    heroTcNext.style.top  = Math.round(ct + ch + 12) + 'px';
+  }
+  function showNextPill() {
+    if (!heroTcNext) return;
+    heroTcNext.setAttribute('aria-hidden', 'false');
+    heroTcNext.tabIndex = 0;
+    placeNextPill();
+    heroTcNext.classList.add('show');
+  }
+  function hideNextPill() {
+    if (!heroTcNext) return;
+    heroTcNext.classList.remove('show');
+    heroTcNext.setAttribute('aria-hidden', 'true');
+    heroTcNext.tabIndex = -1;
+  }
+  if (heroTcNext) heroTcNext.addEventListener('click', function () {
+    if (phase === 2) { hideNextPill(); toP4(); }
+  });
 
   /* ── mobile P3: no side panel — the sentence ITSELF lifts off the page
      (3D card, anchored right), its text morphs to the visitor's language,
@@ -2174,11 +2321,14 @@ window.LanternPlaying = false;
   function playTranslate(sel) {
     if (!heroTpanel) return;
     var g = ++tpGen;
+    hideNextPill();
     var fadeMs = openTPanel(sel) || 1200;
     window.LanternBusy.set('translate', true);
     setTimeout(function () {
-      if (g === tpGen && phase === 2) window.LanternBusy.set('translate', false);
-    }, fadeMs + 1300);
+      if (g !== tpGen || phase !== 2) return;
+      showNextPill();                               /* "go next" cue once it has played */
+      window.LanternBusy.set('translate', false);
+    }, fadeMs + 650);
   }
 
   if (heroTpClose) heroTpClose.addEventListener('click', closeTPanel);
@@ -2336,6 +2486,7 @@ window.LanternPlaying = false;
     if (wasAbove) {
       closeTPanel();
       document.querySelectorAll('#hero .sel').forEach(function (s) { s.classList.remove('on', 'cand-pulse'); });
+      if (window._heroSimpReset) window._heroSimpReset();
     }
     /* any entry into P2 guarantees the four words — a dot1→dot3 jump used to
        skip this and silently degrade the simplify demo to plain text */
@@ -2352,17 +2503,6 @@ window.LanternPlaying = false;
       setTimeout(populateShelf, 400);
     }
     setDots(1);
-    /* the paragraph simplifies ITSELF a beat after entry — desktop and mobile
-       alike, so PLAY runs the action without anyone hunting for the dot. The
-       'simp' flag (raised now, dropped when the word-stream ends or the phase
-       is left) is what makes the engine wait for the whole reveal. */
-    window.LanternBusy.set('simp', true);
-    setTimeout(function () {
-      if (phase !== 1) { window.LanternBusy.set('simp', false); return; }
-      if (document.body.classList.contains('hero-simp')) { window.LanternBusy.set('simp', false); return; }
-      var d = document.getElementById('hero-simp-dot');
-      if (d) d.click(); else window.LanternBusy.set('simp', false);
-    }, 1100);
   }
 
   function toP3() {
@@ -2376,7 +2516,6 @@ window.LanternPlaying = false;
     document.body.classList.remove('hero-p4', 'hero-p5', 'hero-simp');
     closeTPanel();
     leaveDiscuss();
-    if (window._heroSimpReset) window._heroSimpReset();
     setDots(2);
     setTimeout(function () {
       if (phase !== 2) return;
@@ -2404,7 +2543,6 @@ window.LanternPlaying = false;
     document.body.classList.add('hero-p2', 'hero-p3', 'hero-p4');
     document.body.classList.remove('hero-p5', 'hero-simp');
     closeTPanel();
-    if (window._heroSimpReset) window._heroSimpReset();
     document.querySelectorAll('#hero .sel').forEach(function (s) { s.classList.remove('on', 'cand-pulse'); });
     setDots(3);
     runDiscuss();
@@ -2431,18 +2569,16 @@ window.LanternPlaying = false;
      "Discuss the article" click → dock slides in → reading… →
      summary at your level → suggested questions → grounded answers
      ============================================================ */
-  var SUMMARY = [
-    'Taylor Swift\'s Eras Tour spanned six continents and became the highest-grossing concert series ever.',
-    'She moved from country to pop to indie folk and kept every audience along the way.',
-    'Critics say no other artist has crossed so many genre boundaries without losing fans.'
-  ];
-  /* no canned reply chips: the visitor "types" a question that reuses a
-     saved word — using your own word is the point, and the deck credits it */
-  var ASK = {
-    text:  'Why do her [[devoted]] fans follow her across so many different genres?',
-    plain: 'Why do her devoted fans follow her across so many different genres?',
-    lemma: 'devoted', cite: 's4',
-    a: 'That\'s the [[phenomenon]] — she builds trust with each audience before moving on, so they follow the artist, not just the genre.'
+  /* bot opens with a provocation; visitor fires back; bot closes with citation */
+  var BOT_OPEN = 'Quick take — is Swift\'s cross-genre run a real [[phenomenon]], or just [[devoted]] fans who\'d follow anything she does?';
+  var USER_REPLY = {
+    text:  'Has to be a [[phenomenon]] — she kept every crowd through every [[genre]] shift.',
+    plain: 'Has to be a phenomenon — she kept every crowd through every genre shift.',
+    lemmas: ['phenomenon', 'genre']
+  };
+  var BOT_FOLLOW = {
+    text: 'Exactly. The article puts it plain — crossing every [[genre]] boundary, leaving a [[legacy]] no other artist has matched.',
+    cite: 's4'
   };
 
   function wait(ms) { return new Promise(function (r) { setTimeout(r, RM ? 0 : ms); }); }
@@ -2561,70 +2697,72 @@ window.LanternPlaying = false;
     }, 560);
   }
 
-  /* the visitor "types" a question that reuses a saved word, sends it,
-     the word is credited, then a grounded answer streams back */
-  async function typeAsk(gen) {
+  /* visitor types a short reply; each saved word used is credited */
+  async function typeReply(gen) {
     if (dockBusy || !aliveD(gen)) return;
     dockBusy = true;
     var input = dock.querySelector('.cw-composer textarea');
     var send  = dock.querySelector('.cw-send');
     if (input && !RM) {
       if (send) send.classList.add('on');
-      for (var i = 1; i <= ASK.plain.length; i++) {
+      for (var i = 1; i <= USER_REPLY.plain.length; i++) {
         if (!aliveD(gen)) { input.value = ''; input.style.height = ''; dockBusy = false; return; }
-        input.value = ASK.plain.slice(0, i);
+        input.value = USER_REPLY.plain.slice(0, i);
         input.style.height = 'auto'; input.style.height = input.scrollHeight + 'px';
-        await wait(9 + (i % 3) * 6);
+        await wait(8 + (i % 3) * 5);
       }
-      await wait(150); if (!aliveD(gen)) { input.value = ''; dockBusy = false; return; }
+      await wait(120); if (!aliveD(gen)) { input.value = ''; dockBusy = false; return; }
       if (send) { send.classList.add('press'); setTimeout(function () { send.classList.remove('press', 'on'); }, 180); }
-      input.value = '';
+      input.value = ''; input.style.height = '';
     }
     var u = document.createElement('div');
     u.className = 'cw-user';
-    buildWords(u, ASK.text).forEach(function (s) { s.el.classList.add('on'); });
+    buildWords(u, USER_REPLY.text).forEach(function (s) { s.el.classList.add('on'); });
     dockBody.appendChild(u); pinDock();
-    await wait(240); if (!aliveD(gen)) { dockBusy = false; return; }
-    var usedEl = u.querySelector('.cw-saved');
-    if (usedEl) creditWord(ASK.lemma, usedEl);
-    await wait(380); if (!aliveD(gen)) { dockBusy = false; return; }
-    var bot = document.createElement('div');
-    bot.className = 'cw-bot';
-    bot.innerHTML = '<span class="cw-typing"><i></i><i></i><i></i></span>';
-    dockBody.appendChild(bot); pinDock();
     await wait(200); if (!aliveD(gen)) { dockBusy = false; return; }
-    bot.innerHTML = '';
-    var queue = buildWords(bot, ASK.a);
-    pinDock();
-    citePulse(ASK.cite);
-    await revealWords(queue, gen);
+    USER_REPLY.lemmas.forEach(function (lemma) {
+      var el = u.querySelector('.cw-saved[data-w="' + lemma + '"]');
+      if (el) creditWord(lemma, el);
+    });
     dockBusy = false;
   }
 
   /* everything after the "Discuss the article" press */
   async function openDockFlow(gen) {
     dock.classList.add('show');
-    await wait(260); if (!aliveD(gen)) return;
+    await wait(160); if (!aliveD(gen)) return;
     var skel = document.createElement('div');
     skel.className = 'dk-skel'; skel.innerHTML = '<i></i><i></i><i></i>';
     dockBody.appendChild(skel);
-    await wait(440); if (!aliveD(gen)) return;        /* honest, brief "reading…" */
+    await wait(280); if (!aliveD(gen)) return;      /* brief, honest "reading…" */
     skel.classList.add('out');
-    await wait(130); if (!aliveD(gen)) return;
+    await wait(100); if (!aliveD(gen)) return;
     if (skel.parentNode) skel.parentNode.removeChild(skel);
-    await streamSummary(gen); if (!aliveD(gen)) return;
+    /* bot opens first — provokes rather than summarises */
+    var botQ = document.createElement('div');
+    botQ.className = 'cw-bot';
+    var qQueue = buildWords(botQ, BOT_OPEN);
+    dockBody.appendChild(botQ); pinDock();
+    await revealWords(qQueue, gen); if (!aliveD(gen)) return;
     await wait(360); if (!aliveD(gen)) return;
-    await typeAsk(gen);
-    await wait(1100); if (!aliveD(gen)) return;
+    /* visitor fires back — two saved words credited */
+    await typeReply(gen); if (!aliveD(gen)) return;
+    await wait(260); if (!aliveD(gen)) return;
+    /* bot closes with article citation */
+    var botF = document.createElement('div');
+    botF.className = 'cw-bot';
+    botF.innerHTML = '<span class="cw-typing"><i></i><i></i><i></i></span>';
+    dockBody.appendChild(botF); pinDock();
+    await wait(170); if (!aliveD(gen)) return;
+    botF.innerHTML = '';
+    var fQueue = buildWords(botF, BOT_FOLLOW.text);
+    pinDock();
+    citePulse(BOT_FOLLOW.cite);
+    await revealWords(fQueue, gen); if (!aliveD(gen)) return;
+    await wait(800); if (!aliveD(gen)) return;
     dock.classList.remove('show');
-    await wait(380); if (!aliveD(gen)) return;
-    window.LanternBusy.set('discuss', false);   /* chat played out → scene done */
-    /* the page NEVER advances on its own. Releasing 'discuss' busy lets PLAY's
-       chase engine (desktop deck / mobile scrubber) walk on to Practice at its
-       own beat; with PLAY off we simply rest on the finished chat until the
-       visitor scrolls or taps the deck. Removing the old auto-toP5() is what
-       stops Discuss self-jumping to Practice — and matches the deck's contract
-       that scenes never self-advance. */
+    await wait(350); if (!aliveD(gen)) return;
+    window.LanternBusy.set('discuss', false);
   }
 
   async function runDiscuss() {
@@ -2640,7 +2778,7 @@ window.LanternPlaying = false;
     var bbar = document.querySelector('#hero .browser .bbar');
     if (bbar) dock.style.top = (bbar.offsetHeight + 10) + 'px';   /* popup hangs under the toolbar */
     /* the words the answers weave back in */
-    if (window.Shelf && !window.Shelf.has('coast')) populateShelf();
+    if (window.Shelf && !window.Shelf.has('genre')) populateShelf();
 
     if (RM) {                       /* reduced motion: the scene assembles without theatrics */
       await openDockFlow(gen);
@@ -2673,6 +2811,45 @@ window.LanternPlaying = false;
   /* simp-done state: departure board on left copy after word stream finishes */
   window._heroToP3 = function () { document.body.classList.add('hero-simp'); };
   window._heroToP2 = function () { document.body.classList.remove('hero-simp'); };
+
+  /* verb cycle: "made" spreads in, then departure-board 3D-flips to "invented" */
+  (function () {
+    var gen = 0;
+    function start() {
+      var g = ++gen;
+      setTimeout(function () {
+        if (g !== gen) return;
+        var v = document.querySelector('#hero .hero-copy-simp .sc-verb');
+        if (!v) return;
+        /* freeze post-spread state; release overflow so rotateX isn't clipped */
+        v.style.maxWidth = '400px';
+        v.style.opacity = '1';
+        v.style.overflow = 'visible';
+        v.style.animation = 'none';
+        void v.offsetHeight;
+        v.classList.add('v-out');
+        setTimeout(function () {
+          if (g !== gen) return;
+          v.textContent = ' invented';   /* swap while invisible mid-flip */
+          v.classList.remove('v-out');
+          void v.offsetHeight;
+          v.classList.add('v-in');
+          setTimeout(function () { if (g === gen) v.classList.remove('v-in'); }, 550);
+        }, 200);
+      }, 2730);   /* 550 delay + 680 spread + 1500 pause on "made" */
+    }
+    function reset() {
+      gen++;
+      var v = document.querySelector('#hero .hero-copy-simp .sc-verb');
+      if (!v) return;
+      v.classList.remove('v-out', 'v-in');
+      v.style.cssText = '';
+      v.textContent = ' made';
+    }
+    new MutationObserver(function () {
+      if (document.body.classList.contains('hero-simp')) start(); else reset();
+    }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+  }());
 
   /* ---- inputs ---- */
   if (dot1) dot1.addEventListener('click', toP1);
@@ -3015,11 +3192,11 @@ window.LanternPlaying = false;
   var SIMPLE = [
     'She dominated every ',
     { lemma: 'genre',      text: 'genre' },
-    ' — from country to pop to indie folk — and kept her ',
+    ' — from country to pop to folk — and kept her ',
     { lemma: 'devoted',    text: 'devoted' },
-    ' fans through every style shift. Critics call it a ',
+    ' fans. Critics call it a ',
     { lemma: 'phenomenon', text: 'phenomenon' },
-    ': no artist had ever crossed so many boundaries without losing the crowd.'
+    ': no other artist had crossed so many boundaries.'
   ];
 
   var simplified = false, busy = false;
@@ -3036,11 +3213,11 @@ window.LanternPlaying = false;
     levelEl = document.createElement('div');
     levelEl.className = 'simp-level';
     levelEl.innerHTML =
-      '<span class="sl-cap">now at your level</span>' +
-      '<span class="sl-chip before">C1</span>' +
-      '<span class="sl-arrow">→</span>' +
-      '<span class="sl-chip after">B2</span>';
-    para.appendChild(levelEl);
+      '<span class="sl-was">C1</span>' +
+      '<span class="sl-dn">↓</span>' +
+      '<span class="sl-now">B2</span>';
+    var url = para.closest('.browser').querySelector('.url');
+    (url || para).appendChild(levelEl);
     return levelEl;
   }
 

@@ -160,6 +160,7 @@
     function release(e) {
       if (!dragging) return;
       dragging = false; scrub.classList.remove('drag');
+      scrub.blur();
       if (!moved && LP.jump) {
         /* click (no drag): jump directly — no story walk-through */
         LP.jump(target); expected = target; render();

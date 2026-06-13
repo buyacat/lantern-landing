@@ -321,8 +321,7 @@
       popup.innerHTML =
         '<div class="top"><div class="wl"><div class="w">' + d.w + '</div>' + (d.ph ? '<div class="ph">' + d.ph + '</div>' : '') + '</div>' +
         '<div class="ctrls"><span class="spk">' + ICON.spk + '</span><span class="cefr-b ' + d.cls + '">' + d.lvl + '</span><button class="close" aria-label="close">✕</button></div></div>' +
-        '<hr />' + (d.syn ? '<div class="syn">' + d.syn + '</div>' : '') + '<div class="def">' + d.def + '</div>' + (d.ex ? '<div class="ex">' + boldEx(d.ex) + '</div>' : '') +
-        (d.tr ? '<div class="popup-tr"><span class="popup-tr-lbl">UK</span>' + d.tr + '</div>' : '') +
+        (function(){ var tr = d['tr'+cap(LANG)] || d.trEn || d.tr || ''; return (tr && tr !== '···') ? '<div class="popup-tr"><span class="popup-tr-lbl">'+LANG.toUpperCase()+'</span>' + tr + '</div>' : ''; }()) +
         '<div class="save"><button class="savebtn ' + (saved ? 'saved' : '') + '" data-k="' + lemma + '"><span class="bk">' + ICON.bk + '</span><span class="ck">' + ICON.ck + '</span><span class="lbl">' + (saved ? 'Saved to deck' : 'Save word') + '</span></button></div>';
     }
     function placePopup(w) {
