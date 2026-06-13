@@ -1742,6 +1742,30 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
 <script src="lantern-cta-charge.js"></script>
 <script>
 /* ============================================================
+   PLAY cinema — scene-busy registry
+   Each phase has a scripted action (simplify the paragraph, lift+translate a
+   sentence, play the discuss chat, autoplay the exercises, split/dock the
+   window). Those actions take far longer than one tick and start with their
+   own delays. This tiny registry lets every action raise a flag while it is
+   PERFORMING and drop it the moment it has played to the end (or is
+   abandoned). The PLAY engines (desktop deck + mobile scrubber) wait for the
+   registry to clear before advancing — so the demo runs each action to
+   completion, screen by screen, like a film. Manual gestures ignore it and
+   always cut through. window.LanternPlaying marks when a PLAY run owns the
+   wheel, so self-advancing scenes can defer to the engine instead.
+   ============================================================ */
+window.LanternBusy = (function () {
+  var flags = {};
+  return {
+    set: function (key, on) { if (on) flags[key] = true; else delete flags[key]; },
+    has: function (key) { return !!flags[key]; },
+    active: function () { for (var k in flags) if (flags[k]) return true; return false; },
+    clearAll: function () { flags = {}; }
+  };
+})();
+window.LanternPlaying = false;
+
+/* ============================================================
    Deck progress — every saved word starts barely lit (10%) and
    earns a little progress each time it's woven back into a
    scene or the reader uses it
@@ -1992,6 +2016,7 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
                   if (!alive()) return;
                   sel.style.opacity = ''; sel.style.pointerEvents = '';
                   clone.remove();
+                  window.LanternBusy.set('translate', false);   /* riser settled → PLAY may advance */
                   if (chainNext) {
                     var sels = document.querySelectorAll('#hero .tr-page .sel:not(.m-riser)');
                     if (sels[1]) setTimeout(function () { if (gen === mobGen && phase === 2) mobTranslate(sels[1], false); }, 500);
@@ -2070,6 +2095,16 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
         install button, all as phase morphs of this same pinned screen. ── */
   var LE = function () { return window.LanternEverywhere || null; };
 
+  /* every phase change abandons the previous scene mid-flight — drop all
+     scene-busy flags so the PLAY engine is never stranded waiting on a scene
+     that's no longer on screen. The entered phase re-raises its own flag. */
+  function clearScenes() {
+    window.LanternBusy.set('simp', false);
+    window.LanternBusy.set('translate', false);
+    window.LanternBusy.set('discuss', false);
+    window.LanternBusy.set('practice', false);
+  }
+
   /* leaving phases 5/6 back to a hero phase: drop the overlays, restore the wall */
   function exitOverlays() {
     var le = LE(); if (le && le.backToWall) le.backToWall();   /* removes ph-cta + un-hides wall */
@@ -2078,6 +2113,7 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
 
   function toEverywhere() {            /* phase 5 */
     if (phase === 5) return;
+    clearScenes();                     /* the morph itself reports through LE().busy() */
     var fromCTA = (phase === 6);
     phase = 5;
     closeTPanel(); leaveDiscuss();
@@ -2089,6 +2125,7 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
 
   function toCTA() {                   /* phase 6 */
     if (phase === 6) return;
+    clearScenes();
     phase = 6;
     document.body.classList.add('ph-cta');
     setDots(6);
@@ -2148,6 +2185,7 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
   function toP1() {
     if (phase === 0) return;
     fastExitCurrent();
+    clearScenes();
     phase = 0;
     exitOverlays();
     cardsIn();
@@ -2162,6 +2200,7 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
   function toP2() {
     if (phase === 1) return;
     fastExitCurrent();
+    clearScenes();
     var wasAbove = (phase >= 2);
     phase = 1;
     exitOverlays();
@@ -2187,21 +2226,24 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
       setTimeout(populateShelf, 400);
     }
     setDots(1);
-    /* mobile: nobody hunts for a 13px dot with a thumb — the paragraph
-       simplifies itself once the reveal lands */
-    if (window.matchMedia('(max-width: 920px)').matches) {
-      setTimeout(function () {
-        if (phase !== 1) return;
-        if (document.body.classList.contains('hero-simp')) return;
-        var d = document.getElementById('hero-simp-dot');
-        if (d) d.click();
-      }, 1700);
-    }
+    /* the paragraph simplifies ITSELF a beat after entry — desktop and mobile
+       alike, so PLAY runs the action without anyone hunting for the dot. The
+       'simp' flag (raised now, dropped when the word-stream ends or the phase
+       is left) is what makes the engine wait for the whole reveal. */
+    window.LanternBusy.set('simp', true);
+    setTimeout(function () {
+      if (phase !== 1) { window.LanternBusy.set('simp', false); return; }
+      if (document.body.classList.contains('hero-simp')) { window.LanternBusy.set('simp', false); return; }
+      var d = document.getElementById('hero-simp-dot');
+      if (d) d.click(); else window.LanternBusy.set('simp', false);
+    }, 1100);
   }
 
   function toP3() {
     if (phase === 2) return;
     fastExitCurrent();
+    clearScenes();
+    window.LanternBusy.set('translate', true);   /* held until the riser settles back, or the phase is left */
     phase = 2;
     exitOverlays();
     document.body.classList.add('hero-p2', 'hero-p3');
@@ -2227,6 +2269,8 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
   function toP4() {
     if (phase === 3) return;
     fastExitCurrent();
+    clearScenes();
+    window.LanternBusy.set('discuss', true);     /* held across the whole scripted chat */
     phase = 3;
     exitOverlays();
     document.body.classList.add('hero-p2', 'hero-p3', 'hero-p4');
@@ -2241,6 +2285,8 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
   function toP5() {
     if (phase === 4) return;
     fastExitCurrent();
+    clearScenes();
+    window.LanternBusy.set('practice', true);    /* held across the cursor-guided exercise autoplay */
     phase = 4;
     exitOverlays();
     document.body.classList.add('hero-p2', 'hero-p3', 'hero-p5');
@@ -2443,7 +2489,10 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
     await wait(1400); if (!aliveD(gen)) return;
     dock.classList.remove('show');
     await wait(380); if (!aliveD(gen)) return;
-    toP5();
+    window.LanternBusy.set('discuss', false);   /* chat played out → scene done */
+    /* ambient watching auto-advances to Practice; under PLAY the engine owns
+       the step, so don't double-advance — just release and let it walk on. */
+    if (!window.LanternPlaying) toP5();
   }
 
   async function runDiscuss() {
@@ -2689,6 +2738,14 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
       var le0 = LE();
       return !!(le0 && le0.busy && le0.busy());
     },
+    /* the current phase's scripted scene is still performing — PLAY waits for
+       this before advancing (manual gestures ignore it and cut through). The
+       window-split / dock morph reports through busy() above, so fold it in. */
+    actionPlaying: function () {
+      if (window.LanternBusy.active()) return true;
+      var le0 = LE();
+      return !!(le0 && le0.busy && le0.busy());
+    },
     step: function (dir) {
       var le0 = LE();
       if (le0 && le0.busy && le0.busy()) return false;
@@ -2921,6 +2978,7 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
     }
 
     busy = false;
+    window.LanternBusy.set('simp', false);   /* word-stream done → PLAY may advance */
   });
 
   /* phase changes restore the original paragraph instantly, so a later return
@@ -3191,14 +3249,15 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
     step(280,  function () { tap(); pick(3, true); });
 
     step(950,  function () { hideCur(); if (solved >= targets.length) successWin(); });
+    step(1900, function () { window.LanternBusy.set('practice', false); });   /* success card seen → PLAY may advance */
   }
 
   window._heroExOnEnter = function () {
-    if (enabled) return;
+    if (enabled) { window.LanternBusy.set('practice', false); return; }   /* already played → don't block PLAY */
     /* show the text for 1.2s so the viewer sees it as normal — then cursor-guided demo */
     setTimeout(function () {
-      if (enabled || !document.body.classList.contains('hero-p5')) return;
-      if (RM) { enable(); return; }
+      if (enabled || !document.body.classList.contains('hero-p5')) { window.LanternBusy.set('practice', false); return; }
+      if (RM) { enable(); window.LanternBusy.set('practice', false); return; }   /* reduced motion: no autoplay to wait on */
       autoplay();
     }, 1200);
   };

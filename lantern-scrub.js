@@ -10,7 +10,9 @@
    ============================================================ */
 (function () {
   var N = 7;                       /* phases 0..6 */
-  var DWELL = 1150;                /* min ms between phase steps — the speed cap */
+  var DWELL = 1150;                /* manual drag/tap speed cap between phase steps */
+  var BREATH = 600;               /* PLAY: beat after a scene finishes before the next */
+  var MAX_SCENE = 18000;          /* PLAY: safety cap so a stuck scene can't hang the reel */
   var NAMES = ['HOME', 'SIMPLIFY', 'TRANSLATE', 'DISCUSS', 'PRACTICE', 'EVERYWHERE', 'INSTALL'];
 
   function init() {
@@ -41,7 +43,9 @@
 
     var target = LP.get();                         /* where the user pointed */
     var lastStep = 0;
+    var lastBusy = 0;                              /* last moment a scene was performing — BREATH measured from here */
     var dragging = false;
+    var playing = false;                           /* PLAY owns the chase + drives the runway */
 
     function pct(p) { return (p / (N - 1) * 100) + '%'; }
 
@@ -57,15 +61,40 @@
       if (chasing) goal.style.left = pct(target);
     }
 
-    /* chase engine: walk one phase toward the goal, never faster than DWELL */
+    /* keep the scroll runway (and so the bead's resting scroll position) under
+       the current phase while PLAY drives — without letting that programmatic
+       scroll feed back in and re-drive phases */
+    function syncRunway(p) {
+      if (window.LanternCrank && window.LanternCrank.syncTo) {
+        window.LanternCrank.suppress(900);
+        window.LanternCrank.syncTo(p);
+      }
+    }
+
+    /* chase engine — two cadences:
+       - PLAY forward = cinema: step only once the phase's scripted scene has
+         played out (LP.actionPlaying() clears), then a BREATH; a safety cap
+         steps anyway if a scene forgets to release.
+       - drag / tap / rewind = snappy: DWELL-capped, only gated by busy(). */
     var rafId = 0;
     function chase() {
       rafId = 0;
       var cur = LP.get();
-      if (cur === target) { render(); return; }
-      var now = performance.now();
-      if (now - lastStep >= DWELL && !LP.busy()) {
-        if (LP.step(cur < target ? 1 : -1)) lastStep = now;
+      if (cur === target) { render(); if (playing) stopPlay(); return; }
+      var now = performance.now(), dir = cur < target ? 1 : -1, ready;
+      if (playing && dir > 0) {
+        if (now - lastStep >= MAX_SCENE) ready = true;       /* safety cap fires even mid-scene */
+        else if (LP.busy() || LP.actionPlaying()) { lastBusy = now; ready = false; }
+        else ready = (now - lastBusy >= BREATH);
+      } else {
+        ready = (now - lastStep >= DWELL) && !LP.busy();
+      }
+      if (ready && LP.step(dir)) {
+        lastStep = now; lastBusy = now;
+        /* NB: don't scroll the runway here — a leaked scroll event would feed
+           back through the crank handler and reset target to the current
+           phase, silently halting the reel. The bead shows the phase; the
+           runway is re-synced only when PLAY stops (chase no longer running). */
         render();
       }
       rafId = requestAnimationFrame(chase);
@@ -140,7 +169,6 @@
        fling still plays every beat on the way. ── */
     var playBtn = document.getElementById('m-playbtn');
     var progScroll = false;
-    var playing = false, playRaf = 0, playStartY = 0, playEndY = 0, playT0 = 0, playDur = 0;
     function crankRange() { return Math.max(1, document.documentElement.scrollHeight - window.innerHeight); }
 
     var crank = document.getElementById('m-crank');
@@ -175,10 +203,11 @@
       }, 350);
     }
 
-    /* ── PLAY (the council's hybrid): the button auto-cranks the runway to the
-       end so the whole story plays itself; the same chase engine speed-caps it
-       so every beat lands. Any real touch / wheel / key / drag hands control
-       straight back — play and manual coexist, manual always wins. ── */
+    /* ── PLAY = cinema: the chase engine walks the whole story, but each screen
+       waits for its scripted scene to finish (LP.actionPlaying clears) before
+       the next — so it reads like a film, not a flick-book. The runway scrolls
+       to follow. Any real touch / wheel / key / drag hands control back and
+       freezes on the current screen — manual always wins. ── */
     function setPlayUI(on) {
       if (!playBtn) return;
       playBtn.classList.toggle('playing', on);
@@ -186,35 +215,20 @@
     }
     function stopPlay() {
       if (!playing) return;
-      playing = false;
-      if (playRaf) { cancelAnimationFrame(playRaf); playRaf = 0; }
+      playing = false; window.LanternPlaying = false;
+      target = LP.get();                          /* freeze on this screen */
       setPlayUI(false);
-    }
-    function loopPlay() {
-      if (!playing) return;
-      var p = Math.min(1, (performance.now() - playT0) / playDur);
-      var e = p < .5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;   /* easeInOutQuad */
-      progScroll = false;                        /* let the scroll handler drive phases */
-      window.scrollTo(0, playStartY + (playEndY - playStartY) * e);
-      if (p >= 1) { stopPlay(); return; }
-      playRaf = requestAnimationFrame(loopPlay);
+      render();
+      syncRunway(LP.get());                       /* chase is idle now → safe to bring the runway along */
     }
     function startPlay() {
-      if (!crank) return;
-      var range = crankRange();
-      var y = window.scrollY;
-      if (range - y < 8) {                        /* already at the end → replay from the top */
-        y = 0;
-        if (LP.jump) { LP.jump(0); target = 0; render(); }   /* snap phase too, so it plays forward, not in reverse */
-      }
-      var phasesLeft = Math.max(1, (N - 1) - Math.round(y / range * (N - 1)));
-      playStartY = y; playEndY = range;
-      playDur = phasesLeft * DWELL + 350;         /* keep pace with the speed cap */
-      playT0 = performance.now();
-      playing = true;
+      var cur = LP.get();
+      target = (cur >= N - 1) ? 0 : N - 1;         /* at the end → rewind home; else play to the end */
+      lastStep = lastBusy = performance.now();     /* first screen gets its full beat */
+      playing = true; window.LanternPlaying = true;
       setPlayUI(true);
-      if (y !== window.scrollY) { progScroll = true; window.scrollTo(0, y); }
-      playRaf = requestAnimationFrame(loopPlay);
+      render();
+      kick();
     }
     if (playBtn) {
       playBtn.addEventListener('click', function () { if (playing) stopPlay(); else startPlay(); });
