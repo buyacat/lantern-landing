@@ -400,8 +400,8 @@ body.hero-p4 #hero .tr-page .sel { pointer-events: none; }
   pointer-events: none;
 }
 #hero-dock.show { opacity: 1; transform: none; pointer-events: auto; }
-#hero-dock .cw-body  { flex: 0 0 auto; overflow-y: visible; padding: 14px 16px 10px; }
-#hero-dock .cw-foot  { padding: 9px 12px 12px; border-top: 1px solid var(--line-soft); }
+#hero-dock .cw-body  { flex: 1 1 auto; min-height: 0; height: auto; overflow-y: auto; padding: 14px 16px 10px; }
+#hero-dock .cw-foot  { flex: 0 0 auto; padding: 9px 12px 12px; border-top: 1px solid var(--line-soft); }
 #hero-dock .cw-bot   { font-size: 14px; line-height: 1.55; }
 #hero-dock .cw-user  { font-size: 13.5px; }
 
@@ -925,7 +925,7 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
     top: auto !important;
     bottom: calc(env(safe-area-inset-bottom, 0px) + 92px) !important;
     height: auto !important;
-    max-height: 62vh !important;
+    max-height: 70vh !important;
     border-radius: 20px !important;
     box-shadow: 0 32px 72px -20px rgba(26,23,20,.52), 0 0 0 1px rgba(26,23,20,.07) !important;
     transform: translateY(18px) scale(0.97) !important;
@@ -941,7 +941,7 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
   }
   #hero-dock .cw-body {
     height: auto !important; flex: 1 1 auto !important;
-    min-height: 0 !important; max-height: 38vh !important; overflow-y: auto !important;
+    min-height: 0 !important; max-height: 46vh !important; overflow-y: auto !important;
   }
   body.hero-p4 #hero .browser .page { opacity: 0.22 !important; transition: opacity .3s ease; }
 
@@ -1458,33 +1458,33 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
       <div class="float" data-speed="-0.08" style="top:8%;left:-1%;z-index:1">
         <div class="floatwrap" style="--dur:8s;--del:0s">
           <div class="browser" style="box-shadow:0 72px 124px -46px rgba(58,36,2,.22),0 18px 38px -20px rgba(26,23,20,.16)">
-            <div class="bbar"><div class="bdots"><i></i><i></i><i></i></div><div class="url">nationalgeographic.com</div></div>
+            <div class="bbar"><div class="bdots"><i></i><i></i><i></i></div><div class="url">rollingstone.com</div></div>
             <div class="page" style="font-size:16.5px;line-height:1.72;position:relative">
               <!-- English content — Phase 1 & 2 -->
               <div class="page-en" style="padding:26px 32px">
-                <p style="font-family:'General Sans',sans-serif;font-weight:700;font-size:21px;margin:0 0 14px;text-align:center">The Atlantic Road</p>
-                <p style="margin:0">The coastal <span class="hl" data-w="route" data-ph="/ruːt/" data-cls="blue" data-cefr="B1" data-tr="маршрут" data-tr-uk="маршрут" data-tr-es="ruta" data-tr-fr="itinéraire" data-tr-de="Route" data-tr-pt="rota" data-tr-en="path">route</span> threads along an exposed stretch of Norwegian <span class="hl" data-w="coast" data-ph="/kəʊst/" data-cls="green" data-cefr="B1" data-tr="узбережжя" data-tr-uk="узбережжя" data-tr-es="costa" data-tr-fr="côte" data-tr-de="Küste" data-tr-pt="costa" data-tr-en="shore">coast</span>, where <span class="hl" data-w="rugged" data-ph="/ˈrʌɡ.ɪd/" data-cls="red" data-cefr="B2" data-tr="скелястий" data-tr-uk="скелястий" data-tr-es="escarpado" data-tr-fr="escarpé" data-tr-de="zerklüftet" data-tr-pt="escarpado" data-tr-en="rocky">rugged</span> cliffs meet the open sea and low bridges leap from one <span class="hl" data-w="remote" data-ph="/rɪˈməʊt/" data-cls="violet" data-cefr="B1" data-tr="віддалений" data-tr-uk="віддалений" data-tr-es="remoto" data-tr-fr="éloigné" data-tr-de="abgelegen" data-tr-pt="remoto" data-tr-en="far-off">remote</span> island to the next.</p>
+                <p style="font-family:'General Sans',sans-serif;font-weight:700;font-size:21px;margin:0 0 14px;text-align:center">The Eras Tour</p>
+                <p style="margin:0">Few musicians have crossed so many <span class="hl" data-w="genre" data-ph="/ˈʒɒn.rə/" data-cls="blue" data-cefr="B2" data-tr="жанр" data-tr-uk="жанр" data-tr-es="género" data-tr-fr="genre" data-tr-de="Genre" data-tr-pt="gênero" data-tr-en="style">genre</span> boundaries and kept every audience with them. Taylor Swift moved from country to pop to indie folk without losing her <span class="hl" data-w="devoted" data-ph="/dɪˈvəʊ.tɪd/" data-cls="green" data-cefr="B2" data-tr="відданий" data-tr-uk="відданий" data-tr-es="devoto" data-tr-fr="dévoué" data-tr-de="treu" data-tr-pt="devotado" data-tr-en="loyal">devoted</span> fans, turning into a cultural <span class="hl" data-w="phenomenon" data-ph="/fɪˈnɒm.ɪ.nən/" data-cls="red" data-cefr="B2" data-tr="явище" data-tr-uk="явище" data-tr-es="fenómeno" data-tr-fr="phénomène" data-tr-de="Phänomen" data-tr-pt="fenômeno" data-tr-en="marvel">phenomenon</span> and leaving a <span class="hl" data-w="legacy" data-ph="/ˈleɡ.ə.si/" data-cls="violet" data-cefr="C1" data-tr="спадщина" data-tr-uk="спадщина" data-tr-es="legado" data-tr-fr="héritage" data-tr-de="Erbe" data-tr-pt="legado" data-tr-en="heritage">legacy</span> no one had predicted.</p>
                 <!-- revealed in phase 2 — the dense paragraph that simplifies -->
                 <div class="hero-extra">
                   <p class="sv-para simp" id="hero-simp-para" style="margin:18px 0 0">
                     <button class="simp-dot" id="hero-simp-dot" aria-label="Simplify this paragraph"><span class="sd-core"></span></button>
-                    <span class="simp-body" id="hero-simp-body">Before construction, engineers conducted an exhaustive survey of this treacherous, far-flung archipelago, contending with ceaseless storms that halted progress at every turn.</span>
+                    <span class="simp-body" id="hero-simp-body">Her unprecedented commercial dominance — spanning genres from country to pop to indie folk — has prompted critics to ask whether the contemporary music industry's infrastructure can even accommodate an artist of her singular, multifaceted resonance.</span>
                   </p>
                 </div>
               </div>
               <!-- English content — Phase 3 (sentences clickable for translation) -->
               <div class="tr-page">
-                <p style="font-family:'General Sans',sans-serif;font-weight:700;font-size:21px;margin:0 0 14px;text-align:center">The Atlantic Road</p>
+                <p style="font-family:'General Sans',sans-serif;font-weight:700;font-size:21px;margin:0 0 14px;text-align:center">The Eras Tour</p>
                 <!-- same text as page-en, sentence-wrapped — the P2→P3 swap changes
                      the affordance (words → sentences), never the text position -->
-                <p style="margin:0"><span class="sel" data-tr="s1" tabindex="0" role="button">The coastal route threads along an exposed stretch of Norwegian coast, where rugged cliffs meet the open sea and low bridges leap from one remote island to the next.</span></p>
-                <p style="margin:18px 0 0"><span class="sel" data-tr="s4" tabindex="0" role="button">Before construction, engineers conducted an exhaustive survey of this treacherous, far-flung archipelago, contending with ceaseless storms that halted progress at every turn.</span></p>
+                <p style="margin:0"><span class="sel" data-tr="s1" tabindex="0" role="button">Few musicians have crossed so many genre boundaries and kept every audience with them. Taylor Swift moved from country to pop to indie folk without losing her devoted fans, turning into a cultural phenomenon and leaving a legacy no one had predicted.</span></p>
+                <p style="margin:18px 0 0"><span class="sel" data-tr="s4" tabindex="0" role="button">Her unprecedented commercial dominance — spanning genres from country to pop to indie folk — has prompted critics to ask whether the contemporary music industry's infrastructure can even accommodate an artist of her singular, multifaceted resonance.</span></p>
               </div>
               <!-- Phase 5 — same text, exercise gaps instead of sentence-selects -->
               <div class="ex-page" style="padding:26px 32px">
-                <p style="font-family:'General Sans',sans-serif;font-weight:700;font-size:21px;margin:0 0 14px;text-align:center">The Atlantic Road</p>
-                <p style="margin:0">The coastal <span class="exw" data-a="route" data-o="route|storm|path">route</span> threads along an exposed stretch of Norwegian <span class="exw" data-a="coast" data-o="coast|cliff|sea">coast</span>, where <span class="exw" data-a="rugged" data-o="rugged|gentle|steep">rugged</span> cliffs meet the open sea and low bridges leap from one <span class="exw" data-a="remote" data-o="remote|distant|local">remote</span> island to the next.</p>
-                <p style="margin:14px 0 0">Every autumn, storms drive waves across the roadway — sometimes shutting the road for days.</p>
+                <p style="font-family:'General Sans',sans-serif;font-weight:700;font-size:21px;margin:0 0 14px;text-align:center">The Eras Tour</p>
+                <p style="margin:0">Few musicians have crossed so many <span class="exw" data-a="genre" data-o="genre|style|trend">genre</span> boundaries and kept every audience with them. Taylor Swift moved from country to pop to indie folk without losing her <span class="exw" data-a="devoted" data-o="devoted|casual|loyal">devoted</span> fans, turning into a cultural <span class="exw" data-a="phenomenon" data-o="phenomenon|event|talent">phenomenon</span> and leaving a <span class="exw" data-a="legacy" data-o="legacy|career|record">legacy</span> no one had predicted.</p>
+                <p style="margin:14px 0 0">Every show ran for more than three hours — long enough to feel like a whole life lived in a single night.</p>
               </div>
             </div>
 
@@ -1513,7 +1513,7 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
         <div class="cw-head">
           <div class="dc-id">
             <span class="dc-name">Discuss the article</span>
-            <span class="dc-src">nationalgeographic.com · The Atlantic Road</span>
+            <span class="dc-src">rollingstone.com · The Eras Tour</span>
           </div>
         </div>
         <div class="cw-body" id="dock-body"></div>
@@ -1816,7 +1816,7 @@ window.LanternPlaying = false;
    Phase controller — P1=Hero  P2=Simplify  P3=Translate
    ============================================================ */
 (function () {
-  var HERO_WORDS = ['route', 'coast', 'rugged', 'remote'];
+  var HERO_WORDS = ['genre', 'devoted', 'phenomenon', 'legacy'];
   var phase = 0;
   var wheelLock = false, wheelLockTimer = 0, wheelLockStart = 0;
   var RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1858,12 +1858,12 @@ window.LanternPlaying = false;
 
   var TR = {
     s1: {
-      en: "The coastal route threads along an exposed stretch of Norwegian coast, where rugged cliffs meet the open sea and low bridges leap from one remote island to the next.",
-      uk: "Прибережний маршрут в'ється відкритою ділянкою норвезького узбережжя, де скелясті кручі зустрічаються з відкритим морем, а низькі мости перестрибують з одного віддаленого острова на інший.",
-      es: "La ruta costera serpentea por un tramo expuesto de la costa noruega, donde acantilados escarpados se encuentran con el mar abierto y puentes bajos saltan de una isla remota a otra.",
-      fr: "La route côtière serpente le long d'un tronçon exposé de la côte norvégienne, où des falaises escarpées rencontrent le large et des ponts bas sautent d'une île isolée à l'autre.",
-      de: "Die Küstenroute schlängelt sich über einen exponierten Abschnitt der norwegischen Küste, wo schroffe Klippen auf das offene Meer treffen und niedrige Brücken von einer abgelegenen Insel zur nächsten springen.",
-      pt: "A rota costeira serpenteia por um trecho exposto da costa norueguesa, onde falésias escarpadas encontram o mar aberto e pontes baixas saltam de uma ilha remota para a outra."
+      en: "Few musicians have crossed so many genre boundaries and kept every audience with them. Taylor Swift moved from country to pop to indie folk without losing her devoted fans, turning into a cultural phenomenon and leaving a legacy no one had predicted.",
+      uk: "Небагато музикантів перейшли через стільки жанрових меж і при цьому зберегли кожну аудиторію. Тейлор Свіфт рухалась від кантрі до попу та інді-фолку, не втрачаючи відданих фанатів і ставши культурним явищем, залишивши після себе спадщину, якої ніхто не очікував.",
+      es: "Pocos músicos han cruzado tantas fronteras de género manteniéndose con cada audiencia. Taylor Swift pasó del country al pop y al indie folk sin perder a sus fans devotos, convirtiéndose en un fenómeno cultural y dejando un legado que nadie había previsto.",
+      fr: "Peu de musiciens ont franchi autant de frontières de genre en gardant chaque public avec eux. Taylor Swift est passée du country à la pop et à l'indie folk sans perdre ses fans dévoués, devenant un phénomène culturel et laissant un héritage que personne n'avait prévu.",
+      de: "Wenige Musiker haben so viele Genregrenzen überschritten und dabei jedes Publikum mitgenommen. Taylor Swift wechselte vom Country über Pop zum Indie-Folk, ohne ihre treuen Fans zu verlieren, wurde zu einem kulturellen Phänomen und hinterließ ein Erbe, das niemand vorhergesagt hatte.",
+      pt: "Poucos músicos cruzaram tantas fronteiras de gênero mantendo cada público com eles. Taylor Swift passou do country ao pop e ao indie folk sem perder seus fãs devotados, tornando-se um fenômeno cultural e deixando um legado que ninguém havia previsto."
     },
     s2: {
       en: "Every autumn, storms drive waves across the roadway — sometimes shutting the road for days.",
@@ -1882,12 +1882,12 @@ window.LanternPlaying = false;
       pt: "Os engenheiros levaram sete anos para construir esta travessia, lutando contra o mar em cada etapa."
     },
     s4: {
-      en: "Before construction, engineers conducted an exhaustive survey of this treacherous, far-flung archipelago, contending with ceaseless storms that halted progress at every turn.",
-      uk: "Перед будівництвом інженери провели вичерпне обстеження цього підступного, віддаленого архіпелагу, змагаючись із безперервними штормами, які раз у раз зупиняли роботу.",
-      es: "Antes de la construcción, los ingenieros realizaron un estudio exhaustivo de este archipiélago traicionero y remoto, lidiando con tormentas incesantes que detenían el avance a cada paso.",
-      fr: "Avant la construction, les ingénieurs ont mené une étude exhaustive de cet archipel traître et isolé, affrontant des tempêtes incessantes qui interrompaient les travaux à chaque étape.",
-      de: "Vor dem Bau führten die Ingenieure eine erschöpfende Vermessung dieses tückischen, abgelegenen Archipels durch und kämpften mit unablässigen Stürmen, die die Arbeiten immer wieder zum Stillstand brachten.",
-      pt: "Antes da construção, os engenheiros realizaram um levantamento exaustivo deste arquipélago traiçoeiro e remoto, enfrentando tempestades incessantes que paravam o avanço a cada passo."
+      en: "Her unprecedented commercial dominance — spanning genres from country to pop to indie folk — has prompted critics to ask whether the contemporary music industry's infrastructure can even accommodate an artist of her singular, multifaceted resonance.",
+      uk: "Її безпрецедентне комерційне домінування — у жанрах від кантрі до попу та інді-фолку — змусило критиків запитати, чи взагалі може сучасна музична індустрія вмістити художника з таким неповторним, багатогранним резонансом.",
+      es: "Su dominio comercial sin precedentes — que abarca géneros desde el country hasta el pop y el indie folk — ha llevado a los críticos a preguntarse si la infraestructura de la industria musical contemporánea puede incluso albergar a una artista de tan singular y multifacética resonancia.",
+      fr: "Sa domination commerciale sans précédent — couvrant des genres allant du country à la pop et à l'indie folk — a amené les critiques à se demander si l'infrastructure de l'industrie musicale contemporaine peut même accueillir une artiste d'une résonance aussi singulière et multifacette.",
+      de: "Ihre beispiellose kommerzielle Dominanz — die Genres vom Country über Pop bis Indie-Folk umspannt — hat Kritiker dazu veranlasst zu fragen, ob die Infrastruktur der zeitgenössischen Musikindustrie überhaupt eine Künstlerin von ihrer einzigartigen, vielschichtigen Resonanz aufnehmen kann.",
+      pt: "Seu domínio comercial sem precedentes — abrangendo gêneros do country ao pop e ao indie folk — levou os críticos a questionar se a infraestrutura da indústria musical contemporânea pode sequer acomodar uma artista de sua singular e multifacetada ressonância."
     }
   };
 
@@ -2088,6 +2088,10 @@ window.LanternPlaying = false;
     if (mCaption && M_PHASE_NAMES[p]) {
       mCaption.textContent = ('0' + (p + 1)) + ' · ' + M_PHASE_NAMES[p];
     }
+    /* tell the mobile scrubber/crank the phase moved — synchronously, so a scene
+       auto-advance (discuss→practice) anchors the runway before a stale scroll
+       can walk it back (the chat-stuck bug). No-op on desktop (no crank). */
+    if (window.LanternCrank && window.LanternCrank.notifyPhase) window.LanternCrank.notifyPhase(p);
   }
 
   /* ── ONE-SCREEN phases 5 (Everywhere) & 6 (CTA): no scroll, no screen swap —
@@ -2213,7 +2217,7 @@ window.LanternPlaying = false;
     }
     /* any entry into P2 guarantees the four words — a dot1→dot3 jump used to
        skip this and silently degrade the simplify demo to plain text */
-    var needWords = !window.Shelf || !window.Shelf.has('coast');
+    var needWords = !window.Shelf || !window.Shelf.has('genre');
     var canMorph = window.HeroWords && window.HeroWords.pending();
     if (needWords && canMorph) {
       /* the screen-1 cards lift to fixed coords and MORPH straight into the
@@ -2293,7 +2297,7 @@ window.LanternPlaying = false;
     document.body.classList.remove('hero-p4', 'hero-simp');
     closeTPanel();
     leaveDiscuss();
-    if (window.Shelf && !window.Shelf.has('coast')) setTimeout(populateShelf, 400);
+    if (window.Shelf && !window.Shelf.has('genre')) setTimeout(populateShelf, 400);
     setDots(4);
     if (window._heroExOnEnter) window._heroExOnEnter();
   }
@@ -2304,17 +2308,17 @@ window.LanternPlaying = false;
      summary at your level → suggested questions → grounded answers
      ============================================================ */
   var SUMMARY = [
-    'A coastal road in Norway that jumps from island to island on low bridges.',
-    'Autumn storms push waves right over the road — it can close for days.',
-    'Engineers fought the sea for seven years to build it.'
+    'Taylor Swift\'s Eras Tour spanned six continents and became the highest-grossing concert series ever.',
+    'She moved from country to pop to indie folk and kept every audience along the way.',
+    'Critics say no other artist has crossed so many genre boundaries without losing fans.'
   ];
   /* no canned reply chips: the visitor "types" a question that reuses a
      saved word — using your own word is the point, and the deck credits it */
   var ASK = {
-    text:  'So the [[rugged]] coast is why it took so long to build?',
-    plain: 'So the rugged coast is why it took so long to build?',
-    lemma: 'rugged', cite: 's4',
-    a: 'Exactly — the [[coast]] gave the crews no shelter, so every stage was a fight with the open sea.'
+    text:  'Why do her [[devoted]] fans follow her across so many different genres?',
+    plain: 'Why do her devoted fans follow her across so many different genres?',
+    lemma: 'devoted', cite: 's4',
+    a: 'That\'s the [[phenomenon]] — she builds trust with each audience before moving on, so they follow the artist, not just the genre.'
   };
 
   function wait(ms) { return new Promise(function (r) { setTimeout(r, RM ? 0 : ms); }); }
@@ -2490,9 +2494,12 @@ window.LanternPlaying = false;
     dock.classList.remove('show');
     await wait(380); if (!aliveD(gen)) return;
     window.LanternBusy.set('discuss', false);   /* chat played out → scene done */
-    /* ambient watching auto-advances to Practice; under PLAY the engine owns
-       the step, so don't double-advance — just release and let it walk on. */
-    if (!window.LanternPlaying) toP5();
+    /* the page NEVER advances on its own. Releasing 'discuss' busy lets PLAY's
+       chase engine (desktop deck / mobile scrubber) walk on to Practice at its
+       own beat; with PLAY off we simply rest on the finished chat until the
+       visitor scrolls or taps the deck. Removing the old auto-toP5() is what
+       stops Discuss self-jumping to Practice — and matches the deck's contract
+       that scenes never self-advance. */
   }
 
   async function runDiscuss() {
@@ -2591,6 +2598,13 @@ window.LanternPlaying = false;
 
   /* wheel: P1 → P2 → P3 → P4; at P4 a further scroll-down releases to the CTA section below */
   var lastAwayTs = 0;
+  /* one physical flick (and the inertial tail trackpads keep emitting after it)
+     must produce at most ONE phase step — and never a reverse step from a tail
+     event whose deltaY flips sign. Track the gap between wheel events: a quiet
+     stretch > WHEEL_GESTURE_GAP ms means a genuinely new gesture began; until
+     then this flick has "already stepped" and we swallow every event whatever
+     its sign. This is the layer that kills the self-skip-forward-and-back. */
+  var WHEEL_GESTURE_GAP = 160, wheelGestureTs = 0, wheelGestureStepped = false;
   window.addEventListener('wheel', function (e) {
     /* crank mode (mobile): native scroll drives the phases — don't double-step */
     if (window.__mCrank) return;
@@ -2615,6 +2629,14 @@ window.LanternPlaying = false;
        Backward 6→0 walks the same chain in reverse. */
     e.preventDefault();
     e.stopImmediatePropagation();
+    /* gesture gate: one step per physical flick. Update the clock on EVERY event
+       (so a continuous inertia train keeps the gesture "alive"), then bail if this
+       gesture already spent its step — the inertial tail and any reverse-sign tail
+       event are eaten before they can re-drive a phase. */
+    var nowW = performance.now();
+    if (nowW - wheelGestureTs > WHEEL_GESTURE_GAP) wheelGestureStepped = false;
+    wheelGestureTs = nowW;
+    if (wheelGestureStepped) return;
     /* while locked: refresh the window on every event so inertial scroll can't outlast it */
     if (wheelLock) {
       /* absolute cap: inertial scroll can't hold the lock past 2500ms */
@@ -2629,6 +2651,7 @@ window.LanternPlaying = false;
     var le0 = LE();
     if (le0 && le0.busy && le0.busy()) return;
     wheelLock = true; wheelLockStart = performance.now();
+    wheelGestureStepped = true;   /* this flick has now spent its single step */
     clearTimeout(wheelLockTimer);
     wheelLockTimer = setTimeout(function () { wheelLock = false; }, 1500);
     if (e.deltaY > 0) {
