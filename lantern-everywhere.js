@@ -7,6 +7,12 @@
   var ev      = document.getElementById('finale');
   if (!ev) return;
   var pages   = Array.from(ev.querySelectorAll('.pg'));
+  /* seed each level badge's data-lv from its starting (hard) level so the
+     per-level colour applies before any simplify; morphBadge updates it later */
+  pages.forEach(function (pg) {
+    var b = pg.querySelector('.pg-cefr');
+    if (b && !b.getAttribute('data-lv')) b.setAttribute('data-lv', (b.textContent || '').trim());
+  });
   var cue     = ev.querySelector('.ev-cue');
   var flame   = document.getElementById('flame');
   var ctaSect = document.getElementById('ev-close');
@@ -128,6 +134,20 @@
   }
   function clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
 
+  /* ── bob hand-off ────────────────────────────────────────────────────────
+     pgbob now begins + ends each loop at the card's flow position (keyframe 0%
+     == identity, a zero-velocity ease-in-out stop). So a card the morph lands
+     ON its exact slot can hand straight into the float with no seam:
+       parkBob   — forward morphs: the wall is still hidden, so reset the float
+                   to identity (== where the shards land + are measured). Invisible.
+       holdBob   — reverse morph: the wall is on screen, so just freeze the
+                   current phase (resetting here would pop the visible cards).
+       startBob  — hand-off: RESTART pgbob from phase 0. It eases up off the rest
+                   the shard settled on — no positional pop, no velocity yank. */
+  function parkBob(p)  { var f = p.parentNode; if (f) f.style.animation = 'none'; }
+  function holdBob(p)  { var f = p.parentNode; if (f) f.style.animationPlayState = 'paused'; }
+  function startBob(p) { var f = p.parentNode; if (f) { f.style.animation = ''; f.style.animationPlayState = ''; } }
+
   /* ONE continuous timeline per shard — corners, stretch and flight are
      segments of a single path under a single global ease, so the motion never
      stops between beats: it breathes in, flows and settles. s runs 0 (window)
@@ -177,10 +197,12 @@
   function buildShatter(srcWin, fwd) {
     var sr = srcWin.getBoundingClientRect();
     var tw = sr.width / 3, th = sr.height / 2;
-    /* PAUSE the wall's bob (hold the current value — NOT reset, so no jump) so the
-       slot we measure now == where the real card sits at hand-off. Resumed, from
-       the same phase, when the morph ends → the bob carries on without a skip. */
-    pages.forEach(function (p) { if (p.parentNode) p.parentNode.style.animationPlayState = 'paused'; p.style.transition = 'none'; p.style.transform = 'none'; });
+    /* Park the wall's bob so the slot we measure now == where the card lands.
+       Forward (into the wall, hidden): reset to identity so the hand-off can
+       restart the float from phase 0 and ease up off the rest with no seam.
+       Reverse (off the visible wall): only freeze the current phase — resetting
+       would pop the on-screen cards. */
+    pages.forEach(function (p) { (fwd ? parkBob : holdBob)(p); p.style.transition = 'none'; p.style.transform = 'none'; });
     void ev.offsetWidth;
     var cardW = pages[0].getBoundingClientRect().width;
     var items = pages.map(function (pg, i) {
@@ -211,20 +233,25 @@
       revealed = true;
       pages.forEach(function (p) { p.classList.add('in'); p.style.visibility = ''; });
       if (cue) cue.classList.add('in');
+      /* touch can't hover, so the signature "the whole web simplifies to your
+         level" moment runs itself on phones: each card ripples its CEFR badge
+         down (C1/C2 -> A2/B1/B2) + tints, staggered, once the wall has landed. */
+      if (innerWidth <= 920 && !REDUCED) setTimeout(startSimplifyCascade, 480);
       return;
     }
     morphing = true; revealed = true;
     var items = buildShatter(srcWin, true);
     runShatter(items, 1250, true, function () {
-      /* same frame: reveal the real cards exactly where the shards landed and
-         resume the bob from its paused phase → no skip, no jump.
+      /* same frame: reveal the real cards exactly where the shards landed, then
+         restart the float from rest (startBob) → it eases up off the slot, no
+         seam where the shard's dead stop hands to the drift.
          transition is on TRANSFORM only — so opacity still snaps in (no fade),
          but if the cursor is over a card the .pg.in:hover scale(1.05) eases in
          instead of popping the size the instant the piece hands off. */
       pages.forEach(function (p) {
         p.style.transition = 'transform .32s cubic-bezier(.22,.61,.36,1),box-shadow .32s ease,border-color .32s ease';
         p.classList.add('in'); p.style.visibility = ''; p.style.transform = ''; p.style.opacity = '';
-        if (p.parentNode) p.parentNode.style.animationPlayState = '';
+        startBob(p);                                      /* restart pgbob from rest → seamless */
       });
       items.forEach(function (it) { it.wrap.remove(); });
       srcWin.style.visibility = '';
@@ -255,15 +282,267 @@
       setTimeout(function () {                       /* hero has faded back in under the closed window */
         srcWin.style.visibility = '';
         items.forEach(function (it) { it.wrap.remove(); });
-        pages.forEach(function (p) { p.style.visibility = ''; p.style.transition = ''; p.classList.remove('in'); if (p.parentNode) p.parentNode.style.animationPlayState = ''; });
+        pages.forEach(function (p) { p.style.visibility = ''; p.style.transition = ''; p.classList.remove('in'); startBob(p); });
         if (cue) cue.classList.remove('in');
         revealed = false; morphing = false;          /* re-armed: it plays again next time */
       }, 620);
     });
   }
+  /* Discuss → Everywhere: the chat panel itself CRACKS into six pieces and each
+     piece flies to a card slot — the same shatter morphFromWindow runs, but
+     seeded from the chat panel instead of the browser window. The chat body
+     STAYS VISIBLE on the six shards through the crack + stretch; the article
+     only surfaces (opaque card crossfading up, no blank-white phase) during the
+     stretch, so it reads as "the chat divides and each piece becomes a page" —
+     never "the chat disappears". dockClone + dr captured BEFORE leaveDiscuss(). */
+  var DSEG1 = 0.16, DSEG2 = 0.30;                    /* crack / stretch / flight shares */
+
+  function buildDockShard(dockClone, dr, pg, col, row, tw, th, z) {
+    var wrap = document.createElement('div');
+    wrap.className = 'ev-shard';
+    /* no border: under the global *{box-sizing:border-box} a 1px border would
+       inset the sliced chat by 1px per tile and the seams wouldn't line up. The
+       GAP between tiles + the shadow lift carry the "cracked into six" read. */
+    wrap.style.cssText = 'position:fixed;left:0;top:0;box-sizing:border-box;overflow:hidden;pointer-events:none;background:#fff;will-change:transform,width,height;z-index:' + z;
+    /* the chat panel, sliced: this tile shows its (col,row) quadrant of the chat */
+    var chat = dockClone.cloneNode(true);
+    chat.removeAttribute('id');
+    chat.querySelectorAll('[id]').forEach(function (n) { n.removeAttribute('id'); });
+    chat.style.cssText = 'position:absolute;left:' + (-col * tw).toFixed(1) + 'px;top:' + (-row * th).toFixed(1) + 'px;' +
+      'width:' + dr.width.toFixed(1) + 'px;height:' + dr.height.toFixed(1) + 'px;margin:0;transform:none;opacity:1;transition:none;' +
+      'background:#fff;display:flex;flex-direction:column;overflow:hidden;border-radius:0;box-shadow:none';
+    /* the article card that this piece becomes — fades up opaque over the chat */
+    var card = pg.cloneNode(true);
+    card.classList.add('in');
+    card.style.cssText += ';position:absolute;left:0;top:0;width:' + pg.getBoundingClientRect().width.toFixed(1) + 'px;margin:0;transform:none;box-shadow:none;opacity:0';
+    wrap.appendChild(chat); wrap.appendChild(card);
+    document.body.appendChild(wrap);
+    return { wrap: wrap, chat: chat, card: card };
+  }
+  function setDockShard(it, x, y, w, h, rad, shAlpha, cardOp) {
+    it.wrap.style.transform = 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px)';
+    it.wrap.style.width  = w.toFixed(1) + 'px';
+    it.wrap.style.height = h.toFixed(1) + 'px';
+    it.wrap.style.borderRadius = rad.toFixed(1) + 'px';
+    it.wrap.style.boxShadow = '0 22px 46px -26px rgba(26,23,20,' + shAlpha.toFixed(3) + ')';
+    it.card.style.opacity = cardOp.toFixed(3);
+  }
+  function dockShardAt(it, s) {
+    var x, y, w, h, u;
+    if (s < DSEG1) {                                 /* crack: the chat splits into six tiles */
+      u = s / DSEG1;
+      x = it.tx + (it.cx - it.tx) * u; y = it.ty + (it.cy - it.ty) * u;
+      w = it.tw + (it.cw - it.tw) * u; h = it.th + (it.ch - it.th) * u;
+    } else if (s < DSEG1 + DSEG2) {                  /* stretch: each tile grows to card size */
+      u = (s - DSEG1) / DSEG2;
+      x = it.cx + (it.mx - it.cx) * u; y = it.cy + (it.my - it.cy) * u;
+      w = it.cw + (it.sw - it.cw) * u; h = it.ch + (it.sh - it.ch) * u;
+    } else {                                         /* flight: pieces scatter to their slots */
+      u = (s - DSEG1 - DSEG2) / (1 - DSEG1 - DSEG2);
+      x = it.mx + (it.sx - it.mx) * u; y = it.my + (it.sy - it.my) * u;
+      w = it.sw; h = it.sh;
+    }
+    /* corners round + shadow lift as it leaves the panel; the article card
+       crossfades up DURING the stretch (chat stays solid underneath until the
+       opaque card fully covers it — no blank-white frame, no early vanish) */
+    setDockShard(it, x, y, w, h,
+      16 * clamp01((s - DSEG1) / DSEG2),
+      0.5 * clamp01(s / 0.30),
+      clamp01((s - DSEG1 - 0.04) / (DSEG2 - 0.02)));
+  }
+
+  function morphFromDock(dockClone, dr, srcWin) {
+    if (morphing) return;
+    if (REDUCED || innerWidth < 980 || pages.length !== 6 || revealed) {
+      revealed = true;
+      pages.forEach(function (p) { p.classList.add('in'); p.style.visibility = ''; });
+      if (cue) cue.classList.add('in');
+      return;
+    }
+    morphing = true; revealed = true;
+    /* the browser window stays as-is — it fades out with the hero (ph-ev). Only
+       the chat is morphed; force-hiding the window here would pop it away. */
+
+    /* park bob at identity, measure each card's true resting slot, hide originals */
+    pages.forEach(function (p) {
+      parkBob(p);
+      p.style.transition = 'none'; p.style.transform = 'none';
+    });
+    void ev.offsetWidth;
+
+    var tw = dr.width / 3, th = dr.height / 2;
+    var items = pages.map(function (pg, i) {
+      var col = i % 3, row = (i / 3) | 0;
+      var r  = pg.getBoundingClientRect();
+      var it = buildDockShard(dockClone, dr, pg, col, row, tw, th, 1200 + i);
+      it.tx = dr.left + col * tw; it.ty = dr.top + row * th; it.tw = tw; it.th = th;
+      it.cx = it.tx + GAP; it.cy = it.ty + GAP; it.cw = tw - 2 * GAP; it.ch = th - 2 * GAP;
+      it.sw = r.width; it.sh = r.height;
+      it.mx = it.tx + tw / 2 - r.width / 2; it.my = it.ty + th / 2 - r.height / 2;
+      it.sx = r.left; it.sy = r.top;
+      it.dly = 0;                                    /* all six crack + split in lockstep — a clean division, not a cascade */
+      setDockShard(it, it.tx, it.ty, tw, th, 0, 0, 0);   /* == the whole chat, joined */
+      return it;
+    });
+    pages.forEach(function (p) { p.style.visibility = 'hidden'; });
+
+    /* one global ease over all shards (same easeInOutCubic the other morphs use);
+       per-shard stagger via it.dly. dockShardAt drives crack→stretch→flight. */
+    var TOTAL = 1250, t0 = performance.now();
+    function frame(now) {
+      var live = false;
+      items.forEach(function (it) {
+        var t = (now - t0 - it.dly) / TOTAL;
+        if (t < 0) { live = true; return; }
+        var pp = Math.min(t, 1);
+        if (pp < 1) live = true;
+        var e = pp < .5 ? 4 * pp * pp * pp : 1 - Math.pow(-2 * pp + 2, 3) / 2;
+        dockShardAt(it, e);
+      });
+      if (live) { requestAnimationFrame(frame); return; }
+      /* shards landed on the slots — swap in the real cards at the same geometry
+         and remove the shards in one frame (no pop), resume the bob */
+      pages.forEach(function (p) {
+        p.style.transition = 'transform .32s cubic-bezier(.22,.61,.36,1),box-shadow .32s ease,border-color .32s ease';
+        p.classList.add('in'); p.style.visibility = ''; p.style.transform = ''; p.style.opacity = '';
+        startBob(p);                                      /* restart pgbob from rest → seamless */
+      });
+      items.forEach(function (it) { it.wrap.remove(); });
+      if (cue) cue.classList.add('in');
+      requestAnimationFrame(function () { pages.forEach(function (p) { p.style.transition = ''; }); });
+      morphing = false;
+    }
+    requestAnimationFrame(frame);
+  }
+
+  /* ── Discuss → Everywhere (council verdict B, 9/9): the MASTERED "phenomenon"
+        vocab card is the hinge. index.html grows a clone of it centre-stage, holds
+        on a "Mastered" stamp, then hands the grown clone here — it CRACKS into the
+        six article pages: the word you mastered opens up the whole web.
+        Seeded from a transform-scaled card (scale k), so each shard clones the card
+        WITH its scale preserved — the assembled shards are pixel-identical to the
+        held clone (no reflow pop), exactly like the window/dock morphs. ── */
+  var CARD_RAD = 16;                                  /* corner radius the grown card + shards + final pages all share */
+  function buildCardShard(srcCard, cardW, cardH, k, col, row, tw, th, pgW, pg, z) {
+    var wrap = document.createElement('div');
+    wrap.className = 'ev-shard';
+    /* NO white background: the tile is transparent, so when the card's own pixels
+       fade out there's a near-transparent beat (the frosted scene shows through)
+       before the media surfaces — "card stuff disappears → media appears", no
+       white wash. SQUARE inner/article (border-radius:0) + the wrap's rounded
+       clip = clean rounded corners, no white wedge. */
+    wrap.style.cssText = 'position:fixed;left:0;top:0;overflow:hidden;pointer-events:none;will-change:transform,width,height,opacity;z-index:' + z;
+    var inner = srcCard.cloneNode(true);
+    inner.classList.remove('ring-pop', 'in');
+    inner.style.cssText += ';position:absolute;left:' + (-col * tw).toFixed(1) + 'px;top:' + (-row * th).toFixed(1) + 'px;' +
+      'width:' + cardW + 'px;height:' + cardH + 'px;margin:0;border-radius:0;transform-origin:0 0;transform:scale(' + k.toFixed(4) + ');box-shadow:none;transition:none;opacity:1';
+    var card = pg.cloneNode(true);
+    card.classList.add('in');
+    card.style.cssText += ';position:absolute;left:0;top:0;width:' + pgW + 'px;margin:0;border-radius:0;transform:none;box-shadow:none;opacity:0';
+    wrap.appendChild(inner); wrap.appendChild(card);
+    document.body.appendChild(wrap);
+    return { wrap: wrap, win: inner, card: card };
+  }
+  /* CONSTANT corner radius (no square-flash, no white corners). The card's own
+     pixels fade OUT first; after a near-transparent beat the media (article + its
+     text) eases IN — every step a smooth crossfade, no white. */
+  function cardShardAt(it, s) {
+    var x, y, w, h, u;
+    if (s < SEG1) { u = s / SEG1; x = it.tx + (it.cx - it.tx) * u; y = it.ty + (it.cy - it.ty) * u; w = it.tw + (it.cw - it.tw) * u; h = it.th + (it.ch - it.th) * u; }
+    else if (s < SEG1 + SEG2) { u = (s - SEG1) / SEG2; x = it.cx + (it.mx - it.cx) * u; y = it.cy + (it.my - it.cy) * u; w = it.cw + (it.sw - it.cw) * u; h = it.ch + (it.sh - it.ch) * u; }
+    else { u = (s - SEG1 - SEG2) / (1 - SEG1 - SEG2); x = it.mx + (it.sx - it.mx) * u; y = it.my + (it.sy - it.my) * u; w = it.sw; h = it.sh; }
+    var inOp = 1 - clamp01(s / 0.10);                 /* the card SHEDS its colours/text/ring almost at once */
+    var caOp = clamp01((s - 0.28) / 0.42);            /* media then surfaces on the flying pieces */
+    it.wrap.style.transform = 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px)';
+    it.wrap.style.width  = w.toFixed(1) + 'px';
+    it.wrap.style.height = h.toFixed(1) + 'px';
+    /* OUTER corners (the assembled card's silhouette) ease r0→16; INTERNAL corners
+       stay SQUARE through the crack, so the six tiles read as ONE card splitting along
+       straight lines — not six rounded pills — then round to 16 as they become cards */
+    var Ro = it.r0 + (CARD_RAD - it.r0) * clamp01(s / 0.5);
+    var Ri = CARD_RAD * clamp01((s - 0.30) / 0.5);
+    it.wrap.style.borderRadius = (it.cTL ? Ro : Ri).toFixed(1) + 'px ' + (it.cTR ? Ro : Ri).toFixed(1) + 'px ' + (it.cBR ? Ro : Ri).toFixed(1) + 'px ' + (it.cBL ? Ro : Ri).toFixed(1) + 'px';
+    it.wrap.style.boxShadow = '0 22px 46px -26px rgba(26,23,20,' + (0.5 * Math.max(inOp, caOp)).toFixed(3) + ')';
+    it.win.style.opacity  = inOp.toFixed(3);
+    it.card.style.opacity = caOp.toFixed(3);
+  }
+  function morphFromCard(srcCard) {
+    if (morphing) return;
+    if (REDUCED || innerWidth < 980 || pages.length !== 6 || !srcCard || revealed) {
+      revealed = true;
+      pages.forEach(function (p) { p.classList.add('in'); p.style.visibility = ''; });
+      if (cue) cue.classList.add('in');
+      if (srcCard && srcCard.parentNode) srcCard.parentNode.removeChild(srcCard);
+      return;
+    }
+    morphing = true; revealed = true;
+
+    var cr = srcCard.getBoundingClientRect();             /* the grown (scaled) footprint */
+    var cardW = srcCard.offsetWidth, cardH = srcCard.offsetHeight;   /* natural, pre-scale */
+    var k  = cr.width / cardW;
+    var tw = cr.width / 3, th = cr.height / 2;
+    /* the held card's ON-SCREEN corner radius (its css radius scaled by k) — the
+       shards start here so the corners match the soft floating card exactly */
+    var R0 = (parseFloat(getComputedStyle(srcCard).borderTopLeftRadius) || 15) * k;
+
+    /* park bob at identity, measure each card's resting slot, then hide originals */
+    pages.forEach(function (p) { parkBob(p); p.style.transition = 'none'; p.style.transform = 'none'; });
+    void ev.offsetWidth;
+    var pgW = pages[0].getBoundingClientRect().width;
+    var items = pages.map(function (pg, i) {
+      var col = i % 3, row = (i / 3) | 0;
+      var r  = pg.getBoundingClientRect();
+      var it = buildCardShard(srcCard, cardW, cardH, k, col, row, tw, th, pgW, pg, 1200 + i);
+      it.tx = cr.left + col * tw; it.ty = cr.top + row * th; it.tw = tw; it.th = th;
+      it.cx = it.tx + GAP; it.cy = it.ty + GAP; it.cw = tw - 2 * GAP; it.ch = th - 2 * GAP;
+      it.sw = r.width; it.sh = r.height;
+      it.mx = it.tx + tw / 2 - r.width / 2; it.my = it.ty + th / 2 - r.height / 2;
+      it.sx = r.left; it.sy = r.top;
+      it.dly = i * 22;                                     /* very tight stagger — reads as ONE card splitting */
+      it.r0 = R0;                                          /* soft held-card corner radius to start from */
+      it.cTL = (col === 0 && row === 0); it.cTR = (col === 2 && row === 0);   /* which corners are the card's OUTER silhouette */
+      it.cBR = (col === 2 && row === 1); it.cBL = (col === 0 && row === 1);
+      cardShardAt(it, 0);                                  /* joined == the grown card (content shown, media hidden) */
+      return it;
+    });
+    srcCard.style.visibility = 'hidden';
+    pages.forEach(function (p) { p.style.visibility = 'hidden'; });
+
+    /* fast divide (1000ms) — the de-style + crack happen quick, then the pieces fly */
+    var TOTAL = 1000, t0 = performance.now();
+    function frame(now) {
+      var live = false;
+      items.forEach(function (it) {
+        var t = (now - t0 - it.dly) / TOTAL;
+        if (t < 0) { live = true; return; }
+        var p = Math.min(t, 1);
+        if (p < 1) live = true;
+        var e = p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+        cardShardAt(it, e);
+      });
+      if (live) { requestAnimationFrame(frame); return; }
+      /* the shards have landed on the slots. Reveal the real pages with a gentle
+         opacity fade (text eases in, not a snap), and keep the shards one beat
+         longer so the page fades up UNDER them — no flicker at the hand-off. */
+      pages.forEach(function (p) {
+        p.style.transition = 'opacity .4s ease,transform .32s cubic-bezier(.22,.61,.36,1),box-shadow .32s ease,border-color .32s ease';
+        p.style.visibility = ''; p.style.transform = ''; p.style.opacity = '';
+        p.classList.add('in');                            /* opacity 0 → 1, eased */
+        startBob(p);                                      /* restart pgbob from rest → seamless */
+      });
+      if (srcCard.parentNode) srcCard.parentNode.removeChild(srcCard);   /* drop the grown clone */
+      if (cue) cue.classList.add('in');
+      setTimeout(function () { items.forEach(function (it) { it.wrap.remove(); }); }, 200);   /* pages already part-faded */
+      setTimeout(function () { pages.forEach(function (p) { p.style.transition = ''; }); morphing = false; }, 460);
+    }
+    requestAnimationFrame(frame);
+  }
+
   window.LanternEverywhere = {
     morphFromWindow: morphFromWindow, morphToWindow: morphToWindow,
+    morphFromDock: morphFromDock, morphFromCard: morphFromCard,
     toCTA: toCTA, backToWall: backToWall,
+    presentWall: presentWall, presentCTA: presentCTA,
     busy: function () { return morphing; }
   };
 
@@ -292,7 +571,7 @@
     var badge = pg.querySelector('.pg-cefr');
     if (!badge) return;
     var lv = badge.getAttribute('data-easy');
-    if (lv) badge.textContent = lv;
+    if (lv) { badge.textContent = lv; badge.setAttribute('data-lv', lv); }   /* recolour to the new level */
     badge.classList.remove('morph'); void badge.offsetWidth; badge.classList.add('morph');
   }
   function rewriteCard(pg) {
@@ -347,6 +626,8 @@
     pg.addEventListener('mouseenter', function () { rewriteCard(pg); if (!REDUCED) { hovered = pg; layout(); } });
     pg.addEventListener('mouseleave', function () { if (hovered === pg) { hovered = null; layout(); } });
     pg.addEventListener('focusin',   function () { rewriteCard(pg); });
+    /* touch parity for the hover-simplify: tapping a card rewrites it to your level */
+    pg.addEventListener('pointerup', function (e) { if (e.pointerType === 'touch') rewriteCard(pg); });
   });
 
   /* ── advance to the CTA (phase 6): the six article cards FLY from the wall and
@@ -360,6 +641,32 @@
 
   function hideWall() { pages.forEach(function (p) { p.style.visibility = 'hidden'; }); }
   function backToWall() { document.body.classList.remove('ph-cta'); pages.forEach(function (p) { p.style.visibility = ''; }); }
+
+  /* ── static presenters for a scrubber CLICK (jump) — no shatter/flip morph ──
+     A click can land on Everywhere/CTA from any phase, where the predecessor
+     morph has no valid source (the window/wall was never split) and would
+     shatter the wrong content. These drop the wall / dock straight into their
+     resting state, so the jump lands clean instead of replaying a stale morph. */
+  function presentWall() {
+    morphing = false; revealed = true;
+    pages.forEach(function (p) {
+      p.classList.add('in'); p.style.transition = '';
+      p.style.visibility = ''; p.style.transform = ''; p.style.opacity = '';
+      startBob(p);
+    });
+    if (cue) cue.classList.add('in');
+    /* mobile jump straight onto the wall still gets the auto-simplify ripple */
+    if (innerWidth <= 920 && !REDUCED) setTimeout(startSimplifyCascade, 360);
+  }
+  function presentCTA() {
+    presentWall();                                  /* the wall sits under the dock */
+    var LC = window.LanternCharge;
+    document.body.classList.add('ph-cta');
+    if (innerWidth <= 920) { if (LC && LC.buildMobile && !(LC.armed && LC.armed())) LC.buildMobile(); }
+    else if (LC && LC.armDocked && !(LC.armed && LC.armed())) LC.armDocked();
+    docked = true;
+    hideWall();
+  }
 
   function toCTA() {
     if (flaming || morphing) return;

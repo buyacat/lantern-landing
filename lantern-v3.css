@@ -12,6 +12,9 @@ html.fonts-ready #bg{opacity:1}
   --line:#e8e6e0; --line-soft:#f0eee9;
   --amber:#ef8e1c; --amber-bright:#fbb03b; --amber-deep:#bd6e0c;
   --highlight:#ffd98a; --amber-tint:#fdf1dd;
+  /* cursor-as-lantern: eased light offset written by lantern-light.js (desktop only).
+     Defaults are neutral (alpha 0) so without that script the look is unchanged. */
+  --lit-dx:0px; --lit-dy:0px; --lit-a:0; --lit-blur:15px;
   --blue:#3b6fd4; --green:#2f9e5f; --red:#d4503b; --violet:#7a6f9c;
   --maxw:1200px; --gut:48px; --nav:72px;
   --sans:'General Sans','GS Fallback',system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
@@ -96,12 +99,12 @@ body.at-hero .pill{opacity:0;visibility:hidden;pointer-events:none}
 /* split layout: copy (col 1) + floating screen deck (col 2) */
 .hero-inner{position:relative;z-index:5;display:grid;grid-template-columns:minmax(0,0.82fr) minmax(0,1fr);align-items:center;gap:clamp(18px,2.4vw,40px);text-align:left}
 .hero-copy{min-width:0}
-.hero-eyebrow{font-family:var(--mono);font-size:13px;letter-spacing:.3em;text-transform:uppercase;color:var(--amber-deep);margin-bottom:26px}
+.hero-eyebrow{font-family:var(--mono);font-size:13px;letter-spacing:.3em;text-transform:uppercase;color:var(--amber-deep);margin-bottom:36px}
 .hero h1{font-weight:700;letter-spacing:-.04em;font-size:clamp(50px,9vw,118px);line-height:.96}
 .hero-copy h1{font-size:clamp(40px,4.4vw,64px)}
-.hero .hsub{margin:30px auto 0;max-width:40ch;font-size:clamp(16px,1.6vw,20px);color:var(--ink-70);line-height:1.55}
+.hero .hsub{margin:42px auto 0;max-width:40ch;font-size:clamp(16px,1.6vw,20px);color:var(--ink-70);line-height:1.55}
 .hero-copy .hsub{margin-left:0;margin-right:0}
-.hero .hcta{margin-top:38px;display:flex;gap:16px;justify-content:center;align-items:center;flex-wrap:wrap}
+.hero .hcta{margin-top:50px;display:flex;gap:16px;justify-content:center;align-items:center;flex-wrap:wrap}
 .hero-copy .hcta{justify-content:flex-start}
 /* col 2 — the bounded stage that contains the floating screen deck */
 .hero-stage{position:relative;height:clamp(470px,66vh,600px);overflow:visible;margin-right:clamp(8px,2vw,24px)}
@@ -303,9 +306,10 @@ body.at-hero .pill{opacity:0;visibility:hidden;pointer-events:none}
 .hud-activate{position:absolute;inset:0;display:flex;align-items:center;gap:14px;padding:0 18px;transition:opacity .35s ease,transform .4s cubic-bezier(.2,.8,.2,1)}
 .ha-text{font-size:12.5px;color:var(--ink-70);display:inline-flex;align-items:center;gap:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ha-dot{width:8px;height:8px;border-radius:50%;background:var(--amber);box-shadow:0 0 0 3px rgba(239,142,28,.16);flex-shrink:0}
-.ha-go{margin-left:auto;flex-shrink:0;display:inline-flex;align-items:center;gap:8px;background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:11px;padding:9px 15px 9px 11px;font-family:inherit;font-weight:600;font-size:13.5px;cursor:pointer;box-shadow:0 6px 16px -10px rgba(26,23,20,.28);transition:background .2s,box-shadow .2s,transform .2s,border-color .2s}
+.ha-go{margin-left:auto;flex-shrink:0;display:inline-flex;align-items:center;gap:8px;background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:9px 15px 9px 11px;font-family:inherit;font-weight:600;font-size:13.5px;cursor:pointer;box-shadow:0 6px 16px -10px rgba(26,23,20,.28);transition:background .2s,box-shadow .2s,transform .2s,border-color .2s}
 .ha-go:hover{background:var(--paper-2);border-color:#dcd6c9;transform:translateY(-1px)}
 .ha-go .lmark{width:18px;height:18px;border-radius:5px;padding-bottom:3px}
+.ha-go .l-ico{color:var(--amber)}
 .ha-go.beckon{animation:softpulse 1.6s ease-in-out infinite}
 /* neutral beckon ring for the light in-page pills (.ha-go / .disc-fab) */
 @keyframes softpulse{0%,100%{box-shadow:0 8px 20px -12px rgba(26,23,20,.3),0 0 0 0 rgba(26,23,20,.14)}50%{box-shadow:0 8px 20px -12px rgba(26,23,20,.3),0 0 0 10px rgba(26,23,20,0)}}
@@ -625,7 +629,11 @@ body.at-hero .pill{opacity:0;visibility:hidden;pointer-events:none}
 .final .hcta{position:relative;margin-top:38px;display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
 footer{border-top:1px solid var(--line);padding:50px var(--gut);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:18px;background:#f2efe8}
 footer .fb{display:flex;align-items:center;gap:10px;font-weight:600;font-size:20px}
-footer .fm{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-45)}
+footer .fb a{color:inherit;text-decoration:none}
+footer .fb a:hover{text-decoration:underline}
+footer .fm{display:flex;flex-direction:column;align-items:flex-end;gap:7px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-45);text-align:right}
+footer .fm .fm-priv{color:inherit;text-decoration:underline;text-underline-offset:2px;text-decoration-thickness:1px}
+footer .fm .fm-priv:hover{color:var(--ink-70)}
 
 /* dot nav */
 .dotnav{position:fixed;right:22px;top:50%;transform:translateY(-50%);z-index:70;display:flex;flex-direction:column;gap:15px;align-items:flex-start}
@@ -944,17 +952,21 @@ body.tx-off [data-reveal],body.tx-off .reveal-lines .ln>.i,body.tx-off .mini-lis
 .act-sep{width:40px;height:1px;background:var(--line)}
 
 /* ---- word DECK — saved words as plain cards, a calm rail on the right ---- */
-#worddeck{position:fixed;right:20px;top:50%;transform:translateY(-45%);z-index:64;width:148px;display:none;pointer-events:none;transition:opacity .35s ease}
+#worddeck{position:fixed;right:20px;top:50%;transform:translateY(-45%);z-index:64;width:162px;display:none;pointer-events:none;transition:opacity .35s ease}
 #worddeck.show{display:block;pointer-events:auto}
 body.ev-active #worddeck,body.at-hero #worddeck,body.at-close #worddeck{opacity:0;pointer-events:none}
-.wd-label{font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:rgba(26,23,20,.4);margin-bottom:8px;padding-left:3px}
+.wd-label{font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:rgba(26,23,20,.4);margin-bottom:5px;padding-left:3px}
 /* a calm right-edge DECK: cards piled one over another, newest in front */
 .wd-stack{display:flex;flex-direction:column}
-.wd-card{position:relative;background:#fff;border:1px solid var(--line);border-radius:14px;padding:8px 11px 8px 11px;margin-top:-14px;max-height:120px;display:flex;flex-direction:column;gap:4px;
+.wd-card{position:relative;background:#fff;border:1px solid var(--line);border-radius:15px;padding:10px 13px;margin-top:-14px;max-height:130px;display:flex;flex-direction:row;align-items:center;gap:11px;
   box-shadow:0 18px 34px -16px rgba(26,23,20,.4),0 2px 6px -3px rgba(26,23,20,.1);
   opacity:0;transform:translateX(16px) scale(.96);transition:opacity .5s ease,transform .55s cubic-bezier(.2,.85,.25,1)}
 .wd-card:first-child{margin-top:0}
-.wd-prog{position:absolute;top:9px;right:9px;width:18px;height:18px;pointer-events:none}
+.wd-prog{width:21px;height:21px;pointer-events:none;flex:none}
+/* left = word over gloss; right = progress ring over the level badge — both columns
+   vertically centred so the card reads balanced */
+.wd-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.wd-side{flex:none;display:flex;flex-direction:column;align-items:center;gap:6px}
 /* per-card scatter + float timing: each card rests at its own rotation, nudge, and float phase */
 .wd-card:nth-child(1){--crot: 1.5deg;--cdx:-3px;--fdur:4.2s;--fdel:0s}
 .wd-card:nth-child(2){--crot:-2deg;  --cdx: 4px; --fdur:3.8s;--fdel:.7s}
@@ -986,13 +998,16 @@ body.ev-active #worddeck,body.at-hero #worddeck,body.at-close #worddeck{opacity:
 /* oldest cards collapse away smoothly past the cap (no jump) */
 .wd-card.collapsing{overflow:hidden;animation:none;transition:opacity .4s ease,transform .44s cubic-bezier(.4,0,.2,1),max-height .44s cubic-bezier(.4,0,.2,1),margin-bottom .44s ease,padding-top .44s ease,padding-bottom .44s ease}
 .wd-card.collapsing.gone{opacity:0;transform:translateX(-14px) scale(.9);max-height:0;margin-bottom:0;padding-top:0;padding-bottom:0}
-.wd-w{font-weight:600;font-size:14px;letter-spacing:-.014em;color:var(--ink);line-height:1.05}
-/* native gloss — shown on the small mobile cards (see the ≤920px rules); hidden on desktop, which keeps phonetic + level */
-.wd-tr{display:block;font-size:11px;font-weight:500;letter-spacing:-.01em;line-height:1.1}
+.wd-w{font-weight:600;font-size:15px;letter-spacing:-.014em;color:var(--ink);line-height:1.05}
+/* native gloss — shown on every card now (desktop card = word + level + gloss, no phonetic) */
+.wd-tr{display:block;font-size:11.5px;font-weight:500;letter-spacing:-.01em;line-height:1.1}
 .wd-tr:empty{display:none}
 .wd-row{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:18px}
+/* word + level badge share the top line; padding-right keeps the badge clear of the
+   progress ring in the corner (they used to stack into each other) */
+.wd-head{display:flex;align-items:center;justify-content:space-between;gap:7px;min-height:17px;padding-right:21px}
 .wd-ph{font-family:var(--mono);font-size:10.5px;color:var(--ink-45)}
-.wd-card .cefr-b{font-size:9px;padding:2px 6px}
+.wd-card .cefr-b{font-size:9px;padding:2px 6px;flex:none}
 
 /* flying clone — page→deck and deck→scene (plain card to match) */
 .fly-card{position:fixed;z-index:96;background:#fff;border:1px solid var(--line);border-radius:14px;padding:11px 14px;display:flex;flex-direction:column;gap:5px;width:150px;box-sizing:border-box;
@@ -1199,7 +1214,7 @@ body.at-hero.vocab-on #worddeck{display:block!important;opacity:1;pointer-events
 .dca-focus{border-radius:3px;transition:background .35s ease,box-shadow .35s ease}
 .disc-article.focus .dca-focus{background:rgba(26,23,20,.07);box-shadow:inset 0 -2px 0 rgba(26,23,20,.32)}
 /* floating "ask this page" button docked on the article */
-.disc-fab{position:absolute;right:18px;bottom:16px;display:inline-flex;align-items:center;gap:8px;background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:11px;padding:9px 15px 9px 13px;font-family:inherit;font-weight:600;font-size:13.5px;cursor:pointer;box-shadow:0 8px 20px -12px rgba(26,23,20,.3),0 1px 3px -1px rgba(26,23,20,.1);transition:transform .2s,box-shadow .2s,background .2s,border-color .2s}
+.disc-fab{position:absolute;right:18px;bottom:16px;display:inline-flex;align-items:center;gap:8px;background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:9px 15px 9px 13px;font-family:inherit;font-weight:600;font-size:13.5px;cursor:pointer;box-shadow:0 8px 20px -12px rgba(26,23,20,.3),0 1px 3px -1px rgba(26,23,20,.1);transition:transform .2s,box-shadow .2s,background .2s,border-color .2s}
 .disc-fab .dc-ico{width:18px;height:18px;flex-shrink:0;color:var(--ink-70);display:flex}
 .disc-fab .dc-ico svg{width:100%;height:100%;display:block}
 .disc-fab:hover{transform:translateY(-2px);background:var(--paper-2);border-color:#dcd6c9}
@@ -1401,13 +1416,13 @@ body.at-hero.vocab-on #worddeck{display:block!important;opacity:1;pointer-events
 .dkok svg{width:11px;height:11px}
 .dktr{display:flex;align-items:center;gap:7px;font-size:11.5px}
 .dktr .s{color:var(--ink-45)}.dktr .ar{color:var(--blue);font-weight:600}
-.dktr .t{font-weight:600;color:var(--ink);background:var(--highlight);border-radius:5px;padding:1px 6px}
+.dktr .t{font-weight:600;color:var(--blue);background:color-mix(in srgb,var(--blue) 14%,#fff);border-radius:5px;padding:1px 6px}
 .dkcz{font-size:11.5px;color:var(--ink-70);line-height:1.5}
 .dkcz .gap{display:inline-block;background:rgba(212,80,59,.12);color:var(--red);font-weight:600;border-radius:5px;padding:0 7px;border-bottom:2px solid var(--red)}
 .dksm{display:flex;align-items:center;gap:7px;font-size:11px;flex-wrap:wrap}
 .dksm s{color:var(--ink-45);text-decoration-color:var(--ink-45)}
-.dksm .ar{color:var(--green);font-weight:700}
-.dksm b{font-weight:600;color:var(--ink);background:rgba(47,158,95,.16);border-radius:5px;padding:1px 6px}
+.dksm .ar{color:var(--amber);font-weight:700}
+.dksm b{font-weight:600;color:var(--ink);background:rgba(239,142,28,.16);border-radius:5px;padding:1px 6px}
 .dkq{display:inline-block;background:var(--ink);color:#fff;border-radius:9px 9px 9px 3px;padding:4px 9px;font-size:11px;font-weight:500}
 .dka{display:block;width:100%;font-size:10.5px;color:var(--ink-45);line-height:1.4}
 .dkfc{display:flex;align-items:center;gap:9px;font-size:12px}
@@ -1525,10 +1540,10 @@ body.tx-off .close-flame,body.tx-off.close-lit footer .lmark::before{animation:n
    Ported from the Day-one design handoff; mapped onto the site tokens.
    ===================================================================== */
 .d1-wrap{position:relative;z-index:1}
-.d1-kick{font-family:var(--mono);font-size:12.5px;letter-spacing:.2em;text-transform:uppercase;color:rgba(26,23,20,.32);margin-bottom:24px}
+.d1-kick{font-family:var(--mono);font-size:12.5px;letter-spacing:.2em;text-transform:uppercase;color:rgba(26,23,20,.32);margin-bottom:34px}
 .d1-headline{font-size:clamp(38px,5.4vw,60px);line-height:.98;letter-spacing:-.035em;max-width:16ch}
 
-.d1-track{display:flex;align-items:center;justify-content:center;gap:clamp(8px,1vw,14px);margin:30px 0 4px;max-width:100%}
+.d1-track{display:flex;align-items:center;justify-content:center;gap:clamp(8px,1vw,14px);margin:40px 0 4px;max-width:100%}
 .d1-daycell{width:clamp(40px,4.4vw,58px);height:clamp(40px,4.4vw,58px);border-radius:clamp(12px,1.2vw,16px);
   display:flex;align-items:center;justify-content:center;flex:none;
   font-family:var(--mono);font-size:15px;color:rgba(26,23,20,.3);
@@ -1545,14 +1560,14 @@ body.tx-off .close-flame,body.tx-off.close-lit footer .lmark::before{animation:n
   padding:16px 24px 16px 19px;font-family:var(--sans);font-weight:600;font-size:17.5px;letter-spacing:-.01em;
   position:relative;isolation:isolate;white-space:nowrap;
   box-shadow:0 20px 40px -20px rgba(26,23,20,.55),0 3px 9px -4px rgba(26,23,20,.3);
-  transition:transform .2s cubic-bezier(.3,.9,.3,1),box-shadow .2s ease;
+  transition:transform .32s cubic-bezier(.22,.61,.36,1),box-shadow .32s ease;
   animation:d1PulseGlow 3.4s ease-in-out infinite 1.2s}
 .d1-install::before{content:"";position:absolute;inset:-3px;border-radius:999px;z-index:-1;
   background:radial-gradient(60% 130% at 50% 120%,rgba(232,144,28,.6),transparent 70%);opacity:0;transition:opacity .25s ease}
-.d1-install:hover{transform:translateY(-3px) scale(1.02);box-shadow:0 32px 56px -22px rgba(26,23,20,.6)}
+.d1-install:hover{transform:translateY(-3px) scale(1.02);box-shadow:0 32px 56px -22px rgba(26,23,20,.6);animation:none}
 .d1-install:hover::before{opacity:1}
 .d1-install .d1-chrome{display:flex;width:25px;height:25px}
-.d1-install .d1-arrow{display:flex;color:var(--amber-bright);margin-left:2px;transition:transform .2s ease}
+.d1-install .d1-arrow{display:flex;color:var(--amber-bright);margin-left:2px;transition:transform .2s ease,color .6s linear}
 .d1-install:hover .d1-arrow{transform:translateX(4px)}
 @keyframes d1PulseGlow{0%,100%{box-shadow:0 20px 40px -20px rgba(26,23,20,.55),0 0 0 0 rgba(232,144,28,0)}50%{box-shadow:0 20px 40px -20px rgba(26,23,20,.55),0 0 0 13px rgba(232,144,28,.05)}}
 @media(prefers-reduced-motion:reduce){.d1-install{animation:none}}
@@ -1577,6 +1592,23 @@ body.tx-off .close-flame,body.tx-off.close-lit footer .lmark::before{animation:n
 .hero .hl:hover{background:#fff3c8;color:#b86a00}
 .hero .hl.picking{background:#ffe6a0;color:#b86a00;box-shadow:0 0 0 3px rgba(239,142,28,.3)}
 .hero .hl.saved{background:#e3edfd;color:#2f6fd6}
+.hero .hl.saved:hover{background:#d2e2fb;color:#2560c4}
+#hero .browser .word.is-saved{box-shadow:inset 0 -2px 0 var(--blue);transition:background .18s,box-shadow .18s}
+#hero .browser .word.is-saved:hover{background:#eaf1fd;box-shadow:inset 0 -2px 0 #2560c4}
+/* candidate words (council follow-up): once the auto-demo ends (body.hw-invite)
+   and we're still on HOME (not hero-p2+), a few good words show a soft amber
+   underline + a gentle pulse so the visitor learns they can save more too. The
+   pulse runs a few times then settles to the quiet underline (not naggy); both
+   vanish the instant a word is saved (its blue underline takes over) or the
+   visitor moves past HOME. */
+#hero .browser .word.cand,#hero .browser .hl.cand{border-radius:3px;transition:box-shadow .25s ease,background .18s}
+body.hw-invite:not(.hero-p2) #hero .browser .word.cand:not(.is-saved),
+body.hw-invite:not(.hero-p2) #hero .browser .hl.cand:not(.saved){
+  box-shadow:inset 0 -2px 0 rgba(239,142,28,.5);
+  animation:candpulse 1.7s ease-in-out 4;
+}
+body.hw-invite:not(.hero-p2) #hero .browser .word.cand:not(.is-saved):hover,
+body.hw-invite:not(.hero-p2) #hero .browser .hl.cand:not(.saved):hover{background:var(--highlight)}
 .hw-card{position:absolute;z-index:6;opacity:0;transform-origin:center;will-change:transform,opacity;transition:transform .72s cubic-bezier(.2,.85,.25,1),opacity .42s ease}
 .hw-card.rested{transition:none;animation:card-bob var(--cbdur,4.5s) ease-in-out infinite;animation-delay:var(--cbdel,0s)}
 @keyframes card-bob{0%{transform:translate3d(0,0,0)}33%{transform:translate3d(1px,-6px,0)}66%{transform:translate3d(-1px,-4px,0)}100%{transform:translate3d(0,0,0)}}
@@ -1600,6 +1632,7 @@ body.tx-off .close-flame,body.tx-off.close-lit footer .lmark::before{animation:n
 /* hero — demo cursor that taps the words */
 .hw-cursor{position:absolute;left:0;top:0;z-index:8;pointer-events:none;opacity:0;transition:transform .6s cubic-bezier(.45,0,.2,1),opacity .35s ease;will-change:transform,opacity}
 .hw-cursor.show{opacity:1}
+.hw-cursor.hw-cursor-fast{transition:transform .51s cubic-bezier(.45,0,.2,1),opacity .35s ease}  /* HOME demo only: .6s → .51s (15% faster glide) */
 .hw-cursor.gone{opacity:0;transition:opacity .4s ease}
 .hwc-ico{display:block;transform-origin:4px 4px}
 .hw-cursor.tap .hwc-ico{animation:hwc-press .32s ease}
@@ -1634,6 +1667,13 @@ body.tx-off .close-flame,body.tx-off.close-lit footer .lmark::before{animation:n
 body.at-hero .dotnav{display:none}
 /* cards fly (JS sets transform; transition drives the motion) */
 #hero .hw-card.rested{transition:transform .7s cubic-bezier(.4,0,.2,1),opacity .5s ease .05s;animation:none}
+/* "that's plenty for a demo" note — shown once the hero hits its card cap, biased
+   toward the card cluster on the right so it reads as part of that shelf */
+.hw-capnote{position:absolute;left:calc(50% + 150px);bottom:11%;transform:translate(-50%,12px);z-index:16;display:inline-flex;align-items:center;gap:9px;background:rgba(26,23,20,.93);color:#f6f3ec;font-size:14.5px;font-weight:500;padding:12px 20px;border-radius:999px;box-shadow:0 20px 46px -16px rgba(26,23,20,.6);opacity:0;pointer-events:none;white-space:nowrap;max-width:calc(100% - 40px);transition:opacity .42s ease,transform .42s cubic-bezier(.2,.85,.25,1)}
+.hw-capnote.show{opacity:1;transform:translate(-50%,0)}
+.hw-capnote b{font-weight:700;color:#fff}
+.hw-capnote-i{color:var(--amber-bright);font-size:13px}
+@media(max-width:1000px){.hw-capnote{display:none}}
 /* (all other phase-2/3/4 geometry lives in main.html's inline <style> — that page
    owns the hero phases; the stale duplicate ruleset that used to sit here had
    diverged values (660px vs 720px, -10vw vs -5vw) and only source order kept
@@ -1660,7 +1700,7 @@ body:not(.at-hero) .m-dotnav{display:none}
 .ev-eye .idx{color:var(--ink-45)}
 .ev-eye .bar{width:26px;height:1px;background:var(--amber)}
 /* ev-title / ev-sub override old rules at lines 1301-1303 */
-.ev-title{font-weight:700;letter-spacing:-.045em;font-size:clamp(34px,5.2vw,66px);line-height:.98;text-align:center;margin-bottom:12px;z-index:5}
+.ev-title{font-weight:700;letter-spacing:-.045em;font-size:clamp(34px,5.2vw,66px);line-height:.98;text-align:center;margin-bottom:22px;z-index:5}
 .ev-sub{font-size:clamp(13px,1.3vw,17px);color:var(--ink-70);text-align:center;max-width:460px;line-height:1.5;margin-bottom:clamp(22px,3.2vh,40px);z-index:5;transition:none}
 /* ev-wall overrides old grid at line 1307 */
 .ev-wall{display:flex;flex-wrap:wrap;justify-content:center;position:relative;z-index:4;gap:clamp(16px,1.5vw,24px);max-width:1160px;grid-template-columns:initial;height:auto;width:auto;transition:none}
@@ -1669,38 +1709,96 @@ body:not(.at-hero) .m-dotnav{display:none}
 .pg-float:hover{z-index:6}
 /* a continuous, slightly-elliptical drift (not a hard up/down bob) + a hair of
    rotation → the cards read as LIGHT, hovering on air. Each card's own --dur/--del
-   keeps the six out of phase, so they never sway in lockstep. */
+   keeps the six out of phase, so they never sway in lockstep.
+   The loop starts AND ends (0%/100%) at the card's own flow position — identity,
+   a zero-velocity ease-in-out stop. That's the seam-killer: a card the morph just
+   landed on its exact slot can hand straight into this float (bob (re)started from
+   phase 0) with no pop and no velocity yank — it just eases up off the rest. */
 @keyframes pgbob{
-  0%  {transform:translate(0,-2px)  rotate(.35deg)}
-  25% {transform:translate(5px,-8px) rotate(0deg)}
-  50% {transform:translate(0,-10px) rotate(-.35deg)}
-  75% {transform:translate(-5px,-6px) rotate(0deg)}
-  100%{transform:translate(0,-2px)  rotate(.35deg)}
+  0%  {transform:translate(0,0)       rotate(0deg)}
+  25% {transform:translate(5px,-5px)  rotate(.34deg)}
+  50% {transform:translate(0,-9px)    rotate(0deg)}
+  75% {transform:translate(-5px,-5px) rotate(-.34deg)}
+  100%{transform:translate(0,0)       rotate(0deg)}
 }
 /* while the single window is splitting into 5, freeze the bob so the stacked
    window is rock-steady (otherwise the overlapped cards drift apart) */
 .ev.ev-splitting .pg-float{animation:none;transform:none}
 /* mini-page card */
-.pg{position:relative;width:clamp(262px,24vw,308px);background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 22px 46px -26px rgba(26,23,20,.5);opacity:0;transform:translateY(22px) scale(.97);transition:opacity .55s cubic-bezier(.4,0,.2,1),transform .5s cubic-bezier(.22,.61,.36,1),box-shadow .5s ease,border-color .5s ease}
-.pg.in{opacity:1;transform:none}
+.pg{position:relative;width:clamp(300px,25vw,340px);background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 22px 46px -26px rgba(26,23,20,.5);opacity:0;transform:translateY(22px) scale(.97);transition:opacity .55s cubic-bezier(.4,0,.2,1),transform .5s cubic-bezier(.22,.61,.36,1),box-shadow .5s ease,border-color .5s ease}
+.pg.in{opacity:1;transform:none;animation:pgCast .78s cubic-bezier(.33,.72,.3,1) .08s backwards}
+/* the shadow is CAST, not snapped on: as the card lands, a fixed overhead light
+   sweeps the shadow in — it swings ~20% past the resting depth (78%), then
+   settles (100%). One-shot on reveal. fill = backwards (not forwards): it holds
+   the faint pre-cast frame during the small delay so the card appears first
+   ("потім тінь"), but once the run ends the resting .pg shadow + the :hover
+   transition take back over cleanly — no animation holding box-shadow. */
+@keyframes pgCast{
+  0%  {box-shadow:0 7px 16px -16px rgba(26,23,20,.3)}
+  78% {box-shadow:0 27px 56px -25px rgba(26,23,20,.55)}
+  100%{box-shadow:0 22px 46px -26px rgba(26,23,20,.5)}
+}
+@media(prefers-reduced-motion:reduce){.pg.in{animation:none}}
+/* ── cursor-as-lantern (desktop only, whole landing) ──────────────────────────
+   The pointer is a soft light source: lantern-light.js eases a global light
+   offset into --lit-dx/--lit-dy/--lit-a, and every elevated surface across the
+   landing adds a faint directional drop-shadow that falls AWAY from it. It's an
+   ADDITIVE layer (a separate property from each element's box-shadow), so it
+   never fights :hover, state shadows (.qcard.correct), or the CTA charge — and
+   the lerped vars keep it smooth: a quiet lean, not a spotlight. Alpha eases to
+   ~0 near screen-centre, so a still/centred pointer barely changes the resting look.
+   Gated behind body.lantern-light, which the script only adds on fine-pointer,
+   motion-OK, wide viewports → touch/mobile never gets the filter at all.
+   Excluded on purpose: .browser (hosts JS-positioned popups + huge repaint area)
+   and preserve-3d surfaces (filter would flatten them). */
+body.lantern-light .pg,
+body.lantern-light .srccard,
+body.lantern-light .qcard,
+body.lantern-light .vocab,
+body.lantern-light .chatwin,
+body.lantern-light .tpanel,
+body.lantern-light .popup,
+body.lantern-light .dk-card{
+  filter:drop-shadow(var(--lit-dx) var(--lit-dy) var(--lit-blur) rgba(26,23,20,var(--lit-a)));
+}
+/* screen 7 (Everywhere): six .pg cards already carry a strong base box-shadow, so
+   the full-strength lantern reads as too heavy here — dial its lean/blur/alpha
+   down just for these cards (other surfaces keep the global strength). */
+body.lantern-light .pg{
+  filter:drop-shadow(calc(var(--lit-dx) * .55) calc(var(--lit-dy) * .55) 10px rgba(26,23,20,calc(var(--lit-a) * .5)));
+}
+/* hero (P0) floating cards already cast their shadow via a layered drop-shadow on
+   .floatwrap — so make THAT reactive instead of stacking another (no doubling).
+   At rest (vars 0) the two layers are byte-identical to index.html:1068; the light
+   only leans the offsets. Higher specificity than #hero .floatwrap so it wins. */
+body.lantern-light #hero .floatwrap{
+  filter:drop-shadow(var(--lit-dx) calc(36px + var(--lit-dy)) 50px rgba(58,36,2,.20))
+         drop-shadow(var(--lit-dx) calc(10px + var(--lit-dy)) 22px rgba(26,23,20,.12));
+}
 .pg.in:hover{transform:scale(1.05);box-shadow:0 38px 68px -28px rgba(26,23,20,.5);border-color:rgba(239,142,28,.4)}
 .pg-bar{display:flex;align-items:center;gap:9px;padding:11px 16px;border-bottom:1px solid var(--line-soft);background:linear-gradient(var(--card),#fcfbf9);border-radius:16px 16px 0 0}
 .pg-fav{width:19px;height:19px;border-radius:5px;flex-shrink:0;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center}
 .pg-url{font-family:var(--mono);font-size:11px;color:var(--ink-45);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pg-kind{margin-left:auto;flex-shrink:0;font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-45)}
-/* reading-level badge in the card's right corner: starts hard (C1/C2, amber),
-   morphs to your level (A2/B1/B2, green) when the card simplifies */
+/* reading-level badge in the card's right corner. Each CEFR level has its own
+   colour on a difficulty gradient (A green → C red); JS keeps data-lv in sync
+   with the shown level, so it animates A2-green ⇄ C1-red as the card simplifies. */
 .pg-cefr{margin-left:auto;flex-shrink:0;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.04em;line-height:1.3;
-  padding:2px 7px;border-radius:99px;
+  padding:2px 7px;border-radius:7px;
   color:var(--amber-deep,#c96b00);background:rgba(176,106,44,.10);border:1px solid rgba(176,106,44,.3);
   transition:background .45s ease,color .45s ease,border-color .45s ease}
-.pg.rewriting .pg-cefr,.pg.rewritten .pg-cefr{color:#fff;background:var(--green,#5a9e5f);border-color:var(--green,#5a9e5f)}
+.pg-cefr[data-lv="A1"]{color:#2e7d4f;background:rgba(58,158,93,.12);border-color:rgba(58,158,93,.34)}
+.pg-cefr[data-lv="A2"]{color:#5a8a28;background:rgba(111,168,60,.14);border-color:rgba(111,168,60,.34)}
+.pg-cefr[data-lv="B1"]{color:#b07814;background:rgba(217,154,38,.15);border-color:rgba(217,154,38,.36)}
+.pg-cefr[data-lv="B2"]{color:#be5f1e;background:rgba(226,116,42,.15);border-color:rgba(226,116,42,.36)}
+.pg-cefr[data-lv="C1"]{color:#c1462e;background:rgba(209,80,58,.13);border-color:rgba(209,80,58,.34)}
+.pg-cefr[data-lv="C2"]{color:#a8324a;background:rgba(176,57,84,.13);border-color:rgba(176,57,84,.34)}
 @keyframes cefrPop{0%{transform:scale(1)}42%{transform:scale(1.24)}100%{transform:scale(1)}}
 .pg-cefr.morph{animation:cefrPop .52s cubic-bezier(.3,1,.4,1)}
 .pg-body{position:relative;padding:16px 18px 18px}
-.pg-head{font-weight:700;font-size:16.5px;letter-spacing:-.018em;line-height:1.24;margin-bottom:10px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pg-head{font-weight:700;font-size:16.5px;letter-spacing:-.018em;line-height:1.24;margin-bottom:10px;color:var(--ink);display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:1;overflow:hidden}
 .pg-stack{position:relative;display:grid}
-.pg-stack>p{grid-area:1/1;font-size:13px;line-height:1.58;margin:0}
+.pg-stack>p{grid-area:1/1;font-size:13px;line-height:1.58;margin:0;align-self:start;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}
 .t-hard{color:var(--ink-70);transition:opacity .3s ease}
 .t-easy{color:var(--ink);opacity:0;padding:5px 9px;margin:-5px -9px;border-radius:6px;background-color:transparent;transition:opacity .3s ease,background-color .95s ease}
 .pg.rewriting .t-hard,.pg.rewritten .t-hard{opacity:0}
@@ -1716,6 +1814,26 @@ body:not(.at-hero) .m-dotnav{display:none}
 #flame{position:fixed;width:18px;height:18px;border-radius:50%;background:var(--amber);box-shadow:0 0 20px 5px rgba(239,142,28,.55);pointer-events:none;display:none;z-index:9999;transform:translate(-50%,-50%)}
 @media(max-width:920px){.ev-wall{max-width:720px}.pg{width:clamp(280px,46vw,348px)}}
 @media(max-width:600px){.ev-wall{max-width:440px}.pg{width:100%}.pg-float:nth-child(n+5){display:none}}
+/* ── desktop only: the fixed bottom player (#d-deck, bottom:26px, ~84px tall)
+      owns the bottom ~110px. Reserve it so this screen's own cue
+      ("click anywhere — and you're in ↓") always clears the caption + scrubber
+      instead of crashing into them. ── */
+@media(min-width:921px){.ev{padding-bottom:clamp(118px,14vh,140px)}}
+/* ── short laptops (≤880px tall): 6 cards in 2 rows + title + cue overran the
+      player. Compress the stack (tighter title, smaller cards, 2-line blurbs)
+      so everything fits above the deck without overflow. ── */
+@media(min-width:921px) and (max-height:880px){
+  .ev{padding-top:clamp(16px,2.4vh,28px)}
+  .ev-title{font-size:clamp(30px,4.2vw,46px);margin-bottom:8px}
+  .ev-sub{margin-bottom:clamp(12px,2vh,20px)}
+  .ev-wall{gap:clamp(12px,1.2vw,18px)}
+  .pg{width:clamp(296px,24vw,332px)}
+  .pg-bar{padding:8px 15px}
+  .pg-body{padding:12px 16px 13px}
+  .pg-head{font-size:15px;margin-bottom:7px}
+  .pg-stack>p{font-size:13px;line-height:1.52;-webkit-line-clamp:3}
+  .ev-cue{margin-top:clamp(12px,2vh,20px)}
+}
 /* ── cross-screen morph (Practice → Everywhere): soften everything around the
       window. While morphing, the hero copy bows out and the finale heading is
       held blank; once the split starts it breathes in — nothing pops. ── */
@@ -1727,4 +1845,26 @@ body.ev-morphing #finale .ev-sub{opacity:0}
 body.ev-morphed #finale .ev-eye,
 body.ev-morphed #finale .ev-title,
 body.ev-morphed #finale .ev-sub{opacity:1;transition:opacity .9s ease .3s}
+
+/* ── mastery reveal (Discuss → Everywhere, council B): the "Mastered" stamp that
+   pops under the grown "phenomenon" card before it cracks into the six pages ── */
+.mastery-stamp{
+  display:inline-flex;align-items:center;gap:8px;white-space:nowrap;
+  font-family:var(--sans);font-weight:600;font-size:15px;letter-spacing:.01em;
+  color:#fff;background:var(--ink);
+  padding:9px 17px;border-radius:999px;
+  box-shadow:0 14px 34px -14px rgba(26,23,20,.55);
+}
+.mastery-stamp .ms-check{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:18px;height:18px;border-radius:50%;
+  background:var(--amber);color:var(--ink);
+  font-size:12px;font-weight:700;line-height:1;
+}
+/* the line above the floating card — the human voice of the beat (council round-2
+   pick "One word. Thousands ahead."); the ✓ Mastered badge below is the receipt */
+.mastery-line{
+  font-family:var(--sans);font-weight:700;letter-spacing:-.02em;
+  font-size:27px;line-height:1.1;color:var(--ink);text-align:center;white-space:nowrap;
+}
 

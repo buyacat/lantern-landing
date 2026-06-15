@@ -26,13 +26,15 @@ const ICON = {
 
 /* ============ shared dictionary ============
    one source of truth for every word that can be saved across scenes.
-   w: lemma · ph: phonetic · tr: native gloss · lvl/cls: CEFR + colour class
+   w: lemma · ph: phonetic · tr: native gloss · lvl: CEFR level
    def/ex: popup body · syn: synonyms                                      */
+const CEFR_CLS = { A1:'b-blue', A2:'b-green', B1:'b-amber', B2:'b-red', C1:'b-violet', C2:'b-violet' };
+window.CEFR_CLS = CEFR_CLS;
 const DICT = {
-  route:    { w:'route',    ph:'/ruːt/',        trUk:'маршрут',    trEs:'ruta',        trFr:'itinéraire',  trDe:'Route',       trPt:'rota',        trEn:'route',      lvl:'B1', cls:'b-blue',   syn:'path · course',        def:'A way taken to get from one place to another.',               ex:'The coastal **route** hugs the cliffs for miles.' },
-  coast:    { w:'coast',    ph:'/kəʊst/',       trUk:'узбережжя',  trEs:'costa',       trFr:'côte',        trDe:'Küste',       trPt:'costa',       trEn:'coast',      lvl:'B1', cls:'b-green',  syn:'shore · seaside',      def:'The land beside or near the sea.',                            ex:'They drove the whole length of the **coast**.' },
-  winding:  { w:'winding',  ph:'/ˈwaɪn.dɪŋ/',  trUk:'звивистий',  trEs:'serpenteante',trFr:'sinueux',     trDe:'kurvig',      trPt:'sinuoso',     trEn:'winding',    lvl:'B2', cls:'b-red',    syn:'twisting · curving',   def:'Following a bending, curving course rather than a straight one.',ex:'A **winding** road climbed into the hills.' },
-  exposed:  { w:'exposed',  ph:'/ɪkˈspəʊzd/',  trUk:'відкритий',  trEs:'expuesto',    trFr:'exposé',      trDe:'ungeschützt', trPt:'exposto',     trEn:'exposed',    lvl:'B2', cls:'b-red',    syn:'open · unsheltered',   def:'Not protected from the weather, wind or danger.',             ex:'The bridge crosses an **exposed** stretch of water.' },
+  route:    { w:'route',    ph:'/ruːt/',        trUk:'маршрут',    trEs:'ruta',        trFr:'itinéraire',  trDe:'Route',       trPt:'rota',        trEn:'route',      lvl:'A1', syn:'path · course',        def:'A way taken to get from one place to another.',               ex:'The coastal **route** hugs the cliffs for miles.' },
+  coast:    { w:'coast',    ph:'/kəʊst/',       trUk:'узбережжя',  trEs:'costa',       trFr:'côte',        trDe:'Küste',       trPt:'costa',       trEn:'coast',      lvl:'A2', syn:'shore · seaside',      def:'The land beside or near the sea.',                            ex:'They drove the whole length of the **coast**.' },
+  winding:  { w:'winding',  ph:'/ˈwaɪn.dɪŋ/',  trUk:'звивистий',  trEs:'serpenteante',trFr:'sinueux',     trDe:'kurvig',      trPt:'sinuoso',     trEn:'winding',    lvl:'B1', syn:'twisting · curving',   def:'Following a bending, curving course rather than a straight one.',ex:'A **winding** road climbed into the hills.' },
+  exposed:  { w:'exposed',  ph:'/ɪkˈspəʊzd/',  trUk:'відкритий',  trEs:'expuesto',    trFr:'exposé',      trDe:'ungeschützt', trPt:'exposto',     trEn:'exposed',    lvl:'B2', syn:'open · unsheltered',   def:'Not protected from the weather, wind or danger.',             ex:'The bridge crosses an **exposed** stretch of water.' },
   survey:   { w:'survey',   ph:'/ˈsɜː.veɪ/',   trUk:'обстеження', trEs:'estudio',     trFr:'étude',       trDe:'Vermessung',  trPt:'levantamento',trEn:'survey',     lvl:'B2', cls:'b-violet', syn:'study · inspection',   def:'A careful examination or measurement of an area.',            ex:'Engineers ran a **survey** before any building began.' },
   remote:   { w:'remote',   ph:'/rɪˈməʊt/',    trUk:'віддалений', trEs:'remoto',      trFr:'isolé',       trDe:'abgelegen',   trPt:'remoto',      trEn:'remote',     lvl:'B1', cls:'b-blue',   syn:'distant · isolated',   def:'Far away from towns or other people.',                        ex:'A handful of **remote** islands dot the bay.' },
   rugged:   { w:'rugged',   ph:'/ˈrʌɡ.ɪd/',    trUk:'скелястий',  trEs:'escarpado',   trFr:'accidenté',   trDe:'zerklüftet',  trPt:'acidentado',  trEn:'rugged',     lvl:'B2', cls:'b-red',    syn:'rough · rocky',        def:'Having a rough, uneven and often rocky surface.',             ex:'The **rugged** shoreline is battered by storms.' },
@@ -208,13 +210,13 @@ const Shelf = (function () {
       'stroke-dasharray="' + circ + '" stroke-dashoffset="' + (circ * (1 - prog)).toFixed(2) + '" ' +
       'stroke-linecap="round" transform="rotate(-90 13 13)"/>' +
       '</svg>';
-    const card = el('wd-card ' + (d.cls || 'b-green')); card.dataset.w = lemma;
-    const trCls = 't-' + (d.cls || 'b-green').replace(/^b-/, '');
+    const cls = CEFR_CLS[d.lvl] || 'b-blue';
+    const card = el('wd-card ' + cls); card.dataset.w = lemma;
+    const trCls = 't-' + cls.replace(/^b-/, '');
     card.innerHTML =
-      ring +
-      '<span class="wd-w">' + d.w + '</span>' +
-      '<span class="wd-row"><span class="wd-ph">' + (d.ph || '') + '</span><span class="cefr-b ' + d.cls + '">' + d.lvl + '</span></span>' +
-      '<span class="wd-tr ' + trCls + '">' + (d.tr || '') + '</span>';
+      '<div class="wd-main"><span class="wd-w">' + d.w + '</span>' +
+      '<span class="wd-tr ' + trCls + '">' + (d.tr || '') + '</span></div>' +
+      '<div class="wd-side">' + ring + '<span class="cefr-b ' + cls + '">' + d.lvl + '</span></div>';
     stackEl.appendChild(card);
     reveal();
     if (opts.preset) {
@@ -223,10 +225,18 @@ const Shelf = (function () {
       requestAnimationFrame(() => card.classList.add('in'));
     }
     trim();
+    // mobile A+ strip: every word is kept (trim() no-ops below 920) and the strip
+    // scrolls horizontally, so slide the newest card into view on each save.
+    if (!opts.preset && window.innerWidth <= 920) {
+      requestAnimationFrame(() => stackEl.scrollTo({ left: stackEl.scrollWidth, behavior: 'smooth' }));
+    }
     return card;
   }
-  // keep the rail bounded: collapse the oldest cards smoothly (no jump) past MAXV
+  // keep the rail bounded: collapse the oldest cards smoothly (no jump) past MAXV.
+  // MOBILE EXCEPTION: the A+ vocab strip keeps EVERY saved word (owner constraint:
+  // nothing is discarded) and scrolls instead, so trim is disabled below 920.
   function trim() {
+    if (window.innerWidth <= 920) return;
     const cards = [...stackEl.querySelectorAll('.wd-card:not(.collapsing)')];
     let extra = cards.length - MAXV;
     for (let i = 0; i < extra; i++) {
@@ -255,8 +265,9 @@ function flyWordToShelf(srcRect, lemma, onDone) {
   const card = Shelf.add(lemma, { preset: true });          // holds its final slot, invisible
   // if the deck rail is hidden (narrow viewport), there's nowhere to fly — just settle the card
   if (card.getBoundingClientRect().width < 2) { card.classList.add('in'); onDone && onDone(); return; }
-  const ghost = el('fly-word ' + (d.cls || 'b-green'));
-  ghost.innerHTML = '<span class="fw-w">' + d.w + '</span><span class="fw-meta">' + (d.ph ? '<span class="fw-ph">' + d.ph + '</span>' : '<span></span>') + '<span class="cefr-b ' + d.cls + '">' + d.lvl + '</span></span>';
+  const ghostCls = CEFR_CLS[d.lvl] || 'b-blue';
+  const ghost = el('fly-word ' + ghostCls);
+  ghost.innerHTML = '<span class="fw-w">' + d.w + '</span><span class="fw-meta"><span></span><span class="cefr-b ' + ghostCls + '">' + d.lvl + '</span></span>';
   // start exactly over the word, sized like the word (text state)
   ghost.style.left = srcRect.left + 'px';
   ghost.style.top = (srcRect.top - 2) + 'px';
@@ -286,8 +297,9 @@ function flyShelfCardTo(lemma, toRect, { scale = 1, settle = 300 } = {}) {
     const from = Shelf.rectOf();
     if (REDUCED || !from || !toRect) { resolve(); return; }
     const d = DICT[lemma] || genDef(lemma);
-    const ghost = el('fly-card out ' + (d.cls || 'b-green'));
-    ghost.innerHTML = '<span class="wd-w">' + d.w + '</span><span class="wd-row">' + (d.ph ? '<span class="wd-ph">' + d.ph + '</span>' : '<span></span>') + '<span class="cefr-b ' + d.cls + '">' + d.lvl + '</span></span>';
+    const fcCls = CEFR_CLS[d.lvl] || 'b-blue';
+    const ghost = el('fly-card out ' + fcCls);
+    ghost.innerHTML = '<span class="wd-w">' + d.w + '</span><div class="wd-head"><span></span><span class="cefr-b ' + fcCls + '">' + d.lvl + '</span></div>';
     ghost.style.left = from.left + 'px'; ghost.style.top = from.top + 'px';
     document.body.appendChild(ghost);
     Shelf.bump();

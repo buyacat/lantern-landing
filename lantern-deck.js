@@ -16,6 +16,7 @@
 (function () {
   var N = 8;
   var NAMES = ['HOME', 'SIMPLIFY', 'TRANSLATE', 'IMMERSE', 'DISCUSS', 'PRACTICE', 'EVERYWHERE', 'INSTALL'];
+  var VIS_PHASE = [0,1,2,3,5,4,6,7]; /* visual pos → internal phase (Practice/Discuss swapped) */
   var DWELL = 1150;                 /* manual drag/keyboard speed cap per phase */
   var BREATH = 600;                 /* PLAY: beat after a scene finishes before the next — reads as cinema */
   var MAX_SCENE = 18000;            /* PLAY: safety cap so a scene that forgets to clear can't hang the reel */
@@ -42,7 +43,10 @@
             '<div class="d-ball"></div>' +
           '</div>' +
         '</div>' +
-      '</div>';
+      '</div>' +
+      /* council (unanimous): first-timers don't know the page is scrollytelling.
+         One quiet line tells them how to move — shown on HOME, fades once they go. */
+      '<div class="d-deck-hint" id="d-hint" aria-hidden="true">Scroll to explore — or press play</div>';
     document.body.appendChild(deck);
 
     var scrub   = deck.querySelector('#d-scrub');
@@ -52,6 +56,7 @@
     var goal    = deck.querySelector('.d-goal');
     var cap     = deck.querySelector('#d-cap');
     var playBtn = deck.querySelector('#d-play');
+    var hint    = deck.querySelector('#d-hint');
 
     var ticks = [];
     for (var i = 0; i < N; i++) {
@@ -73,18 +78,21 @@
     var rafId    = 0;
 
     function pct(p)   { return (p / (N - 1) * 100) + '%'; }
-    function label(p) { return ('0' + (p + 1)) + ' · ' + NAMES[p]; }
+    /* label() is called with visual position (during drag) */
+    function label(vis) { return ('0' + (vis + 1)) + ' · ' + (NAMES[VIS_PHASE[vis]] || NAMES[vis]); }
 
     function render() {
-      var cur = LP.get();
-      if (!dragging) { ball.style.left = pct(cur); fill.style.width = pct(cur); }
-      ticks.forEach(function (t, i) { t.classList.toggle('passed', i <= cur); });
-      var chasing = (cur !== target);
+      var vis = LP.pos();
+      if (!dragging) { ball.style.left = pct(vis); fill.style.width = pct(vis); }
+      ticks.forEach(function (t, i) { t.classList.toggle('passed', i <= vis); });
+      var chasing = (vis !== target);
       scrub.classList.toggle('chasing', chasing);
       if (chasing) goal.style.left = pct(target);
-      cap.textContent = label(cur);
-      scrub.setAttribute('aria-valuenow', cur + 1);
-      scrub.setAttribute('aria-valuetext', label(cur));
+      var capText = ('0' + (vis + 1)) + ' · ' + NAMES[LP.get()];
+      cap.textContent = capText;
+      scrub.setAttribute('aria-valuenow', vis + 1);
+      scrub.setAttribute('aria-valuetext', capText);
+      if (hint) hint.classList.toggle('show', LP.get() === 0);
     }
 
     /* one walk engine for drag / click / keyboard / play, but two cadences:
@@ -96,20 +104,21 @@
     function walk() {
       rafId = 0;
       var cur = LP.get();
+      var vis = LP.pos();
 
       /* a phase change the deck didn't make = the user took the wheel → hand
          control straight back (scenes no longer self-advance under PLAY, so any
          unexpected move is a real gesture). Manual always wins. */
       if (!dragging && cur !== expected) {
         if (playing) stopPlay();
-        target = cur; expected = cur;
+        target = vis; expected = cur;
         render();
         return;
       }
 
-      if (cur === target) { render(); if (playing) stopPlay(); return; }
+      if (vis === target) { render(); if (playing) stopPlay(); return; }
 
-      var now = performance.now(), dir = cur < target ? 1 : -1, ready;
+      var now = performance.now(), dir = vis < target ? 1 : -1, ready;
       if (playing && dir > 0) {
         /* PLAY forward: while the scene performs, keep resetting the breath
            clock; step a BREATH after it releases. The safety cap fires even
@@ -163,7 +172,7 @@
       scrub.blur();
       if (!moved && LP.jump) {
         /* click (no drag): jump directly — no story walk-through */
-        LP.jump(target); expected = target; render();
+        LP.jump(target); expected = LP.get(); render();
       } else {
         render(); kick();              /* drag: walk the story to target */
       }
@@ -173,9 +182,9 @@
 
     /* ── keyboard (a real slider; owns its arrows so the page pager can't eat them) ── */
     scrub.addEventListener('keydown', function (e) {
-      var cur = LP.get(), handled = true;
-      if (e.key === 'ArrowRight' || e.key === 'ArrowUp') setTarget(cur + 1);
-      else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') setTarget(cur - 1);
+      var vis = LP.pos(), handled = true;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowUp') setTarget(vis + 1);
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') setTarget(vis - 1);
       else if (e.key === 'Home') setTarget(0);
       else if (e.key === 'End') setTarget(N - 1);
       else handled = false;
@@ -195,16 +204,21 @@
       lastStep = lastBusy = performance.now();   /* give the first screen its full beat, not an instant cut */
       playing = true; window.LanternPlaying = true; setPlayUI(true); kick();
     }
-    playBtn.addEventListener('click', function () {
+    playBtn.addEventListener('click', function (e) {
       if (playing) { stopPlay(); target = LP.get(); expected = LP.get(); render(); }   /* stop = freeze on this screen */
       else startPlay();
+      /* a mouse click leaves the button focused → the amber :focus-visible ring
+         lingers AND scales with the :active press (reads as a jittery ring).
+         Drop focus for pointer activations (e.detail > 0); keyboard activations
+         (Enter/Space, e.detail === 0) keep the ring for accessibility. */
+      if (e.detail) playBtn.blur();
     });
 
     /* stay in sync if the phase moves by some other path while the deck is idle */
     setInterval(function () {
       if (dragging || rafId) return;
-      var cur = LP.get();
-      if (cur !== target || cur !== expected) { target = cur; expected = cur; }
+      var cur = LP.get(), vis = LP.pos();
+      if (vis !== target || cur !== expected) { target = vis; expected = cur; }
       render();
     }, 300);
 

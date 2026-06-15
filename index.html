@@ -17,7 +17,10 @@
 #hero .hero-stage { transition: transform 0.8s cubic-bezier(.4,0,.2,1); }
 /* phase 2: wider browser slides left so its right edge stays on-screen */
 body.hero-p2 #hero .hero-stage { transform: translateX(-5vw); }
-body.hero-p3 #hero .hero-stage { transform: translateX(calc(-5vw - 2%)) translateY(-14px); }
+/* P3 holds the stage exactly where P2 left it — the in-browser text is the SAME
+   words (page-en → tr-page), so any stage shift here reads as that text jumping.
+   Only the affordance (words → sentences) and the left copy change. */
+body.hero-p3 #hero .hero-stage { transform: translateX(-5vw); }
 /* P4: shift right + rise — browser moves noticeably between phases */
 body.hero-p4 #hero .hero-stage { transform: translateX(calc(-5vw + 1.5%)) translateY(-28px); }
 /* P5: shift left + drop */
@@ -32,7 +35,7 @@ body.hero-p5 #hero .hero-stage { transform: translateX(calc(-5vw - 4.5%)) transl
 /* tr-active: the browser holds still on ALL viewports — only the riser sentence
    card gets the 3D pop. Shadow stays neutral. */
 body.hero-p3 #hero.tr-active .browser {
-  transform: perspective(1300px) rotateY(0deg) rotate(-2deg) !important;
+  transform: perspective(1300px) rotateY(0deg) !important;   /* flat — same pose as P2, browser holds still */
   box-shadow: inherit;
 }
 #hero .browser,
@@ -43,9 +46,13 @@ body.hero-p4 #hero .browser {
   max-width: none !important;
 }
 body.hero-p2 #hero .browser { transform: perspective(1300px) rotateY(0deg) !important; }
-body.hero-p3 #hero .browser { transform: perspective(1300px) rotateY(0deg) rotate(-2deg) !important; }
-body.hero-p4 #hero .browser { transform: perspective(1300px) rotateY(0deg) rotate(1.2deg) !important; }
-body.hero-p5 #hero .browser { transform: perspective(1300px) rotateY(0deg) rotate(-1deg) !important; }
+body.hero-p3 #hero .browser { transform: perspective(1300px) rotateY(0deg) !important; }   /* flat, same as P2 — text doesn't tilt on the P2→P3 swap */
+body.hero-p4 #hero .browser { transform: perspective(1300px) rotateY(0deg) !important; }   /* flat — same pose as Immerse, the frame doesn't tilt on the swap */
+/* DISCUSS morph: once the chat dock is open (disc-open), the browser eases LEFT to
+   become the left-hand backdrop object while the chat floats near screen-centre —
+   applied on .browser (not the stage) so the stage-anchored dock holds still */
+body.hero-p4.disc-open #hero .browser { transform: perspective(1300px) rotateY(0deg) translateX(-72px) !important; }
+body.hero-p5 #hero .browser { transform: perspective(1300px) rotateY(0deg) !important; }   /* flat — same pose as Immerse */
 
 #hero .hero-copy {
   transition: opacity 0.5s ease, transform 0.65s cubic-bezier(.4,0,.2,1);
@@ -87,13 +94,13 @@ body.hero-p2 #hero .hero-copy-p2 { opacity: 1; transform: none; pointer-events: 
 #hero .hero-copy-p4 .p2-eyebrow {
   font-family: var(--mono, 'JetBrains Mono', monospace);
   font-size: 12px; letter-spacing: .22em; text-transform: uppercase;
-  color: var(--amber-deep, #c96b00); margin-bottom: 22px;
+  color: var(--amber-deep, #c96b00); margin-bottom: 32px;
 }
 #hero .hero-copy-p2 h2,
 #hero .hero-copy-p3 h2,
 #hero .hero-copy-p4 h2 {
   font-weight: 700; letter-spacing: -.035em;
-  font-size: clamp(32px, 3.5vw, 50px); line-height: 1.04; margin: 0 0 26px;
+  font-size: clamp(32px, 3.5vw, 50px); line-height: 1.04; margin: 0 0 34px;
 }
 #hero .hero-copy-p2 .p2-sub,
 #hero .hero-copy-p3 .p2-sub,
@@ -102,8 +109,9 @@ body.hero-p2 #hero .hero-copy-p2 { opacity: 1; transform: none; pointer-events: 
   line-height: 1.58; max-width: 36ch; margin: 0;
 }
 
-/* clip-path reveal (overflow:visible lets simp-dot extend left) + animated max-height
-   so the layout height grows with the reveal instead of snapping in one frame */
+/* HOME shows only the lead paragraph; this dense 2nd paragraph stays clipped away
+   (clip-path + max-height:0) until SIMPLIFY (screen 2), where it reveals and gets
+   simplified. overflow:visible lets the simp-dot peek out past the left edge. */
 .hero-extra {
   overflow: visible;
   opacity: 0;
@@ -225,6 +233,15 @@ body.hero-p2.at-hero .pill {
     opacity: .55; transition: opacity .18s ease;
   }
   .d-deck-row { display: flex; align-items: center; gap: 12px; pointer-events: none; }
+  /* quiet nav hint (council, 7/7): tells first-timers the page is scrollytelling.
+     Lives under the scrubber, low-contrast, shown on HOME and faded once moved. */
+  .d-deck-hint {
+    font-family: var(--mono, monospace); font-size: 10.5px; letter-spacing: .1em;
+    text-transform: uppercase; white-space: nowrap; color: var(--ink, #1a1714);
+    opacity: 0; transform: translateY(-2px); pointer-events: none;
+    transition: opacity .4s ease, transform .4s ease;
+  }
+  .d-deck-hint.show { opacity: .4; transform: none; }
   .d-playbtn {
     pointer-events: auto; flex-shrink: 0;
     width: 36px; height: 36px; border-radius: 50%;
@@ -349,7 +366,7 @@ body.hero-p3 #hero-simp-dot { pointer-events: none !important; }
 
 /* All three article layers stay position:absolute — simultaneous crossfade, no layout shifts */
 #hero .browser .page { min-height: 220px; overflow: hidden; transition: min-height 1s cubic-bezier(.4,0,.2,1) 0.12s; }
-/* P2: browser expands smoothly — min-height drives height, pages stay absolute */
+/* P2: browser expands smoothly as the 2nd paragraph reveals — min-height drives height, pages stay absolute */
 body.hero-p2 #hero .browser .page { min-height: 340px; }
 
 #hero .page-en {
@@ -380,7 +397,7 @@ body.hero-p3 #hero .hero-copy-p2 { opacity: 0; transform: translateX(-120px); po
 /* browser stays at p2 position — hero-stage inherits hero-p2 transform */
 
 /* browser nudges left when the translate panel opens, giving it room */
-body.hero-p3 #hero.panel-open .hero-stage { transform: translateX(calc(-5vw - 2% - 36px)); }
+body.hero-p3 #hero.panel-open .hero-stage { transform: translateX(calc(-5vw - 36px)); }
 
 /* p3 copy slides in */
 #hero .hero-copy-p3 {
@@ -403,7 +420,7 @@ body.hero-p3 #hero .hero-copy-p3 { opacity: 1; transform: none; pointer-events: 
    (see the rule below) — so the card is the ONLY thing moving, not the reverse. */
 .tcard {
   position: fixed; left: 0; top: 0; z-index: 60;
-  width: 312px; max-width: min(340px, 86vw);
+  width: 343px; max-width: min(374px, 86vw);
   pointer-events: none;
   animation: tcbob 4.5s ease-in-out infinite;
 }
@@ -426,7 +443,7 @@ body.hero-p3 #hero .floatwrap { animation: none !important; transform: none !imp
   transform-origin: var(--tc-ox, 24px) var(--tc-oy, 0%);
   transition: opacity 0.2s ease, transform 0.44s cubic-bezier(.2,1.05,.3,1), height 0.42s cubic-bezier(.3,.82,.32,1);
 }
-.tcard.show .tc-pop { opacity: 1; transform: none; }
+.tcard.show .tc-pop { opacity: 1; transform: none; pointer-events: auto; }
 /* the demo pointer that flies in to "click" the sentence open — viewport-fixed so
    it tracks the live sentence rect (reuses .hw-cursor visuals; hidden ≤1000px) */
 .hw-cursor.tr-cursor { position: fixed; z-index: 62; }
@@ -497,7 +514,10 @@ body.hero-p3 #hero .floatwrap { animation: none !important; transform: none !imp
   box-shadow: 0 12px 26px -14px rgba(26,23,20,.42), 0 2px 8px -4px rgba(26,23,20,.16);
   cursor: pointer;
   opacity: 0; transform: translateY(6px);
-  transition: opacity .3s ease, transform .4s cubic-bezier(.2,1.05,.3,1), box-shadow .2s ease;
+  /* NOTE: no `transform` in the transition — the bob + press keyframes own
+     transform; a .4s transform transition would fight the keyframes at every
+     bob→press handoff and make the auto-press jitter instead of depress cleanly */
+  transition: opacity .3s ease, box-shadow .2s ease;
   pointer-events: none;
 }
 .tc-next.show { opacity: 1; pointer-events: auto; animation: tcNextBob 2.4s ease-in-out infinite; }
@@ -505,10 +525,25 @@ body.hero-p3 #hero .floatwrap { animation: none !important; transform: none !imp
 .tc-next .arr { color: var(--amber, #ef8e1c); font-weight: 700; transition: transform .25s ease; }
 .tc-next:hover .arr { transform: translateX(3px); }
 @keyframes tcNextBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+/* tactile press: a quick depress + amber ripple — fires on click and (under PLAY)
+   as the visible cause of the auto-advance. Overrides the bob while it plays. */
+.tc-next.press { animation: tcNextPress .28s ease; }
+/* translateY(0) is pinned at every stop so the handoff back to the bob (which
+   also rests at translateY(0)) is seamless — only `scale` moves during the press */
+@keyframes tcNextPress {
+  0%   { transform: translateY(0) scale(1);   box-shadow: 0 12px 26px -14px rgba(26,23,20,.42), 0 0 0 0 rgba(239,142,28,.5); }
+  32%  { transform: translateY(0) scale(.93); box-shadow: 0 6px 14px -10px rgba(26,23,20,.4), 0 0 0 4px rgba(239,142,28,.32); }
+  100% { transform: translateY(0) scale(1);   box-shadow: 0 12px 26px -14px rgba(26,23,20,.42), 0 0 0 12px rgba(239,142,28,0); }
+}
+/* under PLAY the pill is auto-pressed (not waiting for a click), so the idle bob
+   serves no purpose — and its mid-cycle handoff into/out of the press read as a
+   strange one-off jitter. Hold it still: no bob, just the clean depress. */
+.tc-next.show.still { animation: none; transform: translateY(0); }
+.tc-next.show.still.press { animation: tcNextPress .28s ease; }
 @media (prefers-reduced-motion: reduce) { .tc-next.show { animation: none; } }
 /* the chat is tall on phones — its "next" cue would land in the bottom cards +
    scrubber. Mobile already walks on via the scrubber, so hide it there. */
-@media (max-width: 920px) { #hero-disc-next, #hero-home-next, #hero-prac-next { display: none !important; } }
+@media (max-width: 920px) { #hero-disc-next, #hero-home-next, #hero-prac-next, #hero-simp-next, #hero-tc-next { display: none !important; } }
 
 /* ===== HERO PHASE 3.5 — Immersion (read the whole article in your language) =====
    Builds on the Translate browser. The article is a 3D flip card: the front face
@@ -525,14 +560,14 @@ body.hero-imm #hero .imm-page { opacity: 1; pointer-events: auto; }
 /* immersion owns the article surface — the translate layer steps aside */
 body.hero-imm #hero .tr-page { opacity: 0 !important; pointer-events: none; }
 
-#hero .imm-surface {
-  position: relative; transform-style: preserve-3d; min-height: 196px;
-  transition: transform 1s cubic-bezier(.52,0,.18,1); will-change: transform;
-}
-body.imm-flipped #hero .imm-surface { transform: rotateY(180deg); }
-#hero .imm-face { top: 0; left: 0; right: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
-#hero .imm-front { position: relative; }                 /* in flow → defines the card height */
-#hero .imm-back  { position: absolute; transform: rotateY(180deg); }
+#hero .imm-surface { position: relative; min-height: 196px; }
+#hero .imm-face { top: 0; left: 0; right: 0; }
+#hero .imm-front { position: relative; }
+#hero .imm-back  { position: absolute; opacity: 0; pointer-events: none; }
+/* per-word morph — each word transitions as a unit */
+#hero .imm-word { display: inline-block; transition: opacity 0.22s ease, transform 0.27s cubic-bezier(.2,.8,.2,1); }
+#hero .imm-face.imm-out .imm-word { opacity: 0; transform: translateY(-7px); }
+#hero .imm-face.imm-in  .imm-word { opacity: 0; transform: translateY(7px); transition: none; }
 #hero .imm-title { font-family: 'General Sans', sans-serif; font-weight: 700; font-size: 21px; margin: 0 0 14px; text-align: center; }
 #hero .imm-p  { margin: 0; }
 #hero .imm-p.imm-p2 { margin: 18px 0 0; }
@@ -540,6 +575,7 @@ body.imm-flipped #hero .imm-surface { transform: rotateY(180deg); }
 #hero .imm-w { border-radius: 4px; padding: 0 3px; transition: background .25s, color .25s; }
 #hero .imm-front .imm-w { background: #e3edfd; color: #2f6fd6; }
 #hero .imm-back  .imm-w { background: #efe4fb; color: #7b46cf; }
+#hero .tr-page   .imm-w { background: #e3edfd; color: #2f6fd6; }
 
 /* ↻ flip control — reuses the in-browser pill; bottom-right like Discuss */
 #hero-imm-fab {
@@ -567,9 +603,9 @@ body.hero-imm #hero .hero-copy-p3  { opacity: 0; transform: translateX(-120px); 
 #hero .hero-copy-imm .p2-eyebrow {
   font-family: var(--mono, 'JetBrains Mono', monospace);
   font-size: 12px; letter-spacing: .22em; text-transform: uppercase;
-  color: var(--amber-deep, #c96b00); margin-bottom: 22px;
+  color: var(--amber-deep, #c96b00); margin-bottom: 32px;
 }
-#hero .hero-copy-imm h2 { font-weight: 700; letter-spacing: -.035em; font-size: clamp(32px, 3.5vw, 50px); line-height: 1.04; margin: 0 0 26px; }
+#hero .hero-copy-imm h2 { font-weight: 700; letter-spacing: -.035em; font-size: clamp(32px, 3.5vw, 50px); line-height: 1.04; margin: 0 0 34px; }
 #hero .hero-copy-imm .p2-sub { font-size: clamp(15px, 1.5vw, 18px); color: var(--ink-70, rgba(26,23,20,.7)); line-height: 1.58; max-width: 36ch; margin: 0; }
 
 @media (max-width: 920px) {
@@ -579,7 +615,36 @@ body.hero-imm #hero .hero-copy-p3  { opacity: 0; transform: translateX(-120px); 
   #hero .hero-copy-imm .p2-eyebrow { font-size: 10px; letter-spacing: .18em; margin-bottom: 8px; }
   #hero .hero-copy-imm .p2-sub { display: -webkit-box !important; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; margin: 9px auto 0 !important; max-width: 32ch; font-size: 13px !important; line-height: 1.45; }
   #hero-imm-next { display: none !important; }
+  body.hero-imm #hero .browser .page { min-height: 380px !important; }
+  /* the flip-card article is authored at desktop sizes (26/32 padding, 21px title)
+     and the gloss-language text (de/uk) runs ~20% longer than English. The immerse
+     page is capped at 330px so it stays clear of the vocab strip below, and .page
+     is overflow:hidden — so shrink the article to fit that height for every language
+     (verified against Ukrainian, the longest, at 360px) rather than clipping it. */
+  #hero .imm-page { padding: 13px 16px !important; }
+  #hero .imm-title { font-size: 15px !important; margin: 0 0 8px !important; }
+  #hero .imm-p { font-size: 12.5px !important; line-height: 1.48 !important; }
+  #hero .imm-p.imm-p2 { margin: 9px 0 0 !important; }
+  body.hero-imm #hero .imm-surface { min-height: auto !important; }
 }
+
+/* IMMERSE layout swap (desktop only): browser moves left, copy text moves right.
+   Practice (p5) and Discuss (p4) inherit the SAME layout so the browser window
+   stays glued in place across Immerse → Practice → Discuss — only the in-window
+   content and the right-hand copy swap. No column jump between these screens. */
+@media (min-width: 921px) {
+  body.hero-imm #hero .hero-inner,
+  body.hero-p4 #hero .hero-inner,
+  body.hero-p5 #hero .hero-inner { grid-template-columns: minmax(0, 1fr) minmax(0, 0.82fr); }
+  body.hero-imm.hero-p3 #hero .hero-stage,
+  body.hero-p4 #hero .hero-stage,
+  body.hero-p5 #hero .hero-stage { grid-column: 1; transform: none; }
+  body.hero-imm #hero .hero-copy-imm,
+  body.hero-p4 #hero .hero-copy-p4,
+  body.hero-p5 #hero .hero-copy-p5 { grid-column: 2; }
+  body.hero-imm #hero .browser .page { min-height: 400px; }
+}
+body.hero-imm #hero .imm-surface { min-height: 240px; }
 
 /* ===== HERO PHASE 4 — Discuss (the page talks back) =====
    The floating tilted chat is retired: a side panel docks INSIDE the browser
@@ -591,13 +656,14 @@ body.hero-p4 #hero .hero-copy-p3 { opacity: 0; transform: translateX(-120px); po
 #hero .hero-copy-p4 {
   grid-column: 1; grid-row: 1;
   align-self: center; min-width: 0;
-  opacity: 0; transform: translateY(44px); pointer-events: none;
-  transition: opacity 0.6s ease 0.28s, transform 0.72s cubic-bezier(.4,0,.2,1) 0.18s;
+  opacity: 0; transform: translateX(-32px); pointer-events: none;
+  transition: transform 0.55s cubic-bezier(.4,0,.2,1) 0.15s;
 }
 body.hero-p4 #hero .hero-copy-p4 { opacity: 1; transform: none; pointer-events: auto; }
 
 /* the translate sentences go quiet — P4 reads the article, doesn't translate it */
 body.hero-p4 #hero .tr-page .sel { pointer-events: none; }
+#hero.panel-open .tr-page .sel { pointer-events: none; }
 
 /* this headline runs one word longer than its siblings — a notch smaller
    keeps "The page talks back." clear of the window's left edge */
@@ -619,13 +685,13 @@ body.hero-p4 #hero .tr-page .sel { pointer-events: none; }
 /* the chat popup sits flush under the toolbar at the right of the browser frame.
    Height is auto so the dock grows to fit its content without any internal scroll. */
 #hero-dock {
-  position: absolute; top: 56px; right: 12px; width: 308px; z-index: 5;
+  position: absolute; top: 56px; left: 285px; width: 308px; z-index: 7;
   max-height: calc(100% - 66px);
   background: #fff; border: 1px solid var(--line); border-radius: 14px;
   box-shadow: 0 26px 48px -20px rgba(26,23,20,.30), 0 8px 18px -10px rgba(26,23,20,.14);
   display: flex; flex-direction: column; overflow: hidden;
-  opacity: 0; transform: translateY(-8px) scale(.97);
-  transform-origin: top right;
+  opacity: 0; transform: translateX(-18px) scale(.97);
+  transform-origin: top left;            /* floats near screen-centre, slightly left; the browser eases left behind it */
   transition: opacity 0.25s ease, transform 0.38s cubic-bezier(.2,.85,.25,1);
   pointer-events: none;
 }
@@ -676,13 +742,17 @@ body.hero-p4 #hero .tr-page .sel { pointer-events: none; }
 #hero .tr-page .sel.cite { animation: citepulse 1.25s ease 2; border-radius: 4px; }
 @keyframes citepulse { 0%, 100% { background: transparent; } 38% { background: rgba(239,142,28,.2); } }
 
-/* progress ring 3D pop — the ring jumps toward the viewer when a word is used */
+/* progress ring 3D pop — the ring jumps toward the viewer when a word is used.
+   Targets the ring (.wd-prog), NOT the whole card: a card-level transform here
+   with fill 'both' used to stick at transform:none after the pop and kill the
+   resting tilt + hover lift on every card that had ever been used. The ring has
+   no rest/hover transform of its own, so it can hold the pop freely. */
 @keyframes ring-pop {
   0%   { transform: none; }
   38%  { transform: perspective(72px) translateZ(5px) scale(1.16); }
   100% { transform: none; }
 }
-.wd-card.ring-pop { animation: ring-pop 0.52s cubic-bezier(.2,.85,.3,1) both; }
+.wd-card.ring-pop .wd-prog { animation: ring-pop 0.52s cubic-bezier(.2,.85,.3,1) both; }
 
 /* once the page scrolls past the hero to the CTA, hero chrome bows out */
 .m-dotnav { transition: opacity 0.3s ease; }
@@ -764,6 +834,14 @@ body.hero-simp #hero .hero-copy-simp .sc-verb.v-end { animation:verb-in-end  0.4
   transition: opacity 0.6s ease 0.28s, transform 0.72s cubic-bezier(.4,0,.2,1) 0.18s;
 }
 body.hero-p5 #hero .hero-copy-p5 { opacity: 1; transform: none; pointer-events: auto; }
+/* the MY VOCAB rail (#worddeck) is fixed to the viewport's right edge (right:20px,
+   162px wide). On laptop-width viewports its footprint overhangs the right copy
+   column, so the wide "Instant exercises." heading runs under it. Reserve the deck's
+   footprint on the right of the P5 copy — it shrinks to 0 once the viewport is wide
+   enough that the deck clears the centred 1200px wrap (~1500px+). */
+@media (min-width: 921px) {
+  #hero .hero-copy-p5 { padding-right: clamp(0px, calc(150px - (100vw - 1200px) / 2), 150px); }
+}
 /* hero-p3 stays on the body in P5 (additive classes), so the P3 copy is still
    "on" — slide it out, the way P4 does, or it double-exposes under the P5 copy */
 body.hero-p5 #hero .hero-copy-p3 { opacity: 0; transform: translateX(-120px); pointer-events: none; }
@@ -773,10 +851,16 @@ body.hero-p5 #hero .hero-copy-p3 { opacity: 0; transform: translateX(-120px); po
   position: absolute; top: 0; left: 0; right: 0;
   padding: 26px 32px;
   opacity: 0; pointer-events: none;
-  transition: opacity 0.3s ease, padding-right 0.45s cubic-bezier(.34,.1,.64,1);
+  /* leaving Practice, the exercises lift up + fade — they "fly off" rather than
+     just cross-fading into Discuss. The slide only animates on EXIT: the
+     hero-p5 rule below omits transform from its transition, so entry snaps the
+     offset away invisibly (while still at opacity 0) and only fades in. */
+  transform: translateY(-26px);
+  transition: opacity 0.3s ease, transform 0.42s cubic-bezier(.5,0,.85,.3), padding-right 0.45s cubic-bezier(.34,.1,.64,1);
 }
 body.hero-p5 #hero .ex-page {
   opacity: 1; pointer-events: auto;
+  transform: none;
   transition: opacity 0.34s ease;
 }
 /* hero-p3 stays active in P5 (browser stays wide), but tr-page must hide */
@@ -795,6 +879,8 @@ body.hero-p5 #hero .hx-hud { display: block; }
   min-width: 98px; border-radius: 9px;
 }
 #hero .ex-page .inqgap .menu button { font-size: 12px; padding: 5px 10px; border-radius: 6px; }
+/* first gap (genre) is near the top — flip its menu to open downward */
+#hero .ex-page .gap-first .menu { top: calc(100% + 7px); bottom: auto; }
 /* Oops! bubble base — mobile media query has these too; duplicated here so desktop gets them */
 .ex-bubble {
   position: absolute; bottom: calc(100% + 8px); left: 50%;
@@ -819,13 +905,32 @@ body.hero-p5 #hero .hx-hud { display: block; }
 /* hero exercise: menu opens upward, so flip bubble below the gap */
 #hero .ex-page .inqgap .ex-bubble { bottom: auto; top: calc(100% + 8px); }
 #hero .ex-page .inqgap .ex-bubble::after { bottom: auto; top: -6px; border-right: none; border-bottom: none; border-left: 2px solid #1a1714; border-top: 2px solid #1a1714; }
-/* Article-choice pills (Practice screen) */
-.art-gap { display: inline-flex; align-items: baseline; gap: 5px; vertical-align: -1px; margin: 0 2px; position: relative; }
-.art-pill { display: inline-block; padding: 2px 9px; border-radius: 99px; border: 1.5px solid rgba(26,23,20,.2); background: transparent; font-size: 13px; font-family: inherit; font-weight: 500; color: var(--ink); cursor: pointer; transition: background .14s, color .14s, border-color .14s; line-height: 1.5; }
+/* Article-choice exercise (Practice screen) — until "Turn into exercises" the slot
+   reads as plain prose ("a"), like the word gaps. On activation the word collapses
+   to a [ ] gap and the choice pills fly in, matching how the word cards form. */
+.art-gap { position: relative; }
+.art-choices { display: none; }
+.art-gap.art-live .art-rest { display: none; }
+.art-gap.art-live .art-choices { display: inline-flex; align-items: baseline; gap: 1px; vertical-align: -1px; margin: 0 1px; }
+/* the [ ] frame that marks the slot as a fill-in */
+.art-br { color: rgba(26,23,20,.34); font-weight: 600; }
+.art-gap.art-live .art-br { animation: artBr .34s ease both; }
+@keyframes artBr { from { opacity: 0; } to { opacity: 1; } }
+.art-pill { display: inline-block; padding: 2px 6px; border-radius: 99px; border: 1.5px solid transparent; background: transparent; font-size: 13px; font-family: inherit; font-weight: 500; color: var(--ink); cursor: pointer; transition: background .14s, color .14s, border-color .14s; line-height: 1.5; }
+/* each pill flies up into the gap, staggered */
+.art-gap.art-live .art-pill { animation: artPop .42s cubic-bezier(.2,1.5,.4,1) both; }
+.art-gap.art-live .art-pill:nth-of-type(1) { animation-delay: .06s; }
+.art-gap.art-live .art-pill:nth-of-type(2) { animation-delay: .15s; }
+.art-gap.art-live .art-pill:nth-of-type(3) { animation-delay: .24s; }
+@keyframes artPop { from { opacity: 0; transform: translateY(7px) scale(.6); } to { opacity: 1; transform: none; } }
 .art-pill:hover, .art-pill.hover { background: rgba(26,23,20,.09); border-color: rgba(26,23,20,.3); }
 .art-pill.wrong { border-color: #c43c3c; color: #c43c3c; }
 .art-pill.chosen { background: var(--green, #5a9e5f); color: #fff; border-color: var(--green, #5a9e5f); pointer-events: none; }
 .art-gap.done .art-pill:not(.chosen) { opacity: .3; pointer-events: none; }
+.art-sep { color: rgba(26,23,20,.22); font-size: 10px; pointer-events: none; align-self: center; margin: 0 -1px; }
+@media (prefers-reduced-motion: reduce) {
+  .art-gap.art-live .art-pill, .art-gap.art-live .art-br { animation: none; opacity: 1; transform: none; }
+}
 
 /* ===== CTA CHARGE — the six features wire into the install button =====
    Cards + wires live in .cta-dock, built by lantern-cta-charge.js.
@@ -844,11 +949,19 @@ body.hero-p5 #hero .hx-hud { display: block; }
 }
 #ev-close .dk-card { animation: dkFloat var(--fd, 8s) ease-in-out var(--fdelay, 0s) infinite; will-change: transform; }
 @media (prefers-reduced-motion: reduce) { #ev-close .dk-card { animation: none; } }
+/* at rest the six cards settle back so the headline + orange CTA own the focus —
+   council 3/7: they should frame the climax, not compete with it (desaturated,
+   slightly recessed). The wires/beads + button stay at full strength. */
+#ev-close .dk-card { opacity: .82; filter: saturate(.85); }
 /* the heat ramp: JS lerps background-color ink → amber in 10 even steps
    (one per bead arrival); the linear transition blurs the steps into one
    continuous warming — no binary flip at the end */
 #ev-close .d1-install { transition: transform .2s cubic-bezier(.3,.9,.3,1), box-shadow .2s ease, background-color .65s linear; }
 .d1-install.blazing { box-shadow: 0 22px 48px -18px rgba(239,142,28,.7), 0 3px 9px -4px rgba(26,23,20,.3); }
+/* once the pill is fully amber the amber-bright arrow would muddy into the
+   background — lift it to white so it stays as legible as the cream label
+   (eases in over the heat ramp via the .d1-arrow color transition) */
+.d1-install.blazing .d1-arrow { color: #fff; }
 /* touches of warmth: each bead that sinks under the rim continues INSIDE the
    pill as a glowing trace — it keeps the bead's trajectory and fades out,
    clipped to the pill shape */
@@ -892,6 +1005,21 @@ body.ph-cta #finale   { opacity: 0; pointer-events: none; }
    !important: lantern-v3.js's scroll loop writes #hero opacity inline every frame,
    so a plain rule would lose to it and the hero would never hide. */
 body.ph-ev #hero, body.ph-cta #hero { opacity: 0 !important; pointer-events: none; transition: opacity .55s ease; }
+/* Practice → Everywhere: before the shatter, the window glides DEAD-CENTRE and the
+   Practice copy clears out — so the six cards then burst symmetrically from centre.
+   JS (toEverywhere) writes the centring translate on .hero-stage inline; these rules
+   square the browser, fade the left copy, and freeze the bob so the measured centre
+   stays put. Placed AFTER the hero-pN transforms so it wins the !important tie. */
+body.ev-centering #hero .floatwrap { animation-play-state: paused; }
+body.ev-centering #hero .browser {
+  transform: perspective(1300px) rotateY(0deg) rotate(0deg) !important;
+  transition: transform 0.55s cubic-bezier(.4,0,.2,1) !important;
+}
+body.ev-centering #hero .hero-copy-p5 {
+  opacity: 0 !important;
+  transform: translateX(-34px) !important;
+  transition: opacity 0.38s ease, transform 0.5s cubic-bezier(.4,0,.2,1) !important;
+}
 /* nav dots fade on the CTA phase (replaces the old at-close hook) */
 body.ph-cta .m-dotnav { opacity: 0; pointer-events: none; }
 /* MY VOCAB deck belongs to the hero — on the CTA it just overlaps the dock cards
@@ -962,13 +1090,14 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
 #hero .tr-page .sel:hover {
   cursor: pointer;
   background: transparent;        /* kill the blue .page .sel:hover wash */
-  text-decoration-color: rgba(239,142,28,.85);
+  text-decoration-color: rgba(59,111,212,.85);   /* blue underline, no fill */
   text-shadow: .35px 0 currentColor, -.35px 0 currentColor;
 }
-/* active sentence (being translated): same cue + a faint wash to mark it */
+/* active sentence (being translated): a blue underline marks it — no background
+   wash (the underline alone is the cue; the amber wash read as a yellow box) */
 #hero .tr-page .sel.on {
-  background: rgba(239,142,28,.09); border-radius: 5px;
-  text-decoration-color: var(--amber, #ef8e1c);
+  background: transparent;
+  text-decoration-color: var(--blue, #3b6fd4);
   text-shadow: .35px 0 currentColor, -.35px 0 currentColor;
 }
 #hero .tr-page .sel.m-lift {
@@ -1118,13 +1247,16 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
   #hero .browser,
   body.hero-p2 #hero .browser,
   body.hero-p3 #hero .browser,
-  body.hero-p4 #hero .browser {
+  body.hero-p4 #hero .browser,
+  body.hero-p4.disc-open #hero .browser {    /* the desktop Discuss browser-right shift is desktop-only */
     position: relative !important;
-    width: 90% !important; max-width: none !important; min-height: 0 !important;  /* 10% narrower, centred */
+    width: 85vw !important; max-width: none !important; min-height: 0 !important;  /* 85% of the screen, centred (vw, not %-of-padded-column) */
     margin-left: auto !important; margin-right: auto !important;
     transform: none !important; clip-path: none !important;
     box-shadow: 0 10px 28px -8px rgba(26,23,20,.18) !important;
   }
+  /* desktop staggers the p4 copy behind disc-open; on mobile just show it on enter */
+  body.hero-p4 #hero .hero-copy-p4 { opacity: 1 !important; transform: none !important; }
   /* translate beat: the desktop tilt/shrink (#hero.tr-active) must NOT move the
      browser on mobile — the frame holds still, only the sentence lifts inside it */
   body.hero-p3 #hero.tr-active .browser {
@@ -1136,7 +1268,7 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
      P1 sized to the FULL 4-line article (no clip), tightened inner padding so the
      paragraph wraps to fewer lines and the window stays compact — cards below ride
      higher and clear the CTA + scrubber (P2 grows it to 330 for the simplify para) */
-  #hero .browser .page { font-size: 14px !important; line-height: 1.6 !important; padding: 16px !important; min-height: 196px !important; }
+  #hero .browser .page { font-size: 14px !important; line-height: 1.6 !important; padding: 16px !important; min-height: 330px !important; }
   #hero .browser .page-en,
   #hero .browser .tr-page,
   #hero .browser .ex-page { padding: 18px 20px !important; }
@@ -1153,9 +1285,7 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
   #hero .browser .page { transition: min-height 1s cubic-bezier(.4,0,.2,1) 0.12s; }
   body.hero-p2 #hero .browser .page { min-height: 330px !important; }
 
-  /* words pre-highlighted on mobile (no interactive demo; show saved state by default).
-     Match desktop: every saved word uses the one "saved" blue (.hero .hl.saved),
-     not a per-class colour — the per-word colour lives on the cards, like desktop. */
+  /* words pre-highlighted on mobile (no interactive demo; show saved state by default) */
   #hero .browser .hl { border-radius: 4px; padding: 0 2px; background: #e3edfd; color: #2f6fd6; }
 
   /* the fake article should read like a real page — left-aligned, not centred
@@ -1191,14 +1321,11 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
   body.ph-ev     #hero .hcta-m,
   body.ph-cta    #hero .hcta-m { opacity: 0; pointer-events: none; }
 
-  /* translate panel: fixed bottom sheet */
-  #hero .tpanel {
-    position: fixed !important;
-    left: 12px !important; right: 12px !important; width: auto !important;
-    bottom: calc(env(safe-area-inset-bottom, 0px) + 120px) !important; top: auto !important;
-    transform: none !important;
-  }
-  #hero .tpanel.show { transform: none !important; }
+  /* Translate card (.tcard) is JS-anchored under the tapped sentence by placeTCard,
+     which on mobile reserves the bottom band so the card never overlaps the My-vocab
+     strip. (The old `.tpanel` bottom-sheet rule that lived here was DEAD — the live
+     element is class `tcard`, not `tpanel` — and a fixed bottom sheet would now
+     collide with the vocab strip at bottom:88px, so it is removed deliberately.) */
 
   /* discuss phase: chat floats as a fixed card in front of the whole screen —
      same focal treatment as desktop but adapted for portrait. The browser frame
@@ -1242,11 +1369,12 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
   body.hero-p2 #worddeck.show { display: block !important; }
   .wd-ph { display: none; }
   .wd-label { font-size: 9px; margin-bottom: 5px; }
-  .wd-card { padding: 7px 9px; border-radius: 10px; margin-top: -12px; }
+  .wd-card { padding: 5px 9px; border-radius: 10px; margin-top: -17px; }
   /* the small cards carry the gloss (the translation), not the phonetic/level —
      that's the payoff the visitor reads; the level badge is dropped, the row with it */
   .wd-card .wd-tr { display: block !important; }
   .wd-card .wd-row { display: none !important; }
+  .wd-card .wd-side .cefr-b { display: none !important; }
 
   /* word popup: compact on mobile */
   .popup.hw-popup { width: min(256px, calc(100vw - 32px)) !important; padding: 12px 14px !important; }
@@ -1257,7 +1385,13 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
   .popup.hw-popup .save { margin-top: 9px !important; }
   .popup.hw-popup .savebtn { padding: 9px 14px !important; font-size: 13px !important; }
 
-  /* P2–P5: worddeck horizontal strip just above the scrubber */
+  /* P2-P5: worddeck = "A+" horizontal-scroll vocab strip just above the scrubber.
+     Fixed-width readable cards (never flex-squished); overflow scrolls with a soft
+     right edge-fade as the "more ->" cue; gesture-isolated (touch-action:pan-x +
+     overscroll-behavior-x:contain) so a sideways pan on the strip does NOT fight
+     the vertical phase-crank. Every saved word is kept and reachable by scroll
+     (trim() is gated off on mobile in lantern-v3.js, and the newest card auto-
+     scrolls into view on save). Static scatter rhymes with the desktop rail. */
   body.hero-p2 #worddeck {
     position: fixed !important;
     bottom: 88px !important;
@@ -1268,12 +1402,30 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
     transform: none !important;
   }
   body.hero-p2 #worddeck.show { display: block !important; }
-  body.hero-p2 #wd-stack { display: flex !important; flex-direction: row !important; gap: 5px !important; }
-  body.hero-p2 .wd-card { flex: 1 !important; min-width: 0 !important; margin: 0 !important; }
-  body.hero-p2 .wd-label { display: none !important; }
-
-  /* strip cards sit flat — no float animation, no scatter offset */
-  body.hero-p2 #worddeck .wd-card.in { transform: none !important; animation: none !important; }
+  body.hero-p2 .wd-label {
+    display: block !important; margin: 0 0 6px 2px !important;
+    font-family: var(--mono); font-size: 9px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--amber-deep); opacity: .9;
+  }
+  body.hero-p2 #wd-stack {
+    display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important;
+    justify-content: flex-start !important; gap: 7px !important;
+    overflow-x: auto !important; overflow-y: visible !important;
+    scroll-behavior: smooth; scrollbar-width: none;
+    touch-action: pan-x; overscroll-behavior-x: contain;
+    -webkit-mask: linear-gradient(90deg, #000 88%, transparent);
+            mask: linear-gradient(90deg, #000 88%, transparent);
+    padding: 3px 14px 4px 0;
+  }
+  body.hero-p2 #wd-stack::-webkit-scrollbar { display: none; }
+  body.hero-p2 .wd-card {
+    flex: 0 0 auto !important; width: 86px !important; min-width: 86px !important; margin: 0 !important;
+  }
+  /* keep the desktop rail's faint scatter so the strip reads as a collectible deck
+     (the deck rests still by design -- the bob lives on the hero word-cards). */
+  body.hero-p2 #worddeck .wd-card.in {
+    transform: translateX(var(--cdx, 0px)) rotate(var(--crot, 0deg)) !important; animation: none !important;
+  }
 
   /* left nav dots: hidden */
   .m-dotnav { display: none !important; }
@@ -1642,6 +1794,10 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
   #ev-close .m-cta-foot .m-hero-hint {
     margin: 0; font-size: 12px; color: var(--ink-45, rgba(26,23,20,.5));
   }
+  #ev-close .m-cta-foot .m-priv-link {
+    margin: 2px 0 0; font-size: 12px; color: var(--ink-45, rgba(26,23,20,.5));
+    text-decoration: underline; text-underline-offset: 2px;
+  }
   /* cards: relative so ::before/::after can anchor to them; float on their own ellipse */
   @keyframes dkfloatM {
     0%   { transform: translateY(0px) rotate(.3deg); }
@@ -1710,7 +1866,7 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
 <!-- NAV -->
 <div class="topbar" id="topbar">
   <div class="brand"><span class="lmark"></span><span class="wm">Lant<span class="en">e</span>rn</span></div>
-  <button class="pill"><span class="g-ico"></span>Add to Chrome</button>
+  <button class="pill"><svg class="c-ico" viewBox="0 0 48 48" width="15" height="15" aria-hidden="true"><circle cx="24" cy="24" r="12" fill="#fff"/><path d="M24 12h20.78A23.993 23.993 0 0 0 3.217 12.003L13.608 30l.009-.002A11.985 11.985 0 0 1 24 12z" fill="#EA4335"/><circle cx="24" cy="24" r="9.5" fill="#1a73e8"/><path d="M34.39 30.003 24.001 48A23.994 23.994 0 0 0 44.78 12.003H23.999l-.003.009A11.985 11.985 0 0 1 34.39 30.003z" fill="#FBBC04"/><path d="M13.609 30.003 3.218 12.006A23.994 23.994 0 0 0 24.003 48L34.393 30.003l-.007-.007a11.985 11.985 0 0 1-20.778.007z" fill="#34A853"/></svg>Add to Chrome</button>
 </div>
 
 <!-- NAV DOTS -->
@@ -1760,7 +1916,7 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
       <p class="hsub">Save words as you read. Lantern weaves them back into the next thing you read — until they stick.</p>
       <div class="hcta">
         <button class="btn-install">
-          <span class="g-ico"></span>
+          <svg width="22" height="22" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="24" cy="24" r="12" fill="#fff"/><path d="M24 12h20.78A23.993 23.993 0 0 0 3.217 12.003L13.608 30l.009-.002A11.985 11.985 0 0 1 24 12z" fill="#EA4335"/><circle cx="24" cy="24" r="9.5" fill="#1a73e8"/><path d="M34.39 30.003 24.001 48A23.994 23.994 0 0 0 44.78 12.003H23.999l-.003.009A11.985 11.985 0 0 1 34.39 30.003z" fill="#FBBC04"/><path d="M13.609 30.003 3.218 12.006A23.994 23.994 0 0 0 24.003 48L34.393 30.003l-.007-.007a11.985 11.985 0 0 1-20.778.007z" fill="#34A853"/></svg>
           <span class="il"><span class="t1">Add to Chrome</span><span class="t2">Free to start · no account needed</span></span>
         </button>
       </div>
@@ -1768,7 +1924,7 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
 
     <!-- COLUMN 2 — browser (stays through both phases) -->
     <div class="hero-stage">
-      <div class="float" data-speed="-0.08" style="top:8%;left:-2%;z-index:1">
+      <div class="float" data-speed="-0.08" style="top:calc(8% + 10px);left:-2%;z-index:1">
         <div class="floatwrap" style="--dur:8s;--del:0s">
           <div class="browser" style="box-shadow:0 72px 124px -46px rgba(58,36,2,.22),0 18px 38px -20px rgba(26,23,20,.16)">
             <div class="bbar"><div class="bdots"><i></i><i></i><i></i></div><div class="url">rollingstone.com</div></div>
@@ -1776,12 +1932,12 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
               <!-- English content — Phase 1 & 2 -->
               <div class="page-en" style="padding:26px 32px">
                 <p style="font-family:'General Sans',sans-serif;font-weight:700;font-size:21px;margin:0 0 14px;text-align:center">The Eras Tour</p>
-                <p style="margin:0">Few musicians branch out across so many <span class="hl" data-w="genre" data-ph="/ˈʒɒn.rə/" data-cls="blue" data-cefr="B2" data-tr="жанр" data-tr-uk="жанр" data-tr-es="género" data-tr-fr="genre" data-tr-de="Genre" data-tr-pt="gênero" data-tr-en="style">genre</span> walls and keep every audience. Taylor Swift moved from country to pop to folk without losing her <span class="hl" data-w="devoted" data-ph="/dɪˈvəʊ.tɪd/" data-cls="green" data-cefr="B2" data-tr="відданий" data-tr-uk="відданий" data-tr-es="devoto" data-tr-fr="dévoué" data-tr-de="treu" data-tr-pt="devotado" data-tr-en="loyal">devoted</span> fans — a cultural <span class="hl" data-w="phenomenon" data-ph="/fɪˈnɒm.ɪ.nən/" data-cls="red" data-cefr="B2" data-tr="явище" data-tr-uk="явище" data-tr-es="fenómeno" data-tr-fr="phénomène" data-tr-de="Phänomen" data-tr-pt="fenômeno" data-tr-en="marvel">phenomenon</span> who left a <span class="hl" data-w="legacy" data-ph="/ˈleɡ.ə.si/" data-cls="violet" data-cefr="C1" data-tr="спадщина" data-tr-uk="спадщина" data-tr-es="legado" data-tr-fr="héritage" data-tr-de="Erbe" data-tr-pt="legado" data-tr-en="heritage">legacy</span> no one had predicted.</p>
+                <p style="margin:0">Few musicians <span class="hl" data-w="branch out" data-ph="/brɑːntʃ aʊt/" data-cls="amber" data-cefr="B2" data-tr="розширюватися" data-tr-uk="розширюватися" data-tr-es="diversificarse" data-tr-fr="se diversifier" data-tr-de="sich verzweigen" data-tr-pt="se ramificar" data-tr-en="diversify" data-nondemo="1">branch out</span> across so many <span class="hl" data-w="genre" data-ph="/ˈʒɒn.rə/" data-cls="green" data-cefr="A2" data-tr="жанр" data-tr-uk="жанр" data-tr-es="género" data-tr-fr="genre" data-tr-de="Genre" data-tr-pt="gênero" data-tr-en="style">genre</span> walls and keep every audience. Taylor Swift moved from country to pop to folk without losing her <span class="hl" data-w="devoted" data-ph="/dɪˈvəʊ.tɪd/" data-cls="red" data-cefr="B2" data-tr="відданий" data-tr-uk="відданий" data-tr-es="devoto" data-tr-fr="dévoué" data-tr-de="treu" data-tr-pt="devotado" data-tr-en="loyal">devoted</span> fans — a cultural <span class="hl" data-w="phenomenon" data-ph="/fɪˈnɒm.ɪ.nən/" data-cls="violet" data-cefr="C1" data-tr="явище" data-tr-uk="явище" data-tr-es="fenómeno" data-tr-fr="phénomène" data-tr-de="Phänomen" data-tr-pt="fenômeno" data-tr-en="marvel">phenomenon</span> who left a <span class="hl" data-w="legacy" data-ph="/ˈleɡ.ə.si/" data-cls="red" data-cefr="B2" data-tr="спадщина" data-tr-uk="спадщина" data-tr-es="legado" data-tr-fr="héritage" data-tr-de="Erbe" data-tr-pt="legado" data-tr-en="heritage">legacy</span> no one had predicted.</p>
                 <!-- revealed in phase 2 — the dense paragraph that simplifies -->
                 <div class="hero-extra">
                   <p class="sv-para simp" id="hero-simp-para" style="margin:18px 0 0">
                     <button class="simp-dot" id="hero-simp-dot" aria-label="Simplify this paragraph"><span class="sd-core"></span></button>
-                    <span class="simp-body" id="hero-simp-body">Her commercial dominance spans every genre, from country to pop to indie folk. It has left critics asking whether today's music industry can accommodate a phenomenon of her scale.</span>
+                    <span class="simp-body" id="hero-simp-body">Her unprecedented commercial <span class="hl" data-w="trajectory" data-ph="/trəˈdʒek.tər.i/" data-cls="red" data-cefr="C1" data-tr="траєкторія" data-tr-uk="траєкторія" data-tr-es="trayectoria" data-tr-fr="trajectoire" data-tr-de="Laufbahn" data-tr-pt="trajetória" data-tr-en="path">trajectory</span> has eclipsed every prior touring benchmark, drawing scrutiny over whether the industry can sustain such <span class="hl" data-w="pervasive" data-ph="/pəˈveɪ.sɪv/" data-cls="violet" data-cefr="C1" data-tr="повсюдний" data-tr-uk="повсюдний" data-tr-es="omnipresente" data-tr-fr="omniprésent" data-tr-de="allgegenwärtig" data-tr-pt="generalizado" data-tr-en="widespread">pervasive</span> saturation. The revenue disparity between her and her <span class="hl" data-w="contemporaries" data-ph="/kənˈtem.pər.ər.iz/" data-cls="blue" data-cefr="C1" data-tr="сучасники" data-tr-uk="сучасники" data-tr-es="contemporáneos" data-tr-fr="contemporains" data-tr-de="Zeitgenossen" data-tr-pt="contemporâneos" data-tr-en="peers">contemporaries</span> signals a structural shift.</span>
                   </p>
                 </div>
               </div>
@@ -1790,10 +1946,10 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
                 <p style="font-family:'General Sans',sans-serif;font-weight:700;font-size:21px;margin:0 0 14px;text-align:center">The Eras Tour</p>
                 <!-- same text as page-en, sentence-wrapped — the P2→P3 swap changes
                      the affordance (words → sentences), never the text position -->
-                <p style="margin:0"><span class="sel" data-tr="s1" tabindex="0" role="button">Few musicians branch out across so many genre walls and keep every audience.</span> <span class="sel" data-tr="s1b" tabindex="0" role="button">Taylor Swift moved from country to pop to folk without losing her devoted fans — a cultural phenomenon who left a legacy no one had predicted.</span></p>
+                <p style="margin:0"><span class="sel" data-tr="s1" tabindex="0" role="button">Few musicians branch out across so many <span class="imm-w">genre</span> walls and keep every audience.</span> <span class="sel" data-tr="s1b" tabindex="0" role="button">Taylor Swift moved from country to pop to folk without losing her <span class="imm-w">devoted</span> fans — a cultural <span class="imm-w">phenomenon</span> who left a <span class="imm-w">legacy</span> no one had predicted.</span></p>
                 <!-- para 2 = the ORIGINAL dense sentence. Simplify (P2) previews the
                      easier version then reverts, so the dense text is what carries here -->
-                <p style="margin:18px 0 0"><span class="sel" data-tr="s2" tabindex="0" role="button">Her commercial dominance spans every genre, from country to pop to indie folk. It has left critics asking whether today's music industry can accommodate a phenomenon of her scale.</span></p>
+                <p style="margin:18px 0 0"><span class="sel" data-tr="s2a" tabindex="0" role="button">Her unprecedented commercial trajectory has eclipsed every prior touring benchmark, drawing scrutiny over whether the industry can sustain such pervasive saturation.</span> <span class="sel" data-tr="s2b" tabindex="0" role="button">The revenue disparity between her and her contemporaries signals a structural shift.</span></p>
               </div>
               <!-- Phase 3.5 — Immersion: the article flips into the reader's language.
                    Front = English, our vocab in blue; flip the ↻ control and the page
@@ -1813,12 +1969,12 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
                 </div>
               </div>
               <!-- Phase 5 — same full article, exercise gaps instead of sentence-selects.
-                   Four gaps in reading order: genre (word), an ARTICLE choice
-                   (a/the/Ø — exercise #2), phenomenon (word), legacy (word). -->
+                   Four gaps in reading order: genre (word), article (a/the/Ø),
+                   phenomenon (word), has/have/had (tense — para 2 first line). -->
               <div class="ex-page" style="padding:26px 32px">
                 <p style="font-family:'General Sans',sans-serif;font-weight:700;font-size:21px;margin:0 0 14px;text-align:center">The Eras Tour</p>
-                <p style="margin:0">Few musicians branch out across so many <span class="exw" data-a="genre" data-o="genre|style|trend">genre</span> walls and keep every audience. Taylor Swift moved from country to pop to folk without losing her devoted fans — <span class="art-gap" data-a="a"><button class="art-pill" data-v="The" type="button">The</button><button class="art-pill" data-v="Ø" type="button">Ø</button><button class="art-pill" data-v="a" type="button">a</button></span> cultural <span class="exw" data-a="phenomenon" data-o="phenomenon|event|talent">phenomenon</span> who left a <span class="exw" data-a="legacy" data-o="legacy|career|record">legacy</span> no one had predicted.</p>
-                <p style="margin:14px 0 0">Every show ran for more than three hours — long enough to feel like a whole life lived in a single night.</p>
+                <p style="margin:0">Few musicians branch out across so many <span class="exw gap-first" data-a="genre" data-o="genre|style|trend">genre</span> walls and keep every audience. Taylor Swift moved from country to pop to folk without losing her devoted fans — <span class="art-gap" data-a="a"><span class="art-rest">a</span><span class="art-choices" aria-hidden="true"><span class="art-br">[</span><button class="art-pill" data-v="The" type="button">The</button><span class="art-sep">|</span><button class="art-pill" data-v="Ø" type="button">Ø</button><span class="art-sep">|</span><button class="art-pill" data-v="a" type="button">a</button><span class="art-br">]</span></span></span> cultural <span class="exw" data-a="phenomenon" data-o="phenomenon|event|talent">phenomenon</span> who left a legacy no one had predicted.</p>
+                <p style="margin:18px 0 0">Her unprecedented commercial trajectory <span class="art-gap" data-a="has"><span class="art-rest">has</span><span class="art-choices" aria-hidden="true"><span class="art-br">[</span><button class="art-pill" data-v="have" type="button">have</button><span class="art-sep">|</span><button class="art-pill" data-v="had" type="button">had</button><span class="art-sep">|</span><button class="art-pill" data-v="has" type="button">has</button><span class="art-br">]</span></span></span> eclipsed every prior touring benchmark, drawing scrutiny over whether the industry can sustain such pervasive saturation. The revenue disparity between her and her contemporaries signals a structural shift.</p>
               </div>
             </div>
 
@@ -1826,7 +1982,7 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
             <div class="inq-hud hx-hud" id="hx-hud">
               <div class="hud-activate">
                 <span class="ha-text"><span class="ha-dot"></span>4 exercises hidden in this page</span>
-                <button class="ha-go" id="hx-toggle" type="button"><span class="lmark"></span>Turn into exercises</button>
+                <button class="ha-go" id="hx-toggle" type="button"><svg class="l-ico" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg>Turn into exercises</button>
               </div>
               <div class="hud-track">
                 <div class="hud-main"><span class="hud-cue" id="hx-cue">Choose the right article or word</span><span class="hud-count" id="hx-count"><b>0</b> / 4</span></div>
@@ -1836,7 +1992,7 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
 
             <!-- Phase 3.5 — Immersion: the ↻ control flips the whole article into the
                  reader's chosen language (the gloss language) -->
-            <button class="disc-fab imm-fab" id="hero-imm-fab" type="button" aria-hidden="true" tabindex="-1"><span class="dc-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 3 21 8 16 8"/><polyline points="3 21 3 16 8 16"/><path d="M19.4 9a7.5 7.5 0 0 0-12.5-2.8L3 8"/><path d="M4.6 15a7.5 7.5 0 0 0 12.5 2.8L21 16"/></svg></span><span class="imm-fab-lbl">Read in your language</span></button>
+            <button class="disc-fab imm-fab" id="hero-imm-fab" type="button" aria-hidden="true" tabindex="-1"><span class="dc-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h18"/><path d="M17 4l4 4-4 4"/><path d="M21 16H3"/><path d="M7 12l-4 4 4 4"/></svg></span><span class="imm-fab-lbl">Read in your language</span></button>
 
             <!-- Phase 4 — "Discuss the article" pill + side panel docked inside the
                  browser frame, the way the real extension opens -->
@@ -1890,13 +2046,13 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
            has played; reparented to <body> in JS (viewport-fixed, like the card) -->
       <button class="tc-next" id="hero-tc-next" type="button" aria-hidden="true" tabindex="-1">Next: Immerse <span class="arr" aria-hidden="true">→</span></button>
       <!-- "go next" pill for Immersion — fades in under the browser once it has flipped -->
-      <button class="tc-next" id="hero-imm-next" type="button" aria-hidden="true" tabindex="-1">Next: Discuss <span class="arr" aria-hidden="true">→</span></button>
+      <button class="tc-next" id="hero-imm-next" type="button" aria-hidden="true" tabindex="-1">Next: Practice <span class="arr" aria-hidden="true">→</span></button>
       <!-- same "go next" pill for Discuss — fades in under the chat once it has played -->
-      <button class="tc-next" id="hero-disc-next" type="button" aria-hidden="true" tabindex="-1">Next: Practice <span class="arr" aria-hidden="true">→</span></button>
+      <button class="tc-next" id="hero-disc-next" type="button" aria-hidden="true" tabindex="-1">Next: Everywhere <span class="arr" aria-hidden="true">→</span></button>
       <!-- "go next" pill for Home — fades in once the "save a word" demo has played -->
-      <button class="tc-next" id="hero-home-next" type="button" aria-hidden="true" tabindex="-1">Next: Save &amp; Simplify <span class="arr" aria-hidden="true">→</span></button>
+      <button class="tc-next" id="hero-home-next" type="button" aria-hidden="true" tabindex="-1">Next: Simplify <span class="arr" aria-hidden="true">→</span></button>
       <!-- "go next" pill for Practice — fades in once the exercise autoplay finishes -->
-      <button class="tc-next" id="hero-prac-next" type="button" aria-hidden="true" tabindex="-1">Next: Everywhere <span class="arr" aria-hidden="true">→</span></button>
+      <button class="tc-next" id="hero-prac-next" type="button" aria-hidden="true" tabindex="-1">Next: Discuss <span class="arr" aria-hidden="true">→</span></button>
 
     </div>
 
@@ -1911,9 +2067,9 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
 
     <!-- PHASE 2 COPY — slides into col 1 -->
     <div class="hero-copy-p2">
-      <div class="p2-eyebrow">Save &amp; Simplify</div>
-      <h2>Tap a word.<br>Keep it for good.</h2>
-      <p class="p2-sub">Every word is tappable — save it to your shelf. Hit the orange dot and watch a dense paragraph simplify to your level, weaving your saved words back in.</p>
+      <div class="p2-eyebrow">Simplify</div>
+      <h2>Too dense?<br>Read it at your level.</h2>
+      <p class="p2-sub">Hit the orange dot and a heavy paragraph rewrites to exactly your level — weaving the words you’ve saved back in, so they resurface as you read.</p>
     </div>
 
     <!-- PHASE 3 COPY — Translate -->
@@ -1930,7 +2086,7 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
       <p class="p2-sub">One tap turns the whole article into your language — your saved words stay marked, so you read fluently and still see what you're learning.</p>
     </div>
 
-    <!-- PHASE 4 COPY — Discuss -->
+    <!-- PHASE 4 COPY — Analysis -->
     <div class="hero-copy-p4">
       <div class="p2-eyebrow">Discuss</div>
       <h2>Click Discuss.<br>The page talks back.</h2>
@@ -1939,8 +2095,8 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
 
     <!-- PHASE 5 COPY — Practice -->
     <div class="hero-copy-p5">
-      <div class="p2-eyebrow" style="font-family:var(--mono,'JetBrains Mono',monospace);font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber-deep,#c96b00);margin-bottom:22px">Practice</div>
-      <h2 style="font-weight:700;letter-spacing:-.035em;font-size:clamp(36px,4vw,56px);line-height:1.04;margin:0 0 26px">Any text.<br>Instant exercises.</h2>
+      <div class="p2-eyebrow" style="font-family:var(--mono,'JetBrains Mono',monospace);font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber-deep,#c96b00);margin-bottom:32px">Practice</div>
+      <h2 style="font-weight:700;letter-spacing:-.035em;font-size:clamp(36px,4vw,56px);line-height:1.04;margin:0 0 34px">Any text.<br>Instant exercises.</h2>
       <p class="p2-sub">Your saved words fly into the page as gaps — <strong>any article, any text, wired to your words</strong>. Watch it happen.</p>
     </div>
 
@@ -1963,9 +2119,8 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
 <!-- ============ ACT III — EVERYWHERE ============ -->
 <section class="ev" id="finale" data-screen-label="Everywhere">
 
-  <div class="ev-eye"><span class="idx">Part III</span><span class="bar"></span>Everywhere</div>
   <h2 class="ev-title">You can read<br />anything now.</h2>
-  <p class="ev-sub">A news article, a forum thread, a long read, a research paper&#160;&#8212; a lasagna recipe.</p>
+  <p class="ev-sub">A news article, a forum thread, a long read, a research paper, a lasagna recipe.</p>
 
   <div class="ev-wall" id="ev-wall">
 
@@ -2062,7 +2217,7 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
     <div class="d1-track">
       <button class="d1-install" id="close-cta" data-cta type="button" aria-label="Add Lantern to Chrome — free to start, no account needed."></button>
     </div>
-    <div class="d1-fine d-only">Free to start · no account needed</div>
+    <div class="d1-fine d-only">Free to start · no account needed · works on any site</div>
     <div class="m-only m-close-cta">
       <p class="m-close-note">Lantern is a Chrome extension —<br>open on your Mac or PC to install.</p>
       <button class="m-share-btn" data-m-share aria-label="Send to desktop">
@@ -2074,8 +2229,9 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
     </div>
   </div>
   <footer style="width:100%;flex-shrink:0">
-    <div class="fb"><span class="lmark"></span>Lantern</div>
-    <div class="fm">Read the world · 2026</div>
+    <div class="fb">withlantern.ai</div>
+    <!-- TODO: point Privacy at the real policy page before launch (stub for now) -->
+    <div class="fm"><span class="fm-tag">Read the world · 2026</span><a class="fm-priv" href="/privacy">Privacy</a></div>
   </footer>
 </section>
 
@@ -2096,15 +2252,13 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
 </div>
 <div id="flame"></div>
 <script src="lantern-v3.js"></script>
-<script src="lantern-v3-act1.js"></script>
-<script src="lantern-v3-act1b.js"></script>
-<script src="lantern-v3-act2.js"></script>
 <script src="lantern-everywhere.js"></script>
 <script src="lantern-morph.js"></script>
 <script src="lantern-v3-morph-feat.js"></script>
 <script src="lantern-hero-words.js"></script>
 <script src="lantern-v3-close.js"></script>
 <script src="lantern-cta-charge.js"></script>
+<script src="lantern-light.js"></script>
 <script>
 /* ============================================================
    PLAY cinema — scene-busy registry
@@ -2160,7 +2314,13 @@ window.LanternPlaying = false;
   };
   window.shelfProgress = function (lemma, step) {
     var card = window.Shelf.cardEl(lemma); if (!card) return;
-    setProg(card, Math.min(MAX, (parseFloat(card.dataset.prog) || START) + (step || STEP)));
+    var cur = parseFloat(card.dataset.prog) || START;
+    /* demo showcase: "phenomenon" is the word we walk the visitor through end to
+       end, so it climbs faster (0.18/credit) and is allowed to top out at a FULL
+       100% ring — its 5 credits (Immerse → Practice×2 → Discuss×2) land it on 1.0
+       exactly at the chat. Every other word still caps at MAX. */
+    if (lemma === 'phenomenon') { setProg(card, Math.min(1, cur + (step || 0.18))); return; }
+    setProg(card, Math.min(MAX, cur + (step || STEP)));
   };
   /* a card flying out into a scene = the word getting used — credit it */
   var origFly = window.flyShelfCardTo;
@@ -2169,6 +2329,32 @@ window.LanternPlaying = false;
     Promise.resolve(p).then(function () { window.shelfProgress(lemma); });
     return p;
   };
+
+  /* ── story-depth floor ────────────────────────────────────────────────────
+     The rings must read the SAME whether you PLAYED through every screen or
+     CLICKED/scrubbed straight to a later one — otherwise jumping ahead leaves
+     the deck looking untouched while the story says the words were already
+     woven through each feature. So every card is floored to the cumulative
+     level of all screens BEFORE the one you're on (the current screen's own
+     per-word credits still play ON TOP, so normal forward play keeps its
+     sparks and never gets pre-empted). Monotonic by visual position: jumping
+     back never lowers a ring — a word already learned stays learned.
+     Floor by VISUAL position 0..7 (HOME SIMP TR IMM PRAC DISC EV INSTALL):
+     each weaving screen passed = one STEP; HOME is the save, EV/INSTALL recap. */
+  var DEPTH = [0, 0, 1, 2, 3, 4, 5, 5];        /* prior-screen credits at each stop */
+  var seenMax = 0;
+  function syncDepth() {
+    var LP = window.LanternPhases; if (!LP) return;
+    var pos = LP.pos();
+    if (pos > seenMax) seenMax = pos;
+    var floor = Math.min(MAX, START + (DEPTH[seenMax] || 0) * STEP);
+    var stack = window.Shelf && window.Shelf.stackEl; if (!stack) return;
+    stack.querySelectorAll('.wd-card').forEach(function (card) {
+      var cur = parseFloat(card.dataset.prog) || 0;
+      if (floor > cur + 0.001) setProg(card, floor);   /* raise only — never lower */
+    });
+  }
+  setInterval(syncDepth, 220);
 })();
 
 /* ============================================================
@@ -2219,6 +2405,7 @@ window.LanternPlaying = false;
 (function () {
   var HERO_WORDS = ['genre', 'devoted', 'phenomenon', 'legacy'];
   var phase = 0;
+  var evCentering = false;          /* true while the window glides to centre before the Everywhere split — gates input */
   var wheelLock = false, wheelLockTimer = 0, wheelLockStart = 0;
   var RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -2265,6 +2452,8 @@ window.LanternPlaying = false;
   /* ---- immersion (phase 3) ---- */
   var immFab     = document.getElementById('hero-imm-fab');
   var immNext    = document.getElementById('hero-imm-next');
+  var immFrontEl = document.querySelector('#hero .imm-front');
+  var immBackEl  = document.querySelector('#hero .imm-back');
   if (immNext && immNext.parentNode !== document.body) document.body.appendChild(immNext);
   var heroTpSrc   = document.getElementById('hero-tp-src');
   var heroTpTgt   = document.getElementById('hero-tp-tgt');
@@ -2295,15 +2484,22 @@ window.LanternPlaying = false;
       de: "Taylor Swift wechselte vom Country über Pop zum Folk, ohne ihre treuen Fans zu verlieren — ein kulturelles Phänomen, das ein Erbe hinterließ, das niemand vorhergesagt hatte.",
       pt: "Taylor Swift passou do country ao pop e ao folk sem perder seus fãs devotados — um fenômeno cultural que deixou um legado que ninguém havia previsto."
     },
-    /* para 2 — the ORIGINAL dense sentence (the simplify on P2 is a preview that
-       reverts; the dense text is what carries into Translate / Immerse) */
-    s2: {
-      en: "Her commercial dominance spans every genre, from country to pop to indie folk. It has left critics asking whether today's music industry can accommodate a phenomenon of her scale.",
-      uk: "Її комерційне домінування — що охоплює кожен жанр від кантрі до попу та інді-фолку — змусило критиків замислитися, чи здатна сучасна музична індустрія вмістити явище такого масштабу.",
-      es: "Su dominio comercial — que abarca todos los géneros, del country al pop y al folk indie — ha llevado a los críticos a preguntarse si la industria musical actual puede albergar un fenómeno de su magnitud.",
-      fr: "Sa domination commerciale — qui couvre tous les genres, du country à la pop au folk indé — a conduit les critiques à se demander si l'industrie musicale actuelle peut accueillir un phénomène de son ampleur.",
-      de: "Ihre kommerzielle Dominanz — die jedes Genre von Country über Pop bis Indie-Folk umspannt — lässt Kritiker fragen, ob die heutige Musikindustrie ein Phänomen ihres Ausmaßes fassen kann.",
-      pt: "Seu domínio comercial — abrangendo todos os gêneros, do country ao pop ao folk indie — fez os críticos questionarem se a indústria musical atual consegue acomodar um fenômeno de sua magnitude."
+    /* para 2 split into two sentences so each hovers independently */
+    s2a: {
+      en: "Her unprecedented commercial trajectory has eclipsed every prior touring benchmark, drawing scrutiny over whether the industry can sustain such pervasive saturation.",
+      uk: "Її безпрецедентна комерційна траєкторія перевершила всі попередні турнейні рекорди, викликаючи запитання про те, чи здатна індустрія витримати таке всеохопне насичення.",
+      es: "Su trayectoria comercial sin precedentes ha eclipsado todos los récords de giras anteriores, generando interrogantes sobre si la industria puede sostener una saturación tan generalizada.",
+      fr: "Sa trajectoire commerciale sans précédent a éclipsé tous les records de tournées précédents, suscitant des interrogations sur la capacité de l'industrie à soutenir une telle saturation généralisée.",
+      de: "Ihre beispiellose kommerzielle Laufbahn hat alle bisherigen Tournee-Rekorde übertroffen und wirft die Frage auf, ob die Branche eine so allgegenwärtige Sättigung aufrechterhalten kann.",
+      pt: "Sua trajetória comercial sem precedentes eclipsou todos os recordes anteriores de turnês, gerando questionamentos sobre se a indústria consegue sustentar uma saturação tão generalizada."
+    },
+    s2b: {
+      en: "The revenue disparity between her and her contemporaries signals a structural shift.",
+      uk: "Розрив у доходах між нею та її сучасниками сигналізує про структурний зсув.",
+      es: "La disparidad de ingresos entre ella y sus contemporáneos señala un cambio estructural.",
+      fr: "L'écart de revenus entre elle et ses contemporains signale un changement structurel.",
+      de: "Die Einkommensunterschiede zwischen ihr und ihren Zeitgenossen signalisieren einen strukturellen Wandel.",
+      pt: "A disparidade de receitas entre ela e seus contemporâneos sinaliza uma mudança estrutural."
     }
   };
 
@@ -2320,36 +2516,37 @@ window.LanternPlaying = false;
   var IMM = {
     en: {
       p1: "Few musicians branch out across so many [[genre]] walls and keep every audience. Taylor Swift moved from country to pop to folk without losing her [[devoted]] fans — a cultural [[phenomenon]] who left a [[legacy]] no one had predicted.",
-      p2: "Her commercial dominance spans every [[genre]], from country to pop to indie folk. It has left critics asking whether today's music industry can accommodate a [[phenomenon]] of her scale."
+      p2: "Her unprecedented commercial trajectory has eclipsed every prior touring benchmark, drawing scrutiny over whether the industry can sustain such pervasive saturation. The revenue disparity between her and her contemporaries signals a structural shift."
     },
     es: {
       p1: "Pocos músicos se ramifican entre tantos muros de [[genre]] y conservan a cada público. Taylor Swift pasó del country al pop y al folk sin perder a sus fans [[devoted]] — un [[phenomenon]] cultural que dejó un [[legacy]] que nadie había predicho.",
-      p2: "Su dominio comercial — que abarca cada [[genre]], del country al pop y al folk indie — ha llevado a los críticos a preguntarse si la industria musical actual puede albergar un [[phenomenon]] de su magnitud."
+      p2: "Su trayectoria comercial sin precedentes ha eclipsado todos los récords de giras anteriores, generando interrogantes sobre si la industria puede sostener una saturación tan generalizada. La disparidad de ingresos entre ella y sus contemporáneos señala un cambio estructural."
     },
     fr: {
       p1: "Peu de musiciens s'aventurent à travers autant de murs de [[genre]] tout en gardant chaque public. Taylor Swift est passée du country à la pop puis au folk sans perdre ses fans [[devoted]] — un [[phenomenon]] culturel qui a laissé un [[legacy]] que personne n'avait prévu.",
-      p2: "Sa domination commerciale — qui couvre chaque [[genre]], du country à la pop au folk indé — a conduit les critiques à se demander si l'industrie musicale actuelle peut accueillir un [[phenomenon]] de son ampleur."
+      p2: "Sa trajectoire commerciale sans précédent a éclipsé tous les records de tournées précédents, suscitant des interrogations sur la capacité de l'industrie à soutenir une telle saturation généralisée. L'écart de revenus entre elle et ses contemporains signale un changement structurel."
     },
     de: {
       p1: "Nur wenige Musiker verzweigen sich über so viele [[genre]]-Grenzen und behalten dabei jedes Publikum. Taylor Swift wechselte vom Country über Pop zum Folk, ohne ihre [[devoted]] Fans zu verlieren — ein kulturelles [[phenomenon]], das ein [[legacy]] hinterließ, das niemand vorhergesagt hatte.",
-      p2: "Ihre kommerzielle Dominanz — die jedes [[genre]] von Country über Pop bis Indie-Folk umspannt — lässt Kritiker fragen, ob die heutige Musikindustrie ein [[phenomenon]] ihres Ausmaßes fassen kann."
+      p2: "Ihre beispiellose kommerzielle Laufbahn hat alle bisherigen Tournee-Rekorde übertroffen und wirft die Frage auf, ob die Branche eine so allgegenwärtige Sättigung aufrechterhalten kann. Die Einkommensunterschiede zwischen ihr und ihren Zeitgenossen signalisieren einen strukturellen Wandel."
     },
     uk: {
       p1: "Небагато музикантів долають стільки меж [[genre]] і зберігають кожну аудиторію. Тейлор Свіфт перейшла від кантрі до попу та фолку, не втративши своїх [[devoted]] шанувальників — культурний [[phenomenon]], що залишив [[legacy]], якого ніхто не очікував.",
-      p2: "Її комерційне домінування — що охоплює кожен [[genre]] від кантрі до попу та інді-фолку — змусило критиків замислитися, чи здатна сучасна музична індустрія вмістити [[phenomenon]] такого масштабу."
+      p2: "Її безпрецедентна комерційна траєкторія перевершила всі попередні турнейні рекорди, викликаючи запитання про те, чи здатна індустрія витримати таке всеохопне насичення. Розрив у доходах між нею та її сучасниками сигналізує про структурний зсув."
     },
     pt: {
       p1: "Poucos músicos se ramificam por tantas barreiras de [[genre]] e mantêm cada público. Taylor Swift passou do country ao pop e ao folk sem perder seus fãs [[devoted]] — um [[phenomenon]] cultural que deixou um [[legacy]] que ninguém havia previsto.",
-      p2: "Seu domínio comercial — abrangendo cada [[genre]], do country ao pop ao folk indie — fez os críticos questionarem se a indústria musical atual consegue acomodar um [[phenomenon]] de sua magnitude."
+      p2: "Sua trajetória comercial sem precedentes eclipsou todos os recordes anteriores de turnês, gerando questionamentos sobre se a indústria consegue sustentar uma saturação tão generalizada. A disparidade de receitas entre ela e seus contemporâneos sinaliza uma mudança estrutural."
     }
   };
 
-  /* [[word]] -> highlighted vocab span (colour comes from the face: blue front, violet back) */
+  /* [[word]] -> highlighted vocab span; each word wrapped for the slide-in animation */
   function immRender(str) {
     return str.split(' ').map(function (w) {
+      if (!w) return '';
       var m = w.match(/^\[\[([\s\S]+?)\]\]([\s\S]*)$/);
-      if (m) return '<span class="imm-w">' + m[1] + '</span>' + m[2];
-      return w;
+      if (m) return '<span class="imm-word"><span class="imm-w">' + m[1] + '</span>' + m[2] + '</span>';
+      return '<span class="imm-word">' + w + '</span>';
     }).join(' ');
   }
   function immFill() {
@@ -2372,18 +2569,45 @@ window.LanternPlaying = false;
     immFab.classList.remove('show', 'beckon');
     immFab.setAttribute('aria-hidden', 'true'); immFab.tabIndex = -1;
   }
+  /* ── Next-pill press: a quick depress + amber ripple so a transition reads as a
+     real button press. Manual click → press, then advance. Under PLAY the engine
+     drives the advance, so we just play the press as its visible cause, holding the
+     reel ('navpress') long enough for it to register before the phase steps. ── */
+  function pressPill(pill) {
+    if (!pill) return;
+    pill.classList.remove('press'); void pill.offsetWidth; pill.classList.add('press');
+    setTimeout(function () { if (pill) pill.classList.remove('press'); }, 300);
+  }
+  function pressThenNav(pill, fn) { pressPill(pill); setTimeout(fn, 170); }
+  function autoPressNext(pill) {
+    if (!pill) return;
+    pill.classList.remove('still');                        /* default (manual): idle bob invites the click */
+    if (!window.LanternPlaying) return;
+    if (getComputedStyle(pill).display === 'none') return; /* hidden on this breakpoint (mobile hides several pills) — don't stall the reel on an invisible press */
+    pill.classList.add('still');                           /* under PLAY: kill the bob so the auto-press is clean (no twitch) */
+    window.LanternBusy.set('navpress', true);              /* hold the reel through the press */
+    setTimeout(function () {
+      pressPill(pill);
+      setTimeout(function () { window.LanternBusy.set('navpress', false); }, 300);   /* release → BREATH, then PLAY steps */
+    }, 220);
+  }
+
   function placeImmNext() {
-    var br = document.querySelector('#hero .browser');
-    if (!immNext || !br) return;
-    var r = br.getBoundingClientRect(), pw = immNext.offsetWidth || 150;
-    immNext.style.left = Math.round(r.left + r.width / 2 - pw / 2) + 'px';
-    immNext.style.top  = Math.round(r.bottom + 14) + 'px';
+    /* anchor UNDER the right-side copy block (.hero-copy-imm), left-aligned with it */
+    var copyEl = document.querySelector('#hero .hero-copy-imm');
+    var br     = document.querySelector('#hero .browser');
+    var host   = (copyEl && copyEl.getBoundingClientRect().width > 0) ? copyEl : br;
+    if (!immNext || !host) return;
+    var r = host.getBoundingClientRect();
+    immNext.style.left = Math.round(r.left) + 'px';
+    immNext.style.top  = Math.round(r.bottom + 16) + 'px';
   }
   function showImmNext() {
     if (!immNext) return;
     immNext.setAttribute('aria-hidden', 'false'); immNext.tabIndex = 0;
     placeImmNext();
     requestAnimationFrame(function () { placeImmNext(); immNext.classList.add('show'); });
+    autoPressNext(immNext);
   }
   function hideImmNext() {
     if (!immNext) return;
@@ -2395,9 +2619,12 @@ window.LanternPlaying = false;
      language may have changed, so refill the back too */
   function immReset() {
     immGen++;
+    immCredited = {};
     document.body.classList.remove('imm-flipped');
     setImmFabLabel(false);
     immFill();
+    if (immFrontEl) { immFrontEl.classList.remove('imm-out', 'imm-in'); immFrontEl.removeAttribute('style'); }
+    if (immBackEl)  { immBackEl.classList.remove('imm-out', 'imm-in');  immBackEl.removeAttribute('style'); }
     hideImmNext();
     showImmFab();
   }
@@ -2409,22 +2636,103 @@ window.LanternPlaying = false;
     var lbl = immFab.querySelector('.imm-fab-lbl');
     if (lbl) lbl.textContent = flipped ? 'Read in English' : 'Read in your language';
   }
+  /* meeting a saved word while reading in YOUR language is a real exposure —
+     credit it like Discuss/Practice: a spark flies from the word to its "My vocab"
+     card and the ring ticks up. Once per word per immersion entry (immReset clears
+     the guard), staggered so the four words don't all fire at once. */
+  var immCredited = {};
+  function immSparkCredit(wordEl, lemma) {
+    var card = window.Shelf && window.Shelf.cardEl(lemma);
+    if (!card || RM || !wordEl) { if (window.shelfProgress) window.shelfProgress(lemma); return; }
+    var fr = wordEl.getBoundingClientRect(), to = card.getBoundingClientRect();
+    if (!fr.width || !to.width) { if (window.shelfProgress) window.shelfProgress(lemma); return; }
+    var spark = document.createElement('span');
+    spark.className = 'use-spark';
+    spark.style.left = (fr.left + fr.width / 2) + 'px';
+    spark.style.top  = (fr.top + fr.height / 2) + 'px';
+    document.body.appendChild(spark);
+    void spark.offsetWidth;
+    spark.style.transform = 'translate(' + (to.left + to.width / 2 - fr.left - fr.width / 2).toFixed(1) + 'px,' +
+                                           (to.top + to.height / 2 - fr.top - fr.height / 2).toFixed(1) + 'px) scale(.55)';
+    spark.style.opacity = '0';
+    setTimeout(function () {
+      if (spark.parentNode) spark.parentNode.removeChild(spark);
+      if (window.shelfProgress) window.shelfProgress(lemma);
+      if (window.Shelf && window.Shelf.bump) window.Shelf.bump();
+    }, 560);
+  }
+  function immCreditWords() {
+    if (!immBackEl) return;
+    var ws = immBackEl.querySelectorAll('.imm-p .imm-w');
+    var delay = 0;
+    for (var i = 0; i < ws.length; i++) {
+      var lemma = (ws[i].textContent || '').trim();
+      if (!lemma || immCredited[lemma]) continue;
+      immCredited[lemma] = true;
+      (function (wordEl, lem, d) {
+        setTimeout(function () { if (phase === 3) immSparkCredit(wordEl, lem); }, d);
+      })(ws[i], lemma, delay);
+      delay += 200;
+    }
+  }
   function immFlip() {
     if (phase !== 3) return;
-    var toBack = !document.body.classList.contains('imm-flipped');   /* English → your language, or back */
+    var toBack = !document.body.classList.contains('imm-flipped');
+    var fromFace = toBack ? immFrontEl : immBackEl;
+    var toFace   = toBack ? immBackEl  : immFrontEl;
+    if (!fromFace || !toFace) return;
     if (immFab) { immFab.classList.remove('beckon'); immFab.classList.add('press'); setTimeout(function () { if (immFab) immFab.classList.remove('press'); }, 140); }
     document.body.classList.toggle('imm-flipped', toBack);
-    setImmFabLabel(toBack);                          /* now offers the reverse swap */
+    setImmFabLabel(toBack);
     var gen = ++immGen;
     window.LanternBusy.set('immerse', true);
-    setTimeout(function () {
-      if (phase !== 3 || gen !== immGen) return;
-      if (toBack) showImmNext();                     /* reaching your language unlocks Discuss */
+
+    if (RM) {
+      fromFace.style.opacity = '0'; fromFace.style.pointerEvents = 'none'; fromFace.style.position = 'absolute';
+      toFace.style.opacity = '1'; toFace.style.pointerEvents = 'auto'; toFace.style.position = 'relative';
+      if (toBack) { showImmNext(); immCreditWords(); }
       window.LanternBusy.set('immerse', false);
-    }, RM ? 0 : 1150);
+      return;
+    }
+
+    /* stagger exit: each word lifts and fades, left→right */
+    var fromChars = fromFace.querySelectorAll('.imm-p .imm-word');
+    for (var i = 0; i < fromChars.length; i++) {
+      fromChars[i].style.transitionDelay = Math.min(i * 14, 200) + 'ms';
+    }
+    fromFace.classList.add('imm-out');
+    var exitMs = Math.min(fromChars.length * 14 + 240, 450);
+
+    setTimeout(function () {
+      if (gen !== immGen) return;
+
+      fromFace.classList.remove('imm-out');
+      for (var j = 0; j < fromChars.length; j++) { fromChars[j].style.transitionDelay = ''; }
+      fromFace.style.opacity = '0'; fromFace.style.pointerEvents = 'none'; fromFace.style.position = 'absolute';
+
+      /* snap incoming words to start position via .imm-in (transition:none) */
+      var toChars = toFace.querySelectorAll('.imm-p .imm-word');
+      toFace.classList.add('imm-in');
+      toFace.style.opacity = '1'; toFace.style.position = 'relative'; toFace.style.pointerEvents = 'auto';
+
+      requestAnimationFrame(function () {
+        for (var k = 0; k < toChars.length; k++) {
+          toChars[k].style.transitionDelay = Math.min(k * 14, 200) + 'ms';
+        }
+        toFace.classList.remove('imm-in');   /* words animate in staggered */
+
+        var enterMs = Math.min(toChars.length * 14 + 240, 450);
+        setTimeout(function () {
+          if (gen !== immGen) return;
+          for (var m = 0; m < toChars.length; m++) { toChars[m].style.transitionDelay = ''; }
+          if (toBack) { showImmNext(); immCreditWords(); }
+          window.LanternBusy.set('immerse', false);
+        }, enterMs);
+      });
+    }, exitMs);
   }
   if (immFab) immFab.addEventListener('click', function (e) { e.stopPropagation(); immFlip(); });
-  if (immNext) immNext.addEventListener('click', function () { if (phase === 3) { hideImmNext(); toP4(); } });
+  if (immNext) immNext.addEventListener('click', function () { if (phase === 3) pressThenNav(immNext, function () { hideImmNext(); toP5(); }); });
   /* changing the gloss language re-immerses the article live — the translated body
      re-renders into the new language while your saved words stay English. Fires
      even off-screen (cheap innerHTML); if flipped, the back updates in place. */
@@ -2448,6 +2756,7 @@ window.LanternPlaying = false;
     simpNext.setAttribute('aria-hidden', 'false'); simpNext.tabIndex = 0;
     placeSimpNext();
     requestAnimationFrame(function () { placeSimpNext(); simpNext.classList.add('show'); });
+    autoPressNext(simpNext);
   }
   function hideSimpNext() {
     if (!simpNext) return;
@@ -2456,17 +2765,17 @@ window.LanternPlaying = false;
   }
   window._heroShowSimpNext = showSimpNext;
   window._heroHideSimpNext = hideSimpNext;
-  if (simpNext) simpNext.addEventListener('click', function () { if (phase === 1) { hideSimpNext(); toP3(); } });
+  if (simpNext) simpNext.addEventListener('click', function () { if (phase === 1) pressThenNav(simpNext, function () { hideSimpNext(); toP3(); }); });
 
   /* ── Home (phase 0) "next" pill: the "save a word" demo plays its four saves,
-     then this pill invites the Save & Simplify screen. Centred under the browser
+     then this pill invites the Simplify screen. Centred under the browser
      like the other cues; raised by lantern-hero-words.js when the demo finishes,
      and by toP1() when the visitor walks back to Home. ── */
   function placeHomeNext() {
     var br = document.querySelector('#hero .browser');
     if (!homeNext || !br) return;
     var r = br.getBoundingClientRect(), pw = homeNext.offsetWidth || 150;
-    homeNext.style.left = Math.round(r.left + r.width / 2 - pw / 2) + 'px';
+    homeNext.style.left = Math.round(r.left + r.width / 2 - pw / 2 - 26) + 'px';   // nudged a touch left of centre
     homeNext.style.top  = Math.round(r.bottom + 14) + 'px';
   }
   function showHomeNext() {
@@ -2474,6 +2783,7 @@ window.LanternPlaying = false;
     homeNext.setAttribute('aria-hidden', 'false'); homeNext.tabIndex = 0;
     placeHomeNext();
     requestAnimationFrame(function () { placeHomeNext(); homeNext.classList.add('show'); });
+    autoPressNext(homeNext);
   }
   function hideHomeNext() {
     if (!homeNext) return;
@@ -2482,22 +2792,27 @@ window.LanternPlaying = false;
   }
   window._heroShowHomeNext = showHomeNext;
   window._heroHideHomeNext = hideHomeNext;
-  if (homeNext) homeNext.addEventListener('click', function () { if (phase === 0) { hideHomeNext(); toP2(); } });
+  if (homeNext) homeNext.addEventListener('click', function () { if (phase === 0) pressThenNav(homeNext, function () { hideHomeNext(); toP2(); }); });
 
   /* ── Practice (phase 5) "next" pill: the cursor-guided exercise plays through,
      the success card is seen, then this pill invites the Everywhere wall. ── */
   function placePracNext() {
-    var br = document.querySelector('#hero .browser');
-    if (!pracNext || !br) return;
-    var r = br.getBoundingClientRect(), pw = pracNext.offsetWidth || 150;
-    pracNext.style.left = Math.round(r.left + r.width / 2 - pw / 2) + 'px';
-    pracNext.style.top  = Math.round(r.bottom + 14) + 'px';
+    /* anchored under the Practice copy column (not the browser): the article +
+       exercises make the window tall, so a pill below it crowds the scrubber.
+       The copy ends higher, so sit under its subtext, left-aligned to the text. */
+    var col = document.querySelector('#hero .hero-copy-p5');
+    var anchor = (col && col.querySelector('.p2-sub')) || col;
+    if (!pracNext || !anchor) return;
+    var r = anchor.getBoundingClientRect();
+    pracNext.style.left = Math.round(r.left) + 'px';
+    pracNext.style.top  = Math.round(r.bottom + 24) + 'px';
   }
   function showPracNext() {
     if (!pracNext || phase !== 5) return;
     pracNext.setAttribute('aria-hidden', 'false'); pracNext.tabIndex = 0;
     placePracNext();
     requestAnimationFrame(function () { placePracNext(); pracNext.classList.add('show'); });
+    autoPressNext(pracNext);
   }
   function hidePracNext() {
     if (!pracNext) return;
@@ -2506,7 +2821,7 @@ window.LanternPlaying = false;
   }
   window._heroShowPracNext = showPracNext;
   window._heroHidePracNext = hidePracNext;
-  if (pracNext) pracNext.addEventListener('click', function () { if (phase === 5) { hidePracNext(); toEverywhere(); } });
+  if (pracNext) pracNext.addEventListener('click', function () { if (phase === 5) pressThenNav(pracNext, function () { hidePracNext(); toP4(); }); });
 
   function closeTPanel() {
     if (activeSel) activeSel.classList.remove('on');
@@ -2534,9 +2849,10 @@ window.LanternPlaying = false;
     var cl = parseFloat(heroTpanel.style.left) || 0;
     var ct = parseFloat(heroTpanel.style.top) || 0;
     var cw = heroTpanel.offsetWidth, ch = heroTpanel.offsetHeight;
-    var pw = heroTcNext.offsetWidth || 150;
+    var pw = heroTcNext.offsetWidth || 150, ph = heroTcNext.offsetHeight || 44;
+    var rawTop = ct + ch + 24;
     heroTcNext.style.left = Math.round(cl + cw / 2 - pw / 2) + 'px';
-    heroTcNext.style.top  = Math.round(ct + ch + 12) + 'px';
+    heroTcNext.style.top  = Math.round(Math.min(rawTop, window.innerHeight - ph - 16)) + 'px';
   }
   function showNextPill() {
     if (!heroTcNext) return;
@@ -2544,6 +2860,7 @@ window.LanternPlaying = false;
     heroTcNext.tabIndex = 0;
     placeNextPill();
     heroTcNext.classList.add('show');
+    autoPressNext(heroTcNext);
   }
   function hideNextPill() {
     if (!heroTcNext) return;
@@ -2552,18 +2869,22 @@ window.LanternPlaying = false;
     heroTcNext.tabIndex = -1;
   }
   if (heroTcNext) heroTcNext.addEventListener('click', function () {
-    if (phase === 2) { hideNextPill(); toImmersion(); }
+    if (phase === 2) pressThenNav(heroTcNext, function () { hideNextPill(); toImmersion(); });
   });
 
   /* the same "go next" pill for Discuss — sits under the chat once it has played,
      click walks on to Practice (mirrors the Translate cue) */
   function placeDiscNext() {
-    if (!heroDiscNext || !dock) return;
-    var r = dock.getBoundingClientRect();
+    /* anchored under the Discuss copy column ("Click Discuss. The page talks
+       back."), left-aligned to the text — same treatment as the Practice cue,
+       so the chat panel below doesn't crowd it */
+    var col = document.querySelector('#hero .hero-copy-p4');
+    var anchor = (col && col.querySelector('.p2-sub')) || col;
+    if (!heroDiscNext || !anchor) return;
+    var r = anchor.getBoundingClientRect();
     if (!r.width) return;
-    var pw = heroDiscNext.offsetWidth || 160;
-    heroDiscNext.style.left = Math.round(r.left + r.width / 2 - pw / 2) + 'px';
-    heroDiscNext.style.top  = Math.round(r.bottom + 12) + 'px';
+    heroDiscNext.style.left = Math.round(r.left) + 'px';
+    heroDiscNext.style.top  = Math.round(r.bottom + 24) + 'px';
   }
   function showDiscNext() {
     if (!heroDiscNext) return;
@@ -2571,6 +2892,7 @@ window.LanternPlaying = false;
     heroDiscNext.tabIndex = 0;
     placeDiscNext();
     heroDiscNext.classList.add('show');
+    autoPressNext(heroDiscNext);
   }
   function hideDiscNext() {
     if (!heroDiscNext) return;
@@ -2579,7 +2901,7 @@ window.LanternPlaying = false;
     heroDiscNext.tabIndex = -1;
   }
   if (heroDiscNext) heroDiscNext.addEventListener('click', function () {
-    if (phase === 4) { hideDiscNext(); toP5(); }
+    if (phase === 4) pressThenNav(heroDiscNext, function () { hideDiscNext(); toEverywhere(); });
   });
 
   /* ── mobile P3: no side panel — the sentence ITSELF lifts off the page
@@ -2720,11 +3042,13 @@ window.LanternPlaying = false;
        so the card overlaps the text instead of hanging off its left edge */
     var left = r.left + r.width * 0.5 - cw * 0.5 - 16;
     left = Math.min(Math.max(left, M), vw - cw - M);
-    /* vertical: pull UP so the card overlaps the sentence's last line by ~1–2
-       letters instead of floating below it */
-    var OVERLAP = 16;
-    var top = r.bottom - OVERLAP;
-    if (top + ch > vh - M) top = Math.max(M, r.top - ch + OVERLAP);   /* no room below → flip above, same overlap */
+    /* vertical: sit below the sentence with a fixed gap */
+    var GAP = 20;
+    /* mobile reserves the bottom ~168px (My-vocab strip at bottom:88px + caption +
+       scrubber) so the card flips above the sentence rather than landing on the strip */
+    var floor = (vw <= 920) ? vh - 168 : vh - M;
+    var top = r.bottom + GAP;
+    if (top + ch > floor) top = Math.max(M, r.top - ch - GAP);   /* no room below → flip above, same gap */
     /* switching sentences must never DROP the card lower — only let it rise */
     if (keepTop != null) top = Math.min(keepTop, top);
     var ox = Math.min(Math.max(r.left + 22 - left, 18), cw - 18);
@@ -2785,12 +3109,25 @@ window.LanternPlaying = false;
       clearTimeout(tpResizeT);
       tpResizeT = setTimeout(function () { pop.style.height = ''; heroTpanel.classList.remove('tc-gliding'); }, 460);
     } else {
-      /* fresh open → pop in */
-      if (pop) pop.style.height = '';
+      /* fresh open → pop in, expanding downward if translation is tall */
+      var h1f = 0;
+      if (pop) {
+        pop.style.transition = 'none';
+        pop.style.height = 'auto';
+        h1f = pop.offsetHeight;
+        var barEl = pop.querySelector('.tc-bar');
+        pop.style.height = (barEl ? barEl.offsetHeight + 20 : 52) + 'px';
+      }
       heroTpanel.classList.remove('tc-gliding', 'show');
       void heroTpanel.offsetWidth;          /* restart the pop + word-wave */
+      if (pop) pop.style.transition = '';
       placeTCard(sel);
       heroTpanel.classList.add('show');
+      if (pop && h1f) {
+        pop.style.height = h1f + 'px';
+        clearTimeout(tpResizeT);
+        tpResizeT = setTimeout(function () { pop.style.height = ''; }, 480);
+      }
     }
     return words.length * stagger + 520;    /* ms until the fade has fully landed */
   }
@@ -2808,7 +3145,7 @@ window.LanternPlaying = false;
     setTimeout(function () {
       if (g !== tpGen || phase !== 2) return;
       window.LanternBusy.set('translate', false);   /* translation played → PLAY may walk on */
-    }, fadeMs + 650);
+    }, fadeMs + 180);
   }
 
   /* cursor-led open: when you SCROLL/scrub into Translate, a pointer flies to the
@@ -2822,9 +3159,14 @@ window.LanternPlaying = false;
     return c;
   }
   function trCursorAt(c, sel, atStart) {
-    var r = sel.getBoundingClientRect();
-    var x = atStart ? (r.right - 24) : (r.left + Math.min(r.width * 0.5, 130));
-    var y = atStart ? (r.bottom + 92) : (r.top + r.height * 0.62);
+    var box = sel.getBoundingClientRect();
+    /* a sentence wraps over 2+ lines, so getBoundingClientRect's 62%-down point lands
+       on a LATER line — the cursor then "clicks" mid-sentence. Aim the click at the
+       sentence's FIRST visual line instead, so it reads as clicking the sentence open. */
+    var rects = sel.getClientRects();
+    var line = (rects && rects.length) ? rects[0] : box;
+    var x = atStart ? (box.right - 24) : (line.left + Math.min(line.width * 0.5, 130));
+    var y = atStart ? (box.bottom + 92) : (line.top + line.height * 0.62);
     if (atStart) { c.style.transition = 'none'; c.style.transform = 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px)'; void c.offsetWidth; c.style.transition = ''; }
     else { c.classList.add('show'); c.style.transform = 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px)'; }
   }
@@ -2845,7 +3187,34 @@ window.LanternPlaying = false;
       setTimeout(function () {
         if (g !== tpGen || phase !== 2) return;
         window.LanternBusy.set('translate', false);
-      }, fadeMs + 650);
+      }, fadeMs + 180);
+    }, 760);                                         /* cursor travel (~.6s) + a beat */
+  }
+
+  /* cursor-led flip: when you SCROLL/scrub into Immerse, a pointer flies to the
+     ↻ fab and "taps" it, so the page-spin reads as a click you could make yourself
+     — and can: tapping the fab first bumps immGen and voids this. PLAY / mobile /
+     reduced-motion flip bare. Mirrors playTranslateWithCursor. */
+  function immCursorAt(c, atStart) {
+    if (!immFab) return;
+    var r = immFab.getBoundingClientRect();
+    var x = atStart ? (r.right + 26) : (r.left + r.width * 0.5 - 2);
+    var y = atStart ? (r.bottom + 84) : (r.top + r.height * 0.5 - 2);
+    if (atStart) { c.style.transition = 'none'; c.style.transform = 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px)'; void c.offsetWidth; c.style.transition = ''; }
+    else { c.classList.add('show'); c.style.transform = 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px)'; }
+  }
+  function playImmersionWithCursor() {
+    if (!immFab) { immFlip(); return; }
+    var gen = immGen;                                /* a real tap on the fab bumps immGen and voids this */
+    window.LanternBusy.set('immerse', true);
+    var cur = makeTrCursor();
+    immCursorAt(cur, true);                          /* park at the fly-in start (lower-right of the fab) */
+    requestAnimationFrame(function () { immCursorAt(cur, false); });   /* glide onto the fab */
+    setTimeout(function () {
+      if (gen !== immGen || phase !== 3) { if (cur.parentNode) cur.remove(); return; }
+      cur.classList.add('tap');                      /* the click */
+      immFlip();                                     /* the page spins into the reader's language */
+      setTimeout(function () { cur.classList.add('gone'); setTimeout(function () { if (cur.parentNode) cur.remove(); }, 420); }, 360);
     }, 760);                                         /* cursor travel (~.6s) + a beat */
   }
 
@@ -2886,7 +3255,8 @@ window.LanternPlaying = false;
     });
     /* mobile caption names the current phase */
     if (mCaption && M_PHASE_NAMES[p]) {
-      mCaption.textContent = ('0' + (p + 1)) + ' · ' + M_PHASE_NAMES[p];
+      var visP = [0,1,2,3,5,4,6,7][p];
+      mCaption.textContent = ('0' + ((visP !== undefined ? visP : p) + 1)) + ' · ' + M_PHASE_NAMES[p];
     }
     /* tell the mobile scrubber/crank the phase moved — synchronously, so a scene
        auto-advance (discuss→practice) anchors the runway before a stale scroll
@@ -2903,11 +3273,14 @@ window.LanternPlaying = false;
      scene-busy flags so the PLAY engine is never stranded waiting on a scene
      that's no longer on screen. The entered phase re-raises its own flag. */
   function clearScenes() {
+    window.LanternBusy.set('home', false);
     window.LanternBusy.set('simp', false);
     window.LanternBusy.set('translate', false);
     window.LanternBusy.set('immerse', false);
     window.LanternBusy.set('discuss', false);
     window.LanternBusy.set('practice', false);
+    window.LanternBusy.set('everywhere', false);
+    window.LanternBusy.set('navpress', false);
     /* immersion is a scene too — drop its flip state + ↻/next controls */
     document.body.classList.remove('imm-flipped');
     hideImmFab();
@@ -2917,45 +3290,336 @@ window.LanternPlaying = false;
     hidePracNext();
   }
 
+  /* true only while a scrubber CLICK (jump) is being applied — tells the
+     morph-bearing entries (toEverywhere/toCTA) to land statically instead of
+     replaying a predecessor morph from a source that a far jump never set up. */
+  var jumping = false;
+
+  /* full instant teardown of EVERY phase layer to a neutral baseline, used
+     before a jump so the target paints onto a clean stage — no leftover hero
+     copy, overlay, or scene mid-animation showing through as a stale render. */
+  function resetPhaseLayers() {
+    clearScenes();
+    abortMastery();                 /* tear down any in-flight mastery reveal (grown clone + stamp) */
+    exitOverlays();                 /* clearEvCentering + backToWall + drop ph-ev/ph-cta */
+    closeTPanel();
+    leaveDiscuss();
+    document.body.classList.remove('hero-p2', 'hero-p3', 'hero-imm', 'hero-p4', 'hero-p5', 'hero-simp');
+    document.querySelectorAll('#hero .sel').forEach(function (s) { s.classList.remove('on', 'cand-pulse'); });
+    if (window._heroSimpReset) window._heroSimpReset();
+    if (window._heroSimpCancelAuto) window._heroSimpCancelAuto();
+  }
+
   /* leaving phases 5/6 back to a hero phase: drop the overlays, restore the wall */
   function exitOverlays() {
+    abortMastery();                                            /* drop any in-flight mastery reveal */
+    clearEvCentering();                                        /* drop any centred-window transform from the Everywhere split */
     var le = LE(); if (le && le.backToWall) le.backToWall();   /* removes ph-cta + un-hides wall */
     document.body.classList.remove('ph-ev', 'ph-cta');
+    /* a completed mastery reveal leaves the rail "phenomenon" card hidden (the
+       clone did the flying) — restore it as the deck slides back into view */
+    var pc = window.Shelf && window.Shelf.cardEl('phenomenon');
+    if (pc) pc.style.visibility = '';
+  }
+
+  /* undo ev-centering: restore bob + browser tilt + copy visibility.
+     stage.style.transform reset is a no-op (we no longer set an inline transform). */
+  function clearEvCentering() {
+    evCentering = false;
+    document.body.classList.remove('ev-centering');
+    var stage = document.querySelector('#hero .hero-stage');
+    if (stage) {
+      stage.style.transition = 'none';
+      stage.style.transform  = '';
+      void stage.offsetWidth;
+      stage.style.transition = '';
+    }
+  }
+
+  /* ── B (council 9/9): the mastered "phenomenon" card is the HINGE of the
+     Everywhere split. On Next it grows centre-stage over the scene, holds with a
+     "Mastered" stamp, then CRACKS into the six article pages — the word you
+     mastered opens up the whole web. The growing card masks the hero/chat fade
+     beneath (nothing fades naked); the "press" is an auto-beat so PLAY + the
+     scrubber stay continuous (evCentering holds the gate through grow + hold,
+     then le.busy()/morphing carries the crack — handed over synchronously). ── */
+  var _mr = null;                       /* { clone, stamp, card, t1, t2 } while a mastery reveal is mid-flight */
+  function abortMastery() {
+    if (!_mr) return;
+    clearTimeout(_mr.tRise); clearTimeout(_mr.t1); clearTimeout(_mr.tStamp); clearTimeout(_mr.tPhrase); clearTimeout(_mr.tExit); clearTimeout(_mr.tFlip); clearTimeout(_mr.t2); clearTimeout(_mr.tDivide);
+    if (_mr.sway) cancelAnimationFrame(_mr.sway);
+    if (_mr.stamp && _mr.stamp.parentNode) _mr.stamp.remove();
+    if (_mr.line  && _mr.line.parentNode)  _mr.line.remove();
+    if (_mr.blur  && _mr.blur.parentNode)  _mr.blur.remove();
+    if (_mr.clone && _mr.clone.parentNode) _mr.clone.remove();
+    if (_mr.card) _mr.card.style.visibility = '';
+    _mr = null;
+    evCentering = false;
+    window.LanternBusy.set('mastery', false);
+  }
+  function masteryReveal(phCard, win, le) {
+    var r  = phCard.getBoundingClientRect();
+    var wr = win.getBoundingClientRect();
+    var cardW = phCard.offsetWidth, cardH = phCard.offsetHeight;
+    var k  = (wr.width / cardW) * 0.72;                    /* −20%, then −10% more */
+    var H  = cardH * k;
+    var cx = innerWidth / 2, cy = innerHeight / 2;         /* DEAD centre of the screen */
+    var Ty = cy - H / 2;                                   /* grown card's top edge (for the stamp) */
+    var ttX = cx - cardW / 2, ttY = cy - cardH / 2;        /* translate for a CENTRE transform-origin: the card's centre lands on screen centre at any scale */
+    var RISE = 360, FLY = 940, HOLD = 3300;                /* two slow beats; the float = pulse → line + badge → they dissolve */
+
+    /* the two screens fully blur behind the card — a frosted backdrop (not a light
+       blur), reaching full WHILE the card flies. The card stays sharp in front. */
+    var blur = document.createElement('div');
+    blur.className = 'mastery-blur';
+    blur.style.cssText = 'position:fixed;inset:0;z-index:1100;pointer-events:none;opacity:0;' +   /* BELOW the card (1300) AND the divide shards (1200+) so both stay sharp; it only blurs the DISCUSS scene behind */
+      'backdrop-filter:blur(20px) saturate(1.04);-webkit-backdrop-filter:blur(20px) saturate(1.04);' +
+      'background:rgba(247,246,243,.38);transition:opacity ' + (RISE + FLY) + 'ms ease;';
+    document.body.appendChild(blur);
+
+    /* the floating card: NO radius override — it keeps the vocab card's own 15px,
+       which scale(k) blows up proportionally, so its corners read exactly as soft
+       as the deck cards. transform-origin centre → it grows + sways in place. */
+    var clone = phCard.cloneNode(true);
+    clone.classList.remove('collapsing', 'gone');
+    clone.style.cssText = 'position:fixed;left:0;top:0;margin:0;z-index:1300;pointer-events:none;' +
+      'width:' + cardW + 'px;transform-origin:50% 50%;' +
+      'transform:translate(' + r.left.toFixed(1) + 'px,' + r.top.toFixed(1) + 'px) scale(1);' +
+      'box-shadow:0 18px 34px -16px rgba(26,23,20,.4),0 2px 6px -3px rgba(26,23,20,.1);transition:none;will-change:transform;';   /* == the rail card's shadow, so the hand-off is invisible; it grows on lift-off */
+    document.body.appendChild(clone);
+    phCard.style.visibility = 'hidden';                    /* hide the rail original under the clone — seamless */
+
+    /* tweak 2: drive the ring home on the SAME easing as the flight. phenomenon is
+       usually already 100% by Discuss, so this is a no-op fill and the ring-pop
+       below carries the tactile beat; on a scrub-in it actually completes here. */
+    var ringC = clone.querySelectorAll('.wd-prog circle')[1];
+    if (ringC) ringC.style.transition = 'stroke-dashoffset ' + (RISE + FLY) + 'ms cubic-bezier(.22,.7,.24,1)';
+
+    var stampPos = 'translate(' + cx.toFixed(1) + 'px,' + (Ty + H + 18).toFixed(1) + 'px) translate(-50%,0)';
+    var stamp = document.createElement('div');
+    stamp.className = 'mastery-stamp';
+    stamp.innerHTML = '<span class="ms-check">✓</span> Mastered';
+    stamp.style.cssText = 'position:fixed;left:0;top:0;z-index:1301;pointer-events:none;opacity:0;transform-origin:50% 50%;' +
+      'transform:' + stampPos + ' scale(.8);' +
+      'transition:opacity .24s ease, transform .34s cubic-bezier(.34,1.56,.64,1);';
+    document.body.appendChild(stamp);
+
+    /* the council round-2 line — the human voice of the beat — sits ABOVE the card */
+    var linePos = 'translate(' + cx.toFixed(1) + 'px,' + (Ty - 24).toFixed(1) + 'px) translate(-50%,-100%)';
+    var line = document.createElement('div');
+    line.className = 'mastery-line';
+    line.textContent = 'One word. Thousands ahead.';
+    line.style.cssText = 'position:fixed;left:0;top:0;z-index:1301;pointer-events:none;opacity:0;' +
+      'transform:' + linePos + ' translateY(12px);' +
+      'transition:opacity .34s ease, transform .44s cubic-bezier(.22,.7,.24,1);';
+    document.body.appendChild(line);
+
+    _mr = { clone: clone, stamp: stamp, line: line, blur: blur, card: phCard, tRise: 0, t1: 0, tStamp: 0, tPhrase: 0, tExit: 0, tFlip: 0, t2: 0, tDivide: 0, sway: 0 };
+    evCentering = true;                                    /* gate input + hold PLAY through the whole reveal */
+    window.LanternBusy.set('mastery', true);
+    void clone.offsetWidth;                                /* commit the start frame so beat 1 eases (no jump) */
+
+    /* BEAT 1 — the card lifts UP out of the vocab deck (in place), like taking off;
+       the frosted blur begins easing in behind it the moment it leaves the rail. */
+    requestAnimationFrame(function () {
+      clone.style.transition = 'transform ' + RISE + 'ms cubic-bezier(.34,1.08,.5,1), box-shadow ' + RISE + 'ms ease';
+      clone.style.transform  = 'translate(' + r.left.toFixed(1) + 'px,' + (r.top - 32).toFixed(1) + 'px) scale(1.07)';
+      clone.style.boxShadow  = '0 44px 96px -34px rgba(26,23,20,.5)';   /* the float shadow grows in as it lifts off the deck */
+      blur.style.opacity = '1';
+    });
+
+    /* BEAT 2 — then it glides LEFT to dead centre and grows (slower) */
+    _mr.tRise = setTimeout(function () {
+      if (!_mr) return;
+      clone.style.transition = 'transform ' + FLY + 'ms cubic-bezier(.4,0,.2,1)';
+      clone.style.transform  = 'translate(' + ttX.toFixed(1) + 'px,' + ttY.toFixed(1) + 'px) scale(' + k.toFixed(4) + ')';
+      if (ringC) ringC.style.strokeDashoffset = '0';        /* ring closes as the card opens */
+    }, RISE);
+
+    /* arrival (achieved): the progress RING pulses first, and a gentle 3-D sway
+       begins — the card parks in space, tilting a couple degrees back and forth */
+    _mr.t1 = setTimeout(function () {
+      if (!_mr) return;
+      clone.classList.remove('ring-pop'); void clone.offsetWidth; clone.classList.add('ring-pop');   /* PB pulse — you reached it */
+      clone.style.transition = 'none';                     /* the sway loop owns transform now */
+      var t0 = performance.now();
+      (function sway(now) {
+        if (!_mr) return;
+        var e = (now - t0) / 1000;
+        var ry = 2.6 * Math.sin(e / 1.9);                  /* tilt a couple degrees, slow, back and forth */
+        var rx = 1.5 * Math.sin(e / 2.5);                  /* starts at 0 (no micro-tilt at hand-off from the glide) */
+        var by = 3.5 * Math.sin(e / 1.5);                  /* gentle vertical bob — it floats, never just sits */
+        var bs = 1 + 0.005 * Math.sin(e / 2.2);            /* the faintest breath of scale */
+        clone.style.transform = 'perspective(1200px) translate(' + ttX.toFixed(1) + 'px,' + (ttY + by).toFixed(2) + 'px) scale(' + (k * bs).toFixed(4) + ') rotateY(' + ry.toFixed(2) + 'deg) rotateX(' + rx.toFixed(2) + 'deg)';
+        _mr.sway = requestAnimationFrame(sway);
+      })(t0);
+    }, RISE + FLY);
+
+    /* 2) a beat AFTER the pulse the BADGE arrives (received) — pops up with overshoot */
+    _mr.tStamp = setTimeout(function () {
+      if (!_mr) return;
+      stamp.style.opacity = '1';
+      stamp.style.transform = stampPos + ' scale(1)';
+    }, RISE + FLY + 460);
+
+    /* 3) THEN the phrase rises in above the card */
+    _mr.tPhrase = setTimeout(function () {
+      if (!_mr) return;
+      line.style.opacity = '1';
+      line.style.transform = linePos;
+    }, RISE + FLY + 460 + 560);
+
+    /* 4) the BADGE leaves first (alone): a quick press, then it flips up + dissolves.
+       The phrase stays — it goes WITH the card at the divide. */
+    _mr.tExit = setTimeout(function () {
+      if (!_mr) return;
+      stamp.style.transition = 'transform .12s ease';
+      stamp.style.transform = stampPos + ' scale(.9)';                                       /* press */
+      _mr.tFlip = setTimeout(function () {
+        if (!_mr) return;
+        stamp.style.transition = 'transform .36s cubic-bezier(.5,0,.75,.2),opacity .34s ease';
+        stamp.style.transform = 'perspective(520px) ' + stampPos + ' scale(.9) rotateX(88deg)';   /* flip up + */
+        stamp.style.opacity = '0';                                                           /* dissolve */
+      }, 130);
+    }, RISE + FLY + HOLD - 1000);
+
+    /* hold ends → first the sway EASES TO REST (no snap), then the card divides.
+       The divide is seeded from this exact flat resting state, so the slices line
+       up with the last on-screen frame — no jump. */
+    _mr.t2 = setTimeout(function () {
+      if (!_mr || phase !== 6) { abortMastery(); return; }
+      cancelAnimationFrame(_mr.sway);
+      clone.style.transition = 'transform .3s cubic-bezier(.33,0,.2,1)';                       /* settle perspective/tilt/bob → flat */
+      clone.style.transform  = 'translate(' + ttX.toFixed(1) + 'px,' + ttY.toFixed(1) + 'px) scale(' + k.toFixed(4) + ')';
+      _mr.tDivide = setTimeout(function () {
+        if (!_mr || phase !== 6) { abortMastery(); return; }
+        var c = clone, b = blur, ln = line;
+        clone.style.transition = 'none';
+        if (stamp.parentNode) stamp.remove();              /* badge already gone */
+        /* 5) the phrase fades out IN LOCKSTEP with the split — card + phrase vanish together */
+        ln.style.transition = 'opacity .4s ease, transform .5s cubic-bezier(.4,0,.6,1)';
+        ln.style.transform = linePos + ' translateY(-8px)';
+        ln.style.opacity = '0';
+        setTimeout(function () { if (ln.parentNode) ln.remove(); }, 520);
+        _mr = null;
+        closeTPanel(); leaveDiscuss();                     /* reset the chat (it divides into the media now) */
+        if (le.backToWall) le.backToWall();
+        document.body.classList.add('ph-ev');              /* hero bows out under the flying media shards */
+        b.style.transition = 'opacity .7s ease';           /* lift the frosted backdrop as the media surface */
+        b.style.opacity = '0';
+        setTimeout(function () { if (b.parentNode) b.remove(); }, 760);
+        evCentering = false;                               /* hand the gate to le.busy() (morphing) — synchronous, no gap */
+        window.LanternBusy.set('mastery', false);
+        le.morphFromCard(c);                               /* the card cracks → six media fly to the wall */
+      }, 330);                                             /* let the settle finish before slicing */
+    }, RISE + FLY + HOLD);
   }
 
   function toEverywhere() {            /* phase 6 */
     if (phase === 6) return;
-    clearScenes();                     /* the morph itself reports through LE().busy() */
+    clearScenes();
     var fromCTA = (phase === 7);
     phase = 6;
+    /* clicked here from a non-adjacent phase: the window/dock was never split,
+       so there's no valid source to shatter — drop the wall in statically */
+    if (jumping) {
+      document.body.classList.add('ph-ev');
+      var le0 = LE(); if (le0 && le0.presentWall) le0.presentWall();
+      setDots(6);
+      return;
+    }
+    /* ── B (council): coming from Discuss on desktop → run the mastery reveal
+       (grow the "phenomenon" card → hold → crack into six). Detected BEFORE
+       leaveDiscuss so the chat stays put under the growing card. ── */
+    var leMR  = LE();
+    var winMR = document.querySelector('#hero .browser');
+    var dockMR = document.getElementById('hero-dock');
+    var phMR  = window.Shelf ? window.Shelf.cardEl('phenomenon') : null;
+    if (!fromCTA && dockMR && dockMR.classList.contains('show') &&
+        phMR && phMR.getBoundingClientRect().width > 2 &&
+        window.matchMedia('(min-width: 981px)').matches && !RM &&
+        winMR && leMR && leMR.morphFromCard) {
+      setDots(6);
+      masteryReveal(phMR, winMR, leMR);
+      return;
+    }
+    /* PLAY: let the six-article wall breathe — hold the reel ≥2s after entry
+       before it docks into the CTA (the split morph's own busy already covers
+       the animation; this is the dwell to actually read the wall) */
+    if (!fromCTA) {
+      window.LanternBusy.set('everywhere', true);
+      setTimeout(function () { window.LanternBusy.set('everywhere', false); }, 2000);
+    }
+    /* capture discuss panel BEFORE leaveDiscuss() clears it */
+    var dock = document.getElementById('hero-dock');
+    var dockShowing = !fromCTA && dock && dock.classList.contains('show');
+    var dockClone = dockShowing ? dock.cloneNode(true) : null;
+    var dockRect  = dockShowing ? dock.getBoundingClientRect() : null;
     closeTPanel(); leaveDiscuss();
-    var le = LE(); if (le && le.backToWall) le.backToWall();   /* clears ph-cta + restores wall visibility */
-    document.body.classList.add('ph-ev');
+    var le = LE(); if (le && le.backToWall) le.backToWall();
     setDots(6);
-    if (!fromCTA && le && le.morphFromWindow) le.morphFromWindow(document.querySelector('#hero .browser'));
+    var win = document.querySelector('#hero .browser');
+    var canSplit  = !fromCTA && le && win;
+    var bigEnough = window.matchMedia('(min-width: 981px)').matches && !RM;
+    if (canSplit && bigEnough) {
+      if (dockClone && le.morphFromDock) {
+        /* Discuss → Everywhere: the chat cracks into the six cards. Run it
+           SYNCHRONOUSLY — leaveDiscuss() above already hid the real dock, so the
+           shards (built here) reconstruct it in the SAME frame: no paint happens
+           in between, the chat never blinks out before the split. */
+        document.body.classList.add('ph-ev');
+        le.morphFromDock(dockClone, dockRect, win);
+      } else {
+        /* Practice → Everywhere: browser window shatters */
+        evCentering = true;
+        document.body.classList.add('ev-centering');
+        setTimeout(function () {
+          evCentering = false;
+          if (phase !== 6) { clearEvCentering(); return; }
+          document.body.classList.add('ph-ev');
+          if (le.morphFromWindow) le.morphFromWindow(win);
+        }, 380);
+      }
+    } else {
+      document.body.classList.add('ph-ev');
+      if (canSplit) {
+        if (dockClone && le.morphFromDock) le.morphFromDock(dockClone, dockRect, win);
+        else if (le.morphFromWindow) le.morphFromWindow(win);
+      }
+    }
   }
 
   function toCTA() {                   /* phase 7 */
     if (phase === 7) return;
     clearScenes();
     phase = 7;
-    document.body.classList.add('ph-cta');
     setDots(7);
-    var le = LE(); if (le && le.toCTA) le.toCTA();
+    var le = LE();
+    /* clicked straight here: the wall was never built, so the finale→CTA flip
+       has no cards to flip — present the docked end-state directly */
+    if (jumping) {
+      document.body.classList.add('ph-ev');
+      if (le && le.presentCTA) le.presentCTA();
+      else document.body.classList.add('ph-cta');
+      return;
+    }
+    document.body.classList.add('ph-cta');
+    if (le && le.toCTA) le.toCTA();
   }
 
-  function backToHero() {              /* phase 6 → 5: the six articles fly home and
+  function backToHero() {              /* phase 6 → 4: the six articles fly home and
                                           flip back into the window — it reassembles */
     if (phase !== 6) return;
+    clearEvCentering();                 /* snap the window back to its real P4 spot so the gather targets it */
     var le = LE(), win = document.querySelector('#hero .browser');
     if (le && le.morphToWindow) {
       le.morphToWindow(win, function () {
         document.body.classList.remove('ph-ev', 'ph-cta');
-        toP5();                        /* restores the hero Practice state, sets phase=4 + dots */
+        toP4();                        /* restores the hero Discuss/Analysis state */
       });
     } else {
       document.body.classList.remove('ph-ev', 'ph-cta');
-      toP5();
+      toP4();
     }
   }
 
@@ -3026,6 +3690,7 @@ window.LanternPlaying = false;
       closeTPanel();
       document.querySelectorAll('#hero .sel').forEach(function (s) { s.classList.remove('on', 'cand-pulse'); });
       if (window._heroSimpReset) window._heroSimpReset();
+      if (window._heroSimpCancelAuto) window._heroSimpCancelAuto();
     }
     /* any entry into P2 guarantees the four words — a dot1→dot3 jump used to
        skip this and silently degrade the simplify demo to plain text */
@@ -3042,6 +3707,15 @@ window.LanternPlaying = false;
       setTimeout(populateShelf, 400);
     }
     if (window._heroLevelRest) window._heroLevelRest();   // C1 badge rests in the corner, awaiting the tap
+    if (!wasAbove && window._heroSimpAutoPlay) {
+      /* gate PLAY from the moment we enter: the cursor autoplay only raises 'simp'
+         ~1.3s in (when it taps the badge), but PLAY's 600ms BREATH would step away
+         first and skip the whole Simplify scene. Hold the reel here; the autoplay's
+         dot.click clears 'simp' when the word-stream ends (and clearScenes drops it
+         if the phase is left first). */
+      window.LanternBusy.set('simp', true);
+      setTimeout(window._heroSimpAutoPlay, 400);
+    }
     setDots(1);
   }
 
@@ -3051,9 +3725,24 @@ window.LanternPlaying = false;
     clearScenes();
     window.LanternBusy.set('translate', true);   /* held until the riser settles back, or the phase is left */
     phase = 2;
+    if (window._heroSimpRevert) window._heroSimpRevert();   // scrolling on rewinds the B2 preview (quick fade)
     exitOverlays();
+    /* FLIP: snapshot stage position before grid-column swap back */
+    var _fStg = document.querySelector('#hero .hero-stage');
+    var _fR = (_fStg && matchMedia('(min-width: 921px)').matches && !matchMedia('(prefers-reduced-motion: reduce)').matches)
+      ? _fStg.getBoundingClientRect() : null;
     document.body.classList.add('hero-p2', 'hero-p3');
     document.body.classList.remove('hero-imm', 'hero-p4', 'hero-p5', 'hero-simp');
+    /* FLIP: invert to old position, release to animate */
+    if (_fR && _fStg) {
+      var _dx = _fR.left - _fStg.getBoundingClientRect().left;
+      if (Math.abs(_dx) > 2) {
+        _fStg.style.transition = 'none';
+        _fStg.style.transform = 'translateX(' + _dx.toFixed(1) + 'px)';
+        void _fStg.offsetWidth;
+        requestAnimationFrame(function () { _fStg.style.transition = ''; _fStg.style.transform = ''; });
+      }
+    }
     closeTPanel();
     leaveDiscuss();
     setDots(2);
@@ -3080,20 +3769,38 @@ window.LanternPlaying = false;
     clearScenes();
     phase = 3;
     exitOverlays();
+    /* FLIP: snapshot stage position before grid-column swap */
+    var _fStg = document.querySelector('#hero .hero-stage');
+    var _fR = (_fStg && matchMedia('(min-width: 921px)').matches && !matchMedia('(prefers-reduced-motion: reduce)').matches)
+      ? _fStg.getBoundingClientRect() : null;
     document.body.classList.add('hero-p2', 'hero-p3', 'hero-imm');
     document.body.classList.remove('hero-p4', 'hero-p5', 'hero-simp');
+    /* FLIP: invert to old position, release to animate */
+    if (_fR && _fStg) {
+      var _dx = _fR.left - _fStg.getBoundingClientRect().left;
+      if (Math.abs(_dx) > 2) {
+        _fStg.style.transition = 'none';
+        _fStg.style.transform = 'translateX(' + _dx.toFixed(1) + 'px)';
+        void _fStg.offsetWidth;
+        requestAnimationFrame(function () { _fStg.style.transition = ''; _fStg.style.transform = ''; });
+      }
+    }
     closeTPanel();
     leaveDiscuss();
     document.querySelectorAll('#hero .sel').forEach(function (s) { s.classList.remove('on', 'cand-pulse'); });
     immReset();                                  /* English front, our words blue, ↻ armed */
     setDots(3);
-    /* auto-demonstrate the flip a beat after entry (scroll-in / PLAY) — unless the
-       visitor turns it themselves first (immFlip bumps immGen, voiding this) */
+    /* a beat after entry, demonstrate the flip — unless the visitor taps the fab
+       themselves first (immFlip bumps immGen, voiding this). On a desktop scroll-in
+       a pointer flies to the ↻ fab and taps it, so the swap reads as a click you
+       could make; the PLAY reel / mobile / reduced-motion just flip bare. */
     window.LanternBusy.set('immerse', true);
     var gen = immGen;
     setTimeout(function () {
       if (phase !== 3 || gen !== immGen) return;
-      immFlip();
+      var deskMotion = matchMedia('(min-width: 921px)').matches && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (deskMotion && !window.LanternPlaying) playImmersionWithCursor();
+      else immFlip();
     }, RM ? 0 : 1100);
   }
 
@@ -3136,12 +3843,12 @@ window.LanternPlaying = false;
   /* bot opens with a provocation; visitor fires back; bot closes with citation */
   var BOT_OPEN = 'Quick take — is Swift\'s cross-genre run a real [[phenomenon]], or just [[devoted]] fans who\'d follow anything she does?';
   var USER_REPLY = {
-    text:  'Has to be a [[phenomenon]] — she kept every crowd through every [[genre]] shift.',
-    plain: 'Has to be a phenomenon — she kept every crowd through every genre shift.',
-    lemmas: ['phenomenon', 'genre']
+    text:  'Has to be a [[phenomenon]] — she kept every crowd through every reinvention.',
+    plain: 'Has to be a phenomenon — she kept every crowd through every reinvention.',
+    lemmas: ['phenomenon']
   };
   var BOT_FOLLOW = {
-    text: 'Exactly. The article puts it plain — crossing every [[genre]] boundary, leaving a [[legacy]] no other artist has matched.',
+    text: 'Exactly. The article puts it plain — leaving a [[legacy]] no other artist has matched.',
     cite: 's2'
   };
 
@@ -3152,6 +3859,7 @@ window.LanternPlaying = false;
   function leaveDiscuss() {
     dockGen++; dockBusy = false;
     hideDiscNext();
+    document.body.classList.remove('disc-open');   /* drop the browser-right / copy reveal */
     if (dock) {
       dock.style.transition = 'none';
       dock.classList.remove('show');
@@ -3294,8 +4002,9 @@ window.LanternPlaying = false;
 
   /* everything after the "Discuss the article" press */
   async function openDockFlow(gen) {
-    dock.classList.add('show');
-    await wait(160); if (!aliveD(gen)) return;
+    dock.classList.add('show');                    /* beat 1 — the chat opens on the LEFT */
+    await wait(260); if (!aliveD(gen)) return;
+    document.body.classList.add('disc-open');      /* beat 2 — browser eases right; beat 3 — copy trails in (CSS-delayed) */
     var skel = document.createElement('div');
     skel.className = 'dk-skel'; skel.innerHTML = '<i></i><i></i><i></i>';
     dockBody.appendChild(skel);
@@ -3324,7 +4033,7 @@ window.LanternPlaying = false;
     pinDock();
     citePulse(BOT_FOLLOW.cite);
     await revealWords(fQueue, gen); if (!aliveD(gen)) return;
-    await wait(800); if (!aliveD(gen)) return;
+    await wait(220); if (!aliveD(gen)) return;
     /* chat played out — keep it open (like the translate card) and raise the
        "Next: Practice" cue, then release so PLAY may walk on */
     showDiscNext();
@@ -3339,6 +4048,7 @@ window.LanternPlaying = false;
     dockBody.innerHTML = '';
     hideDiscNext();
     dock.classList.remove('show');
+    document.body.classList.remove('disc-open');   /* reset the morph: browser back at rest, copy hidden */
     if (discFab) discFab.classList.remove('press', 'gone', 'beckon');
     dock.setAttribute('aria-hidden', 'false');
     /* flush under the real toolbar, whatever its rendered height */
@@ -3538,16 +4248,16 @@ window.LanternPlaying = false;
       if (phase === 0) toP2();
       else if (phase === 1) toP3();
       else if (phase === 2) toImmersion();
-      else if (phase === 3) toP4();
-      else if (phase === 4) toP5();
-      else if (phase === 5) toEverywhere();
+      else if (phase === 3) toP5();
+      else if (phase === 5) toP4();
+      else if (phase === 4) toEverywhere();
       else if (phase === 6) toCTA();
       /* phase 7 (CTA): the end — nothing further */
     } else {
       if (phase === 7) toEverywhere();   /* CTA → Everywhere (overlay back, no re-flip) */
       else if (phase === 6) backToHero();
-      else if (phase === 5) toP4();
-      else if (phase === 4) toImmersion();
+      else if (phase === 4) toP5();
+      else if (phase === 5) toImmersion();
       else if (phase === 3) toP3();
       else if (phase === 2) toP2();
       else toP1();
@@ -3586,9 +4296,12 @@ window.LanternPlaying = false;
     var t = e.changedTouches[0];
     var dy = touchStartY - t.clientY;
     var dx = Math.abs(touchStartX - t.clientX);
-    if (performance.now() - touchStartT > 700) return;
-    if (Math.abs(dy) < 45) return;
-    if (dx > Math.abs(dy) * 0.7) return;
+    /* NO duration cap: in crank mode every vertical drag is a phase step, and a
+       deliberate human swipe routinely runs >0.7s — the old 700ms cap silently
+       ate those (the "swipe does nothing" bug). A swipe is defined by distance +
+       direction, not speed. */
+    if (Math.abs(dy) < 40) return;
+    if (dx > Math.abs(dy)) return;   /* reject only clearly-horizontal drags (thumb swipes arc) */
     /* don't capture swipes inside a scrollable chat body */
     var cw = e.target && e.target.closest ? e.target.closest('.cw-body') : null;
     if (cw && cw.scrollHeight > cw.clientHeight + 1) {
@@ -3625,15 +4338,15 @@ window.LanternPlaying = false;
       if (phase === 0) toP2();
       else if (phase === 1) toP3();
       else if (phase === 2) toImmersion();
-      else if (phase === 3) toP4();
-      else if (phase === 4) toP5();
-      else if (phase === 5) toEverywhere();
+      else if (phase === 3) toP5();
+      else if (phase === 5) toP4();
+      else if (phase === 4) toEverywhere();
       else if (phase === 6) toCTA();
     } else {
       if (phase === 7) toEverywhere();
       else if (phase === 6) backToHero();
-      else if (phase === 5) toP4();
-      else if (phase === 4) toImmersion();
+      else if (phase === 4) toP5();
+      else if (phase === 5) toImmersion();
       else if (phase === 3) toP3();
       else if (phase === 2) toP2();
       else toP1();
@@ -3645,7 +4358,10 @@ window.LanternPlaying = false;
      repeatedly so a long drag still plays every phase on the way. ── */
   window.LanternPhases = {
     get: function () { return phase; },
+    /* visual scrubber position (0-7): Practice(5) now comes before Analysis(4) */
+    pos: function () { return [0,1,2,3,5,4,6,7][phase] !== undefined ? [0,1,2,3,5,4,6,7][phase] : phase; },
     busy: function () {
+      if (evCentering) return true;          /* hold every gesture while the window centres */
       var le0 = LE();
       return !!(le0 && le0.busy && le0.busy());
     },
@@ -3653,27 +4369,28 @@ window.LanternPlaying = false;
        this before advancing (manual gestures ignore it and cut through). The
        window-split / dock morph reports through busy() above, so fold it in. */
     actionPlaying: function () {
-      if (window.LanternBusy.active()) return true;
+      if (evCentering || window.LanternBusy.active()) return true;
       var le0 = LE();
       return !!(le0 && le0.busy && le0.busy());
     },
     step: function (dir) {
+      if (evCentering) return false;          /* mid-centre: ignore steps until the split fires */
       var le0 = LE();
       if (le0 && le0.busy && le0.busy()) return false;
       if (dir > 0) {
         if (phase === 0) toP2();
         else if (phase === 1) toP3();
         else if (phase === 2) toImmersion();
-        else if (phase === 3) toP4();
-        else if (phase === 4) toP5();
-        else if (phase === 5) toEverywhere();
+        else if (phase === 3) toP5();
+        else if (phase === 5) toP4();
+        else if (phase === 4) toEverywhere();
         else if (phase === 6) toCTA();
         else return false;
       } else {
         if (phase === 7) toEverywhere();
         else if (phase === 6) backToHero();
-        else if (phase === 5) toP4();
-        else if (phase === 4) toImmersion();
+        else if (phase === 4) toP5();
+        else if (phase === 5) toImmersion();
         else if (phase === 3) toP3();
         else if (phase === 2) toP2();
         else if (phase === 1) toP1();
@@ -3681,10 +4398,19 @@ window.LanternPlaying = false;
       }
       return true;
     },
+    /* n is a VISUAL scrubber position (0-7); VIS_PHASE maps it to the internal
+       phase (Practice/Analysis swapped). A click jumps clean: tear every layer
+       down to a neutral baseline, then paint the target onto it — no neighbour
+       morph from a state this jump never set up, so no stale render bleeds in. */
     jump: function (n) {
-      var fns = [toP1, toP2, toP3, toImmersion, toP4, toP5, toEverywhere, toCTA];
-      if (n >= 0 && n < fns.length) { fns[n](); return true; }
-      return false;
+      var VIS_PHASE = [0, 1, 2, 3, 5, 4, 6, 7];
+      var fns = [toP1, toP2, toP3, toImmersion, toP5, toP4, toEverywhere, toCTA];
+      if (n < 0 || n >= fns.length) return false;
+      if (VIS_PHASE[n] === phase) return true;      /* already here — don't wipe + rebuild */
+      jumping = true;
+      resetPhaseLayers();
+      try { fns[n](); } finally { jumping = false; }
+      return true;
     }
   };
 })();
@@ -3789,13 +4515,13 @@ window.LanternPlaying = false;
 
   /* simple version: {lemma} = word from shelf (highlighted if saved) */
   var SIMPLE = [
-    'She dominated every ',
+    'Her commercial rise has crossed every ',
     { lemma: 'genre',      text: 'genre' },
-    ' — from country to pop to folk — and kept her ',
+    ' — from country to pop to folk — without ever losing a single ',
     { lemma: 'devoted',    text: 'devoted' },
-    ' fans. Critics call it a ',
+    ' fan along the way. Critics everywhere call it a cultural ',
     { lemma: 'phenomenon', text: 'phenomenon' },
-    ': no other artist had crossed so many boundaries.'
+    ': a scale of success the music industry had simply never seen before.'
   ];
 
   var simplified = false, busy = false;
@@ -3859,10 +4585,9 @@ window.LanternPlaying = false;
       if (s.classList.contains('saved') && window.flyShelfCardTo && window.Shelf && window.Shelf.has(s.dataset.w)) {
         await window.flyShelfCardTo(s.dataset.w, s.getBoundingClientRect(), { scale: 0.5, settle: 0 });
         s.classList.add('on');
-        await wait(150);
+        await wait(40);
       } else {
         s.classList.add('on');
-        await wait(44);
       }
     }
   }
@@ -3892,31 +4617,19 @@ window.LanternPlaying = false;
       var spans = buildSimpleSpans();
       fitPage();                                 // grow the frame to the simplified text before it reveals
       body.classList.remove('fade');
-      await wait(320);                           // brief hold so C1 reads before it ticks
+      await wait(160);                           // brief hold so C1 reads before it ticks
       if (g !== simpGen) { busy = false; return; }
       lvl.classList.add('rolled', 'pulse');      // C1 → B2 with a green pulse + "now at your level"
-      setTimeout(function () { lvl.classList.remove('pulse'); }, 760);
-      await wait(280);
+      setTimeout(function () { lvl.classList.remove('pulse'); }, 600);
+      await wait(120);
       if (g !== simpGen) { busy = false; return; }
       await swapIn(spans);
       if (g !== simpGen) { busy = false; return; }
-      /* hold on the easy (B2) version so the simplify is read… */
-      await wait(1150);
-      if (g !== simpGen) { busy = false; return; }
-      /* …then revert to the ORIGINAL dense text. The simplify is a preview — the
-         dense version is what Translate / Immerse carry forward (not the simplified
-         one), so it eases back to C1 here. */
-      simplified = false;
-      para.classList.remove('simplified');
-      unfitPage();                               // shrink the frame back to baseline
-      if (levelEl) levelEl.classList.remove('rolled', 'pulse');   // badge rolls back to C1 (dense)
-      body.classList.add('fade');
-      await wait(230);
-      if (g !== simpGen) { busy = false; return; }
-      while (body.firstChild) body.removeChild(body.firstChild);
-      if (origNodes) origNodes.forEach(function (n) { body.appendChild(n); });
-      body.classList.remove('fade');
-      await wait(120);
+      /* STAY on the easy (B2) version — it no longer rewinds on its own timer.
+         The dense original comes back only when the visitor scrolls on: toP3 / toP1
+         call _heroSimpRevert for a quick fade. (Translate / Immerse carry the dense
+         text, which lives in the separate tr-page, so leaving this simplified is safe.) */
+      await wait(80);
       if (g !== simpGen) { busy = false; return; }
       if (window._heroShowSimpNext) window._heroShowSimpNext();   // raise the "Next: Translate" cue
     } else {
@@ -3937,6 +4650,29 @@ window.LanternPlaying = false;
     busy = false;
     window.LanternBusy.set('simp', false);   /* word-stream done → PLAY may advance */
   });
+
+  /* scroll-on revert: the visitor leaves the Simplify screen (toP3 / toP1) while the
+     B2 preview is still showing → rewind to the dense original as a QUICK fade, instead
+     of the old self-reverting timer. Mirrors the manual flip-back, minus _heroToP2 (the
+     phase change owns the left copy now). Fire-and-forget; the crossfade plays over it. */
+  async function fadeRevert() {
+    if (!simplified) { if (levelEl) levelEl.classList.remove('show', 'rolled', 'pulse'); return; }
+    var g = ++simpGen;                 /* abort any in-flight word stream */
+    simplified = false; busy = false;
+    para.classList.remove('simplified');
+    unfitPage();
+    dot.style.animation = '';
+    if (levelEl) levelEl.classList.remove('rolled', 'pulse');   // badge eases back toward C1
+    if (window.LanternBusy) window.LanternBusy.set('simp', false);
+    body.classList.add('fade');
+    await wait(160);                                            // quick fade out
+    if (g !== simpGen) return;                                  // a newer reset took over
+    while (body.firstChild) body.removeChild(body.firstChild);
+    if (origNodes) origNodes.forEach(function (n) { body.appendChild(n); });
+    body.classList.remove('fade');
+    if (levelEl) levelEl.classList.remove('show');             // badge gone — we've left P2
+  }
+  window._heroSimpRevert = function () { fadeRevert(); };
 
   /* phase changes restore the original paragraph instantly, so a later return
      to P2 never shows simplified text desynced from the left copy */
@@ -3961,6 +4697,53 @@ window.LanternPlaying = false;
     l.classList.remove('rolled', 'pulse');
     l.classList.add('show');
   };
+
+  var _autoTimer = 0, _autoCur = null;
+  function _killAutoCur() {
+    if (!_autoCur) return;
+    var c = _autoCur; _autoCur = null;
+    c.classList.add('gone');
+    setTimeout(function () { if (c.parentNode) c.parentNode.removeChild(c); }, 420);
+  }
+  window._heroSimpAutoPlay = function () {
+    clearTimeout(_autoTimer); _killAutoCur();
+    if (simplified || busy) return;
+    var hero = document.getElementById('hero');
+    if (!hero) return;
+    var cur = document.createElement('div');
+    cur.className = 'hw-cursor';
+    cur.innerHTML = '<span class="hwc-ico"><svg viewBox="0 0 24 24" width="25" height="25"><path d="M3 2 L3 18.6 L7.3 14.6 L10.3 21 L13 19.8 L10 13.5 L16.2 13.5 Z" fill="#1a1714" stroke="#fff" stroke-width="1.4" stroke-linejoin="round"/></svg></span><span class="hwc-ring"></span>';
+    hero.appendChild(cur); _autoCur = cur;
+    /* measure in rAF so layout is fully settled after phase transition */
+    requestAnimationFrame(function () {
+      if (_autoCur !== cur) return;
+      var hr = hero.getBoundingClientRect(), dr = dot.getBoundingClientRect();
+      var tx = (dr.left + dr.width / 2 - hr.left).toFixed(1);
+      var ty = (dr.top + dr.height / 2 - hr.top).toFixed(1);
+      cur.style.transition = 'none';
+      cur.style.transform = 'translate(' + (parseFloat(tx) - 120) + 'px,' + (parseFloat(ty) + 80) + 'px)';
+      void cur.offsetWidth;
+      cur.style.transition = '';
+      cur.style.transform = 'translate(' + tx + 'px,' + ty + 'px)';
+      cur.classList.add('show');
+    });
+    /* re-measure just before tapping — corrects for float-animation drift over 750ms */
+    _autoTimer = setTimeout(function () {
+      if (_autoCur !== cur) return;
+      var hr2 = hero.getBoundingClientRect(), dr2 = dot.getBoundingClientRect();
+      var fx = (dr2.left + dr2.width / 2 - hr2.left).toFixed(1);
+      var fy = (dr2.top + dr2.height / 2 - hr2.top).toFixed(1);
+      cur.style.transition = 'transform .12s ease';
+      cur.style.transform = 'translate(' + fx + 'px,' + fy + 'px)';
+      setTimeout(function () {
+        if (_autoCur !== cur) return;
+        cur.classList.remove('tap'); void cur.offsetWidth; cur.classList.add('tap');
+        if (!simplified && !busy) dot.click();
+        setTimeout(function () { if (_autoCur === cur) _killAutoCur(); }, 560);
+      }, 130);
+    }, 750);
+  };
+  window._heroSimpCancelAuto = function () { clearTimeout(_autoTimer); _killAutoCur(); };
 })();
 
 /* ============================================================
@@ -3974,7 +4757,7 @@ window.LanternPlaying = false;
   var hxProg   = document.getElementById('hx-prog');
   if (!hxHud) return;
 
-  var WORDS   = ['genre', 'phenomenon', 'legacy'];
+  var WORDS   = ['genre', 'phenomenon'];
   var gaps    = [];   /* every gap (word + article) in reading order — drives progress + autoplay */
   var targets = [];   /* word gaps only (.exw) — the ones that "form" with a flying card */
   var solved  = 0;
@@ -4024,6 +4807,9 @@ window.LanternPlaying = false;
     exw.dataset.done = '1';
     exw.classList.remove('open');
     solved++;
+    /* answering a saved-word gap = using that word — tick its MY VOCAB ring up,
+       same credit a card earns when it flies into a scene */
+    if (window.shelfProgress && exw.dataset.answer) window.shelfProgress(exw.dataset.answer);
     var i = gaps.indexOf(exw);
     if (hxProg && hxProg.children[i]) { hxProg.children[i].classList.remove('miss'); hxProg.children[i].classList.add('on'); }
     var m = exw.querySelector('.menu');
@@ -4076,6 +4862,9 @@ window.LanternPlaying = false;
     /* wire article gaps: pick the right pill, slip on a wrong one */
     gaps.forEach(function (g) {
       if (!g.classList.contains('art-gap')) return;
+      /* fly the choice pills in (slot reads as plain "a" until now), in step with
+         the word cards forming — instead of sitting exposed in the page */
+      setTimeout(function () { g.classList.add('art-live'); }, RM ? 0 : 300);
       g.querySelectorAll('.art-pill').forEach(function (pill) {
         pill.addEventListener('click', function (e) {
           e.stopPropagation();
@@ -4167,6 +4956,16 @@ window.LanternPlaying = false;
         'fill="#1a1714" stroke="#fff" stroke-width="1.4" stroke-linejoin="round"/></svg></span>' +
         '<span class="hwc-ring"></span>';
       heroEl.appendChild(cur);
+      /* snappier glide than the global .6s so the cursor actually keeps up with
+         the step timing below — taps + hovers land where the cursor visibly is */
+      cur.style.transition = 'transform .42s cubic-bezier(.45,0,.2,1), opacity .35s ease';
+      /* if the viewer leaves Practice before the scripted hideCur() runs (scrub or
+         "Next: Discuss" mid-demo), every remaining gated step is skipped — so the
+         cursor would linger into the next scene. Watch the phase and clear it the
+         moment we're off p5. */
+      var exGuard = setInterval(function () {
+        if (!document.body.classList.contains('hero-p5')) { clearInterval(exGuard); hideCur(); }
+      }, 160);
     }
     function moveTo(el) {
       if (!cur || !heroEl || !el) return;
@@ -4182,6 +4981,7 @@ window.LanternPlaying = false;
     }
     function hideCur() {
       if (!cur) return;
+      clearInterval(exGuard);
       cur.classList.add('gone');
       setTimeout(function () { if (cur.parentNode) cur.parentNode.removeChild(cur); }, 400);
     }
@@ -4227,35 +5027,41 @@ window.LanternPlaying = false;
 
     /* gap 0 — word (genre) */
     step(1500, function () { var g = targets[0]; moveTo(g && (g.querySelector('.gt') || g)); });
-    step(350,  function () { tap(); open(0); });
+    step(420,  function () { tap(); open(0); });
     step(550,  function () { moveTo(findBtn(0, true)); });
-    step(280,  function () { tap(); pick(0, true); });
+    step(340,  function () { tap(); pick(0, true); });
 
-    /* exercise 2 — ARTICLE: cursor sweeps left → right over The / Ø / a, then selects "a" */
-    var artGap = document.querySelector('#hero .ex-page .art-gap');
-    var pills  = artGap ? Array.prototype.slice.call(artGap.querySelectorAll('.art-pill')) : [];
-    var artHit = pills.filter(function (p) { return artGap && p.dataset.v === artGap.dataset.a; })[0] || pills[pills.length - 1];
-    step(800,  function () { moveTo(pills[0]); pills[0] && pills[0].classList.add('hover'); });
-    step(480,  function () { pills[0] && pills[0].classList.remove('hover'); moveTo(pills[1]); pills[1] && pills[1].classList.add('hover'); });
-    step(480,  function () { pills[1] && pills[1].classList.remove('hover'); moveTo(artHit); artHit && artHit.classList.add('hover'); });
-    step(380,  function () { artHit && artHit.classList.remove('hover'); tap(); artHit && artHit.click(); });
+    /* exercise 2 — ARTICLE: cursor sweeps left → right over The / Ø / a, then selects "a".
+       The hover must light only AFTER the cursor lands on the pill — otherwise the
+       pill glows while the cursor is still gliding toward it (the desync). */
+    var artGaps = Array.prototype.slice.call(document.querySelectorAll('#hero .ex-page .art-gap'));
+    var artGap  = artGaps[0];
+    var pills   = artGap ? Array.prototype.slice.call(artGap.querySelectorAll('.art-pill')) : [];
+    var artHit  = pills.filter(function (p) { return artGap && p.dataset.v === artGap.dataset.a; })[0] || pills[pills.length - 1];
+    function lightOnArrival(p) { setTimeout(function () { if (alive() && p) p.classList.add('hover'); }, 360); }
+    step(800,  function () { moveTo(pills[0]); lightOnArrival(pills[0]); });
+    step(480,  function () { pills[0] && pills[0].classList.remove('hover'); moveTo(pills[1]); lightOnArrival(pills[1]); });
+    step(480,  function () { pills[1] && pills[1].classList.remove('hover'); moveTo(artHit); lightOnArrival(artHit); });
+    step(480,  function () { artHit && artHit.classList.remove('hover'); tap(); artHit && artHit.click(); });
 
     /* gap 1 — word (phenomenon): WRONG first (menu stays open via stopPropagation), then corrected */
     step(800,  function () { var g = targets[1]; moveTo(g && (g.querySelector('.gt') || g)); });
-    step(350,  function () { tap(); open(1); });
+    step(420,  function () { tap(); open(1); });
     step(500,  function () { moveTo(findBtn(1, false)); });
-    step(280,  function () { tap(); pick(1, false); });
+    step(340,  function () { tap(); pick(1, false); });
     step(1150, function () { moveTo(findBtn(1, true)); });
-    step(350,  function () { tap(); pick(1, true); });
+    step(420,  function () { tap(); pick(1, true); });
 
-    /* gap 2 — word (legacy) */
-    step(800,  function () { var g = targets[2]; moveTo(g && (g.querySelector('.gt') || g)); });
-    step(350,  function () { tap(); open(2); });
-    step(500,  function () { moveTo(findBtn(2, true)); });
-    step(280,  function () { tap(); pick(2, true); });
+    /* gap 3 — tense (has/have/had): last gap, so skip the sweep — cursor goes
+       straight to "has" and selects it (snappier finish to the demo) */
+    var tenseGap  = artGaps[1];
+    var tensePills = tenseGap ? Array.prototype.slice.call(tenseGap.querySelectorAll('.art-pill')) : [];
+    var tenseHit  = tensePills.filter(function (p) { return tenseGap && p.dataset.v === tenseGap.dataset.a; })[0] || tensePills[tensePills.length - 1];
+    step(700,  function () { moveTo(tenseHit); lightOnArrival(tenseHit); });
+    step(480,  function () { tenseHit && tenseHit.classList.remove('hover'); tap(); tenseHit && tenseHit.click(); });
 
     step(950,  function () { hideCur(); if (solved >= totalEx) successWin(); });
-    step(1900, function () { window.LanternBusy.set('practice', false); if (window._heroShowPracNext) window._heroShowPracNext(); });   /* success card seen → PLAY may advance, "next" cue rises */
+    step(380, function () { window.LanternBusy.set('practice', false); if (window._heroShowPracNext) window._heroShowPracNext(); });   /* success card seen → PLAY may advance, "next" cue rises */
   }
 
   function raisePracNext() { if (window._heroShowPracNext) window._heroShowPracNext(); }

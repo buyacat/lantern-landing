@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="30 18 61 77">
+  <title>Lantern</title>
+  <!-- Shadow L — orange -->
+  <path d="M30 18 H50 V62 H78 V82 H30 Z" fill="#f59e0b" transform="translate(13 13)" />
+  <!-- Front L — dark -->
+  <path d="M30 18 H50 V62 H78 V82 H30 Z" fill="#171717" />
+</svg>

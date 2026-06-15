@@ -58,13 +58,13 @@
     function pct(p) { return (p / (N - 1) * 100) + '%'; }
 
     function render() {
-      var cur = LP.get();
+      var vis = LP.pos();
       if (!dragging) {
-        ball.style.left = pct(cur);
-        fill.style.width = pct(cur);
+        ball.style.left = pct(vis);
+        fill.style.width = pct(vis);
       }
-      ticks.forEach(function (t, i) { t.classList.toggle('passed', i <= cur); });
-      var chasing = (cur !== target);
+      ticks.forEach(function (t, i) { t.classList.toggle('passed', i <= vis); });
+      var chasing = (vis !== target);
       scrub.classList.toggle('chasing', chasing);
       if (chasing) goal.style.left = pct(target);
     }
@@ -88,18 +88,17 @@
     function chase() {
       rafId = 0;
       var cur = LP.get();
-      /* a phase change the scrubber didn't make = the discuss→practice auto-advance,
-         a swipe, or a programmatic jump took the wheel → adopt it as the goal
-         instead of walking back. Without this the chat's auto-advance is yanked
-         straight back into the chat (target still points at DISCUSS). */
+      var vis = LP.pos();
+      /* a phase change the scrubber didn't make = a swipe or programmatic jump
+         took the wheel → adopt it as the goal instead of walking back. */
       if (!dragging && cur !== expected) {
         if (playing) stopPlay();
-        target = cur; expected = cur;
+        target = vis; expected = cur;
         render();
         return;
       }
-      if (cur === target) { render(); if (playing) stopPlay(); return; }
-      var now = performance.now(), dir = cur < target ? 1 : -1, ready;
+      if (vis === target) { render(); if (playing) stopPlay(); return; }
+      var now = performance.now(), dir = vis < target ? 1 : -1, ready;
       if (playing && dir > 0) {
         if (now - lastStep >= MAX_SCENE) ready = true;       /* safety cap fires even mid-scene */
         else if (LP.busy() || LP.actionPlaying()) { lastBusy = now; ready = false; }
@@ -126,11 +125,12 @@
       var x = (e.clientX - r.left) / r.width;
       return Math.max(0, Math.min(1, x));
     }
+    var VIS_PHASE = [0,1,2,3,5,4,6,7]; /* visual pos → internal phase (4↔5 swap) */
     function setTarget(f) {
       var t = Math.round(f * (N - 1));
       if (t !== target) {
         target = t;
-        if (cap && NAMES[t]) cap.textContent = '0' + (t + 1) + ' · ' + NAMES[t];
+        if (cap && NAMES[VIS_PHASE[t]]) cap.textContent = '0' + (t + 1) + ' · ' + NAMES[VIS_PHASE[t]];
       }
     }
 
@@ -164,7 +164,7 @@
       /* tap (no movement) → jump directly; drag → let chase walk there */
       if (!wasDrag && LP.jump) {
         lpJump(target);
-        expected = target;
+        expected = LP.get();
         render();
         syncRunway(target);   /* snap the runway under the new phase + suppress feedback, exactly like a swipe — without this the lagging scrollY is read back and drifts the phase */
       } else {
@@ -179,9 +179,9 @@
        in flight, any phase drift came from outside: adopt it as the new goal
        (a swipe mid-chase keeps the chase goal — it'll converge anyway). */
     setInterval(function () {
-      if (dragging || rafId) return;                 /* mid-chase: it'll converge — don't fight it */
-      var cur = LP.get();
-      if (cur !== target || cur !== expected) { target = cur; expected = cur; }
+      if (dragging || rafId) return;
+      var cur = LP.get(), vis = LP.pos();
+      if (vis !== target || cur !== expected) { target = vis; expected = cur; }
       render();
     }, 300);
 

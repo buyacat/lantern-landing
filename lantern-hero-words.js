@@ -7,6 +7,8 @@
    Returning visitor (saved lang in localStorage): auto-demo.
    ============================================================ */
 (function () {
+  function cefrColor(lvl) { return (window.CEFR_CLS && window.CEFR_CLS[lvl]) || 'b-blue'; }
+
   var SUP = ['es', 'fr', 'de', 'uk', 'pt'];
   var ENDONYM = { es: 'Español', fr: 'Français', de: 'Deutsch', uk: 'Українська', pt: 'Português', en: 'English' };
   var STORE = 'lantern.gloss';
@@ -32,26 +34,35 @@
     if (!hero || !browser) return;
     var MOBILE = window.innerWidth < 1000;
 
-    var words = Array.prototype.slice.call(browser.querySelectorAll('.hl'));
+    var words = Array.prototype.slice.call(browser.querySelectorAll('.hl')).filter(function (w) {
+      return !w.closest('#hero-simp-body') && !w.dataset.nondemo;
+    });
     if (!words.length) return;
     var REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    /* simp-body .hl words: wired for click → popup + registered in DICT,
+       but kept OUT of the cursor demo (they're hidden during P1) */
+    var simpHls = Array.prototype.slice.call(browser.querySelectorAll('#hero-simp-body .hl'));
+    /* nondemo .hl words: pre-highlighted from page load (amber underline), wired for popup,
+       excluded from the cursor demo (they're highlighted before it runs) */
+    var nondemoHls = Array.prototype.slice.call(browser.querySelectorAll('.hl[data-nondemo]'));
 
     /* The "My vocab" deck cards are built from DICT, but the four hero words
        (genre·devoted·phenomenon·legacy) live only as inline .hl data — so the deck
        fell back to genDef and every card read A2 / green / no gloss, mismatching the
-       floating word-cards (B2·B2·B2·C1, in colour, with a translation). Seed DICT from
+       floating word-cards (A2·B2·C1·B2, in colour, with a translation). Seed DICT from
        the .hl data so each deck card matches the hero's first state and carries the
        gloss in the chosen language. Re-run on language change to refresh both DICT and
        any card already on the rail. */
     function registerGloss() {
       if (typeof DICT === 'undefined') return;
-      words.forEach(function (word) {
+      words.concat(simpHls).concat(nondemoHls).forEach(function (word) {
         var lemma = word.dataset.w; if (!lemma) return;
         var base = DICT[lemma] || (typeof genDef === 'function' ? genDef(lemma) : {});
+        var lvl = word.dataset.cefr || base.lvl || '';
         DICT[lemma] = Object.assign({}, base, {
           w: word.dataset.w,
-          cls: 'b-' + (word.dataset.cls || 'green'),
-          lvl: word.dataset.cefr || base.lvl || '',
+          cls: cefrColor(lvl),
+          lvl: lvl,
           tr: glossFor(word)
         });
         var dc = window.Shelf && window.Shelf.cardEl && window.Shelf.cardEl(lemma);
@@ -73,10 +84,20 @@
       { xp: 0.820, yp: 0.150, rot: 7 },
       { xp: 0.862, yp: 0.470, rot: -6 },
       { xp: 0.800, yp: 0.780, rot: 5 },
-      { xp: 0.770, yp: 0.625, rot: -4 }
+      { xp: 0.770, yp: 0.625, rot: -4 },
+      /* slots 5–7 catch words the visitor saves themselves; tucked into the gaps
+         (upper-left, lower-left, far-right notch) so up to MAX_CARDS cards rest on
+         the hero without ever stacking on top of each other */
+      { xp: 0.660, yp: 0.150, rot: 4 },
+      { xp: 0.615, yp: 0.795, rot: -5 },
+      { xp: 0.885, yp: 0.300, rot: 6 }
     ];
     var slotI = 0;
     var rested = [];
+    /* the hero is a demonstration, not a real shelf — cap how many cards may rest
+       here so they never run out of slots and pile up. Desktop = the 7 slots above;
+       mobile keeps its prior behaviour (its .hw-cards are display:none under 1000px). */
+    var MAX_CARDS = MOBILE ? Infinity : slots.length;
 
     function slotTop(slot) {
       if (!MOBILE) return slot.yp * hero.offsetHeight;
@@ -85,17 +106,23 @@
     }
 
     var CARD_DURS = ['4.2s', '5.1s', '4.7s'];
-    var CARD_DELS = ['0s', '-1.5s', '-0.8s'];
+    /* delay MUST stay 0: card-bob's 0% keyframe is the resting pose, so a
+       negative delay would start the bob mid-cycle and the card would snap
+       ~6px the instant it "comes alive". Cards desync on their own — they're
+       born at different moments (sequential saves) and their periods differ
+       (CARD_DURS), so they drift out of phase without any start offset. */
+    var CARD_DELS = ['0s', '0s', '0s'];
 
     // resolve card fields: .hl words carry rich inline data-* (incl. per-language gloss);
     // tokenized .word spans fall back to the shared DICT / genDef exposed on window.
     function wordMeta(word) {
-      if (word.dataset.cls) {
-        return { w: word.dataset.w, c: word.dataset.cls, cefr: word.dataset.cefr || '', ph: word.dataset.ph || '', gloss: glossFor(word) };
+      var cefr = word.dataset.cefr || '';
+      if (cefr) {
+        return { w: word.dataset.w, c: cefrColor(cefr).replace(/^b-/, ''), cefr: cefr, ph: word.dataset.ph || '', gloss: glossFor(word) };
       }
       var lemma = word.dataset.w;
       var d = DICT[lemma] || genDef(lemma);
-      return { w: d.w || lemma, c: (d.cls || 'b-green').replace(/^b-/, ''), cefr: d.lvl || '', ph: d.ph || '', gloss: d.tr || '' };
+      return { w: d.w || lemma, c: cefrColor(d.lvl).replace(/^b-/, ''), cefr: d.lvl || '', ph: d.ph || '', gloss: d.tr || '' };
     }
 
     function buildCard(word, slot) {
@@ -121,10 +148,28 @@
       return card;
     }
 
+    /* hero is full → a brief note instead of an 8th card piling onto the stack */
+    var capNoteEl = null, capNoteTimer = 0;
+    function showCapNote() {
+      closePopup();
+      if (!capNoteEl) {
+        capNoteEl = document.createElement('div');
+        capNoteEl.className = 'hw-capnote';
+        capNoteEl.innerHTML = '<span class="hw-capnote-i">✦</span> That’s plenty for a demo — <b>add Lantern</b> to collect for real as you read.';
+        hero.appendChild(capNoteEl);
+      }
+      clearTimeout(capNoteTimer);
+      capNoteEl.classList.remove('show'); void capNoteEl.offsetWidth;
+      requestAnimationFrame(function () { capNoteEl.classList.add('show'); });
+      capNoteTimer = setTimeout(function () { if (capNoteEl) capNoteEl.classList.remove('show'); }, 4200);
+    }
+
     function flyCard(word) {
-      if (word.dataset.flown) return;
+      if (word.dataset.flown) return true;
+      if (rested.length >= MAX_CARDS) { showCapNote(); return false; }   // demo full → note, no overlap
       word.dataset.flown = '1';
       setTimeout(function () { doFly(word); }, 320);
+      return true;
     }
     function doFly(word) {
       var slot = slots[slotI % slots.length]; slotI++;
@@ -140,7 +185,10 @@
         card.style.opacity = '1';
         card.style.transform = 'translate(0px,0px) scale(1)';
       });
-      setTimeout(function () { card.classList.add('rested'); }, 950);
+      /* start the idle float right as the .45s fly-in lands — no dead "frozen"
+         gap before it comes alive. card-bob eases out of the resting pose, so
+         the hand-off from transition to animation is seamless. */
+      setTimeout(function () { card.classList.add('rested'); }, 520);
       word.classList.remove('picking');
       markSaved(word);
     }
@@ -297,10 +345,11 @@
     function doSave(w) {
       var onHero = !document.body.classList.contains('hero-p2') &&
                    !document.body.classList.contains('hero-p3');
-      if (onHero) { flyCard(w); return; }
+      if (onHero) { return flyCard(w); }
       var lemma = w.dataset.w;
-      if (window.Shelf && window.Shelf.has(lemma)) return;   // already in the deck
+      if (window.Shelf && window.Shelf.has(lemma)) return true;   // already in the deck
       if (window.flyWordToShelf) { window.flyWordToShelf(w.getBoundingClientRect(), lemma); markSaved(w); }
+      return true;
     }
 
     // ---- word popup: the lookup card from index.html's reading scenes
@@ -317,7 +366,7 @@
       var saved = (window.Shelf && window.Shelf.has(lemma)) || (openWordEl && openWordEl.dataset.flown === '1');
       popup.innerHTML =
         '<div class="top"><div class="wl"><div class="w">' + d.w + '</div>' + (d.ph ? '<div class="ph">' + d.ph + '</div>' : '') + '</div>' +
-        '<div class="ctrls"><span class="spk">' + ICON.spk + '</span><span class="cefr-b ' + d.cls + '">' + d.lvl + '</span><button class="close" aria-label="close">✕</button></div></div>' +
+        '<div class="ctrls"><span class="spk">' + ICON.spk + '</span><span class="cefr-b ' + cefrColor(d.lvl) + '">' + d.lvl + '</span><button class="close" aria-label="close">✕</button></div></div>' +
         (function(){ var tr = d['tr'+cap(LANG)] || d.trEn || d.tr || ''; return (tr && tr !== '···') ? '<div class="popup-tr"><span class="popup-tr-lbl">'+LANG.toUpperCase()+'</span>' + tr + '</div>' : ''; }()) +
         '<div class="save"><button class="savebtn ' + (saved ? 'saved' : '') + '" data-k="' + lemma + '"><span class="bk">' + ICON.bk + '</span><span class="ck">' + ICON.ck + '</span><span class="lbl">' + (saved ? 'Saved to deck' : 'Save word') + '</span></button></div>';
     }
@@ -355,7 +404,8 @@
       var btn = e.target.closest('.savebtn'); if (!btn) return;
       var lemma = btn.dataset.k;
       if (window.Shelf && window.Shelf.has(lemma)) return;
-      if (openWordEl) doSave(openWordEl);
+      if (openWordEl && !doSave(openWordEl)) return;   // hero full → cap note shown, leave the word unsaved
+      if (openWordEl) openWordEl.dataset.userSaved = '1';   // mark as user-chosen (distinct style from demo-saved)
       btn.classList.add('saved');
       var lbl = btn.querySelector('.lbl'); if (lbl) lbl.textContent = 'Saved to deck';
       setTimeout(closePopup, 360);
@@ -410,9 +460,21 @@
     var firstHl   = browser.querySelector('.hl');
     var mainPara  = firstHl ? firstHl.closest('p') : null;     // the article body paragraph
     var simpBody  = browser.querySelector('#hero-simp-body');  // the dense paragraph revealed in P2
-    var extraWords = tokenizeWords(mainPara).concat(tokenizeWords(simpBody));
+    var extraWords = tokenizeWords(mainPara).concat(tokenizeWords(simpBody)).concat(simpHls);
 
-    words.concat(extraWords).forEach(wireWord);
+    words.concat(extraWords).concat(nondemoHls).forEach(wireWord);
+
+    /* council follow-up: the auto-demo only saves the 4 .hl words, so visitors
+       rarely realise THEY can save more. Tag a few good words in the lead para
+       as "candidates" — once the demo ends they light up with a soft underline
+       + gentle pulse (same invite language as #sv-page), staggered so they don't
+       pulse in unison. Lit/cleared purely via CSS (body.hw-invite, :not on save). */
+    /* all three post-demo candidates start together when hw-invite fires */
+    nondemoHls.forEach(function (el) { el.classList.add('cand'); });
+    ['audience', 'losing'].forEach(function (lemma) {
+      var el = browser.querySelector('.page-en .word[data-w="' + lemma + '"]');
+      if (el) el.classList.add('cand');
+    });
 
     // ---- "Glosses in [XX]" secondary pill — appears after onboarding ----
     function buildPill() {
@@ -476,7 +538,7 @@
     // ---- cursor demo ----
     function makeCursor() {
       var c = document.createElement('div');
-      c.className = 'hw-cursor';
+      c.className = 'hw-cursor hw-cursor-fast';   /* HOME demo: 15% quicker glide than the shared cursor */
       c.innerHTML =
         '<span class="hwc-ico"><svg viewBox="0 0 24 24" width="25" height="25">' +
         '<path d="M3 2 L3 18.6 L7.3 14.6 L10.3 21 L13 19.8 L10 13.5 L16.2 13.5 Z" ' +
@@ -505,6 +567,7 @@
 
     function demo() {
       if (demoDone) return;                  /* visitor already scrolled away → end-state is set */
+      if (window.LanternBusy) window.LanternBusy.set('home', true);   /* gate PLAY across the word-saving demo, like every other screen */
       var c = MOBILE ? null : makeCursor();
       demoCursor = c;
       if (!MOBILE) placeCursor(c, words[0]);
@@ -521,11 +584,16 @@
         t += MOBILE ? 950 : 1450;
       });
       if (!MOBILE) demoTimers.push(setTimeout(function () { c.classList.add('gone'); }, t + 350));
-      /* demo done → raise the hero's "Next: Save & Simplify" cue (desktop only;
+      /* demo done → raise the hero's "Next: Simplify" cue (desktop only;
          the pill is hidden under 920px, and showHomeNext no-ops off phase 0) */
       if (!MOBILE) demoTimers.push(setTimeout(function () {
         if (window._heroShowHomeNext) window._heroShowHomeNext();
-      }, t + 650));
+        document.body.classList.add('hw-invite');   /* now it's the visitor's turn → candidate words invite a save */
+      }, t + 220));
+      /* scene played out → release PLAY (unconditional: mobile has no cursor/cue timer) */
+      demoTimers.push(setTimeout(function () {
+        if (window.LanternBusy) window.LanternBusy.set('home', false);
+      }, t + (MOBILE ? 600 : 350)));
     }
 
     /* snap the cursor demo straight to its end-state — used when the visitor
@@ -537,6 +605,7 @@
       demoDone = true;
       demoTimers.forEach(function (id) { clearTimeout(id); });
       demoTimers = [];
+      if (window.LanternBusy) window.LanternBusy.set('home', false);   /* scrolled away mid-demo → don't strand PLAY on a dropped scene */
       if (demoCursor) {
         var dc = demoCursor; demoCursor = null;
         dc.classList.add('gone');

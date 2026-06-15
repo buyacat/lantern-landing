@@ -19,15 +19,20 @@
 
   const SVGNS = 'http://www.w3.org/2000/svg';
   const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  /* icons borrowed from the dot-nav (lantern-v3.js NAV_ICON) so the dock cards
-     read the same as the rail; the rest are inline */
-  const TRANSLATE = NAV_ICON.translate;   /* swap-arrows mark from the nav menu */
-  const DISCUSS = NAV_ICON.discuss;       /* speech bubble from the nav */
+  /* each dock card wears the SAME mark as its own hero screen, so the last
+     screen reads as a recap of the journey — not the nav rail's variants */
+  /* translate = the "languages" glyph (A + character strokes) from the screen-3
+     translate card header (#hero-tpanel .tc-glyph) */
+  const TRANSLATE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>';
+  /* discuss = the double speech-bubble from the screen-4 "Discuss this article"
+     fab (#hero-disc-fab) */
+  const DISCUSS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2Z"/><path d="M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1"/></svg>';
+  /* exercises = the bolt from the Practice "Turn into exercises" button (#hx-toggle) */
   const BOLT = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg>';
-  /* immersion = read the whole article in your language: the ↻ flip mark from
-     the hero immersion fab, so the card reads the same as that screen */
-  const ROTATE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 3 21 8 16 8"/><polyline points="3 21 3 16 8 16"/><path d="M19.4 9a7.5 7.5 0 0 0-12.5-2.8L3 8"/><path d="M4.6 15a7.5 7.5 0 0 0 12.5 2.8L21 16"/></svg>';
-  /* simplify reduces to the essence — a bare orange dot, no icon plate */
+  /* immerse = the horizontal swap-arrows from the "Read in your language" fab
+     (#hero-imm-fab) — the whole page swaps to your language */
+  const IMMERSE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h18"/><path d="M17 4l4 4-4 4"/><path d="M21 16H3"/><path d="M7 12l-4 4 4 4"/></svg>';
+  /* simplify reduces to the essence — a bare orange dot, like the screen-2 simp-dot */
   const DOT = '<svg viewBox="0 0 24 24" fill="#ef8e1c"><circle cx="12" cy="12" r="6"/></svg>';
 
   /* ---- the visitor's own session feeds the previews ---- */
@@ -44,16 +49,16 @@
   function buildFeats() {
     return [
       { n: 'Save',      c: '#ef8e1c', ic: ICON.bk,    x: 13, y: 18, s: 'l', row: 0,
-        prev: '<span class="dkw"><b>genre</b><i>/ˈʒɒn.rə/</i><em class="cefr-b b-red">B2</em></span><span class="dkok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>saved</span>' },
-      { n: 'Simplify',  c: '#2f9e5f', ic: DOT, bare: true, x: 87, y: 18, s: 'r', row: 0,
+        prev: '<span class="dkw"><b>genre</b><i>/ˈʒɒn.rə/</i><em class="cefr-b b-green">A2</em></span><span class="dkok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>saved</span>' },
+      { n: 'Simplify',  c: '#ef8e1c', ic: DOT, bare: true, x: 87, y: 18, s: 'r', row: 0,
         prev: '<span class="dksm"><s>unprecedented commercial dominance</s><span class="ar">→</span><b>unmatched music success</b></span>' },
       { n: 'Translate', c: '#3b6fd4', ic: TRANSLATE,  x: 11, y: 50, s: 'l', row: 1,
         prev: '<span class="dktr"><span class="s">devoted</span><span class="ar">→</span><span class="t">' + gloss('devoted', 'відданий') + '</span></span>' },
-      { n: 'Discuss',   c: '#7a6f9c', ic: DISCUSS,    x: 89, y: 50, s: 'r', row: 1,
+      { n: 'Discuss',   c: '#3a3a3a', ic: DISCUSS,    x: 89, y: 50, s: 'r', row: 1,
         prev: '<span class="dkq">Cross-genre run — real or hype?</span><span class="dka">She kept every crowd through every genre shift.</span>' },
       { n: 'Exercises', c: '#d4503b', ic: BOLT,       x: 13, y: 82, s: 'l', row: 2,
         prev: '<span class="dkcz">a cultural <span class="gap">phenomenon</span></span>' },
-      { n: 'Immerse',   c: '#7b46cf', ic: ROTATE,     x: 87, y: 82, s: 'r', row: 2,
+      { n: 'Immerse',   c: '#7b46cf', ic: IMMERSE,    x: 87, y: 82, s: 'r', row: 2,
         prev: '<span class="dkim">a <b>' + gloss('genre', 'жанр') + '</b>-defining run of pure <b>' + gloss('devoted', 'відданість') + '</b></span>' }
     ];
   }
@@ -83,7 +88,7 @@
        detached cells read as unexplained pills starting at "2" */
     const lab = document.createElement('span');
     lab.className = 'd1-echo-lab';
-    lab.textContent = 'your streak';
+    lab.textContent = 'your streak starts at';
     echo.appendChild(lab);
     const day1 = document.createElement('span');
     day1.className = 'd1-daycell day1';
@@ -421,6 +426,13 @@
       const hint = mcta.querySelector('.m-hero-hint');
       if (email) foot.appendChild(email);
       if (hint) foot.appendChild(hint);
+      /* the page footer (with its Privacy link) is hidden on mobile, and the CTA is
+         the terminal screen a phone visitor lands on — so carry Privacy here too */
+      var priv = document.createElement('a');
+      priv.className = 'm-priv-link';
+      priv.href = '/privacy';
+      priv.textContent = 'Privacy';
+      foot.appendChild(priv);
       if (foot.childNodes.length) dock.appendChild(foot); /* below the pill grid */
     }
     mShareBtn = mcta && mcta.querySelector('.m-share-btn');
