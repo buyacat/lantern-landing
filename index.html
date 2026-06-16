@@ -789,6 +789,19 @@ body.hero-p4 #hero .tr-page .sel { pointer-events: none; }
 }
 .wd-card.ring-pop .wd-prog { animation: ring-pop 0.52s cubic-bezier(.2,.85,.3,1) both; }
 
+/* mobile mastery bar — the flying chip has no ring, so progress reads as an inset
+   bar that fills 0→100% during the fly, then BLINKS twice at arrival: the bar-
+   analogue of the desktop ring closing + ring-pop. Swell + brightness on the fill,
+   contained within the chip (it never escapes the pill). */
+@keyframes mr-bar-blink {
+  0%   { transform: scaleY(1);   filter: brightness(1)    drop-shadow(0 0 0   rgba(239,142,28,0));  }
+  18%  { transform: scaleY(1.8); filter: brightness(1.38) drop-shadow(0 0 4px rgba(239,142,28,.85)); }
+  40%  { transform: scaleY(1);   filter: brightness(1)    drop-shadow(0 0 0   rgba(239,142,28,0));  }
+  60%  { transform: scaleY(1.6); filter: brightness(1.34) drop-shadow(0 0 4px rgba(239,142,28,.8));  }
+  100% { transform: scaleY(1);   filter: brightness(1)    drop-shadow(0 0 0   rgba(239,142,28,0));  }
+}
+.mr-bar-blink { animation: mr-bar-blink 0.66s cubic-bezier(.2,.85,.3,1) both; }
+
 /* once the page scrolls past the hero to the CTA, hero chrome bows out */
 .m-dotnav { transition: opacity 0.3s ease; }
 body.at-close .m-dotnav { opacity: 0; pointer-events: none; }
@@ -1552,6 +1565,9 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
     background: linear-gradient(90deg, var(--amber, #F07010) calc(var(--wd-prog-frac, 0) * 100%),
                                        rgba(26,23,20,.12) calc(var(--wd-prog-frac, 0) * 100%));
   }
+  /* the in-flight mastery clone draws its own animated bar inside the pill — drop
+     the static underline on it so the two don't stack */
+  body.hero-p2 .wd-card.mr-fly::after { display: none !important; }
   /* keep the desktop rail's faint scatter so the strip reads as a collectible deck
      (the deck rests still by design -- the bob lives on the hero word-cards). */
   body.hero-p2 #worddeck .wd-card.in {
@@ -1961,22 +1977,32 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
        390px phone — "Immerse" clipped). min-width:0 defeats the grid item's auto
        minimum so the cell can actually constrain it. */
     width: 100% !important; min-width: 0; box-sizing: border-box;
+    /* the desktop "recessed" wash (opacity .82 + desaturate) reads as washed-out
+       transparent pills on the small phone cards — keep them solid here */
+    opacity: 1 !important; filter: none !important;
   }
   #ev-close .dk-card.in {
     animation: dkfloatM var(--fd, 8s) ease-in-out var(--fdelay, 0s) infinite;
   }
   @media (prefers-reduced-motion: reduce) { #ev-close .dk-card.in { animation: none; } }
-  /* top row: Translate · Exercises · Immerse  |  bottom row: Simplify · Discuss · Save */
+  /* top row: Translate · Exercises · Save  |  bottom row: Simplify · Discuss · Immerse */
   #ev-close .dk-card[data-feat="translate"]  { order: 1; }
   #ev-close .dk-card[data-feat="exercises"]  { order: 2; }
-  #ev-close .dk-card[data-feat="immerse"]    { order: 3; }
+  #ev-close .dk-card[data-feat="save"]       { order: 3; }
   #ev-close .dk-card[data-feat="simplify"]   { order: 4; }
   #ev-close .dk-card[data-feat="discuss"]    { order: 5; }
-  #ev-close .dk-card[data-feat="save"]       { order: 6; }
+  #ev-close .dk-card[data-feat="immerse"]    { order: 6; }
   /* compact: 3-col cards are narrower, trim padding so previews still fit */
   #ev-close .dk-in  { padding: 7px 8px 8px; }
   #ev-close .dk-top { margin-bottom: 4px; }
-  #ev-close .dk-prev { display: flex; font-size: 9px; line-height: 1.3; min-height: 0; padding: 5px 6px; gap: 3px; }
+  #ev-close .dk-prev { display: flex; font-size: 9px; line-height: 1.3; min-height: 0; padding: 5px 6px; gap: 3px; overflow: hidden; }
+  /* the rigid preview chips (Save's word pill, Translate's gloss) set their own
+     larger font + don't shrink, so on the narrow 3-col card they spilled past
+     the card edge. Pull them down to the compact size and let them wrap. */
+  #ev-close .dk-prev > * { max-width: 100%; min-width: 0; }
+  #ev-close .dkw  { flex-wrap: wrap; font-size: 9px; padding: 2px 5px; gap: 3px 5px; }
+  #ev-close .dkw i { font-size: 8px; }
+  #ev-close .dktr { flex-wrap: wrap; font-size: 9px; gap: 3px 5px; }
 
   /* the REAL wires: the desktop SVG bead engine, vertical geometry —
      absolute overlay across the whole 3+button+3 grid */
@@ -2371,8 +2397,9 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
 <section id="ev-close" data-screen-label="Read the world" style="min-height:100vh;display:flex;flex-direction:column;align-items:center;text-align:center;padding-top:var(--nav)">
   <div class="m-cta-logo m-only" aria-hidden="true"><span class="lmark"></span><span class="m-cta-wm">Lantern</span></div>
   <div class="close-wrap d1-wrap" data-cascade style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;width:100%;padding:0 var(--gut)">
-    <div class="d1-kick">every word you save makes the next page easier</div>
-    <h2 class="disp d1-headline reveal-lines">Day one is one&nbsp;click away.</h2>
+    <div class="d1-kick d-only">every word you save makes the next page easier</div>
+    <h2 class="disp d1-headline reveal-lines d-only">One click&nbsp;away.</h2>
+    <h2 class="disp d1-headline reveal-lines m-only">Every word you save makes the next page&nbsp;easier.</h2>
     <div class="d1-track">
       <button class="d1-install" id="close-cta" data-cta type="button" aria-label="Add Lantern to Chrome — free to start, no account needed."></button>
     </div>
@@ -2959,12 +2986,13 @@ window.LanternPlaying = false;
   if (simpNext) simpNext.addEventListener('click', function () { if (phase === 1) pressThenNav(simpNext, function () { hideSimpNext(); toP3(); }); });
 
   /* TRUE seamless morph: the payoff ribbon physically becomes the "Next: Translate"
-     pill — one continuous gesture, not a crossfade. Uses the View Transitions API
-     (the same mechanism as the card-fold's foldViaViewTransition): the ribbon and the
-     pill share one view-transition-name, so the browser tweens box + position AND
-     crossfades content in a single pass. Root is excluded so the live hero keeps
-     animating underneath. Falls back to the plain show on Firefox / reduced-motion /
-     mobile (no pill there — the crank is the nav). */
+     pill — one continuous gesture. A FLIP clone of the ribbon is pinned to <body> and
+     animated (left/top/width/HEIGHT) from the ribbon's rect to the pill's exact rect,
+     so the box genuinely shrinks into the pill shape; the real pill then crossfades in
+     at that identical rect. Animating height matters: skip it and the box keeps the
+     ribbon's height and collapses ~12px at the swap — the "jump" we're avoiding.
+     Falls back to the plain show on reduced-motion / mobile (no pill there — the crank
+     is the nav). */
   function morphSimpToNext() {
     var canMorph = simpNext && simpRibbon && phase === 1 && window.innerWidth > 920;
     if (!canMorph || matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -2991,7 +3019,8 @@ window.LanternPlaying = false;
     clone.style.cssText =
       'position:fixed;margin:0;transform:none;z-index:300;overflow:hidden;box-sizing:border-box;' +
       'left:' + Math.round(r0.left) + 'px;top:' + Math.round(r0.top) + 'px;' +
-      'width:' + Math.round(r0.width) + 'px;min-width:0;transition:none;';
+      'width:' + Math.round(r0.width) + 'px;height:' + Math.round(r0.height) + 'px;' +
+      'min-width:0;transition:none;';
     document.body.appendChild(clone);
 
     // 4. Hide original ribbon instantly — clone is the visual now
@@ -2999,36 +3028,54 @@ window.LanternPlaying = false;
     simpRibbon.style.transition = 'none';
     simpRibbon.style.opacity = '0';
 
-    // 5. Force layout, then FLIP: animate clone from ribbon rect → Next pill rect
+    // 5. Force layout, then FLIP: animate clone from ribbon rect → Next pill rect.
+    //    Height rides along with width/left/top so the box genuinely SHRINKS into the
+    //    pill's shape. Without it the clone keeps the ribbon's ~49px height the whole
+    //    way and then collapses ~12px to the pill's ~37px at the handoff — that drop
+    //    was the visible "jump". Landing on r1 EXACTLY means the clone↔pill swap has
+    //    no geometry to pop.
     void clone.getBoundingClientRect();
     var DUR = 600;
     var ease = 'cubic-bezier(.4,0,.2,1)';
     clone.style.transition =
-      'left '  + DUR + 'ms ' + ease +
-      ',top '  + DUR + 'ms ' + ease +
-      ',width ' + DUR + 'ms ' + ease;
+      'left '    + DUR + 'ms ' + ease +
+      ',top '    + DUR + 'ms ' + ease +
+      ',width '  + DUR + 'ms ' + ease +
+      ',height ' + DUR + 'ms ' + ease;
 
     requestAnimationFrame(function () { requestAnimationFrame(function () {
-      clone.style.left  = Math.round(r1.left)  + 'px';
-      clone.style.top   = Math.round(r1.top)   + 'px';
-      clone.style.width = Math.round(r1.width) + 'px';
+      clone.style.left   = Math.round(r1.left)   + 'px';
+      clone.style.top    = Math.round(r1.top)    + 'px';
+      clone.style.width  = Math.round(r1.width)  + 'px';
+      clone.style.height = Math.round(r1.height) + 'px';
     }); });
 
-    // 6. Fade text to transparent early — viewer sees the shape moving, not clashing text
+    // 6. Fade the ribbon copy out early — the viewer sees the shape travelling, not the
+    //    long "living dictionary" line clipping as the box narrows.
     setTimeout(function () {
       clone.style.transition += ',color 220ms ease';
       clone.style.color = 'transparent';
     }, 60);
 
-    // 7. Morph done: remove clone, reveal real pill via its CSS opacity transition
+    // 7. Seamless handoff: the real pill fades in (its own .3s opacity) just BEHIND the
+    //    still-opaque clone, so any sub-pixel motion residue is hidden; then — once the
+    //    box has settled on the pill's exact rect — the clone dissolves to reveal it.
+    //    No blank frame, no geometry pop: only the "Next: Translate" copy resolves in.
+    simpNext.classList.add('still');                   // no idle bob during the crossfade
+    setTimeout(function () {
+      simpNext.style.transition = '';                  // restore .tc-next transition: opacity .3s ease
+      simpNext.style.opacity = '';                     // let .tc-next.show { opacity:1 } fade it in
+      simpNext.style.pointerEvents = '';
+    }, DUR - 150);
+    setTimeout(function () {
+      clone.style.transition += ',opacity 180ms ease';
+      clone.style.opacity = '0';
+    }, DUR);
     setTimeout(function () {
       if (clone.parentNode) clone.parentNode.removeChild(clone);
       simpRibbon.style.opacity = ''; simpRibbon.style.transition = '';
-      simpNext.style.transition = '';   // restore .tc-next transition: opacity .3s ease
-      simpNext.style.opacity = '';      // let .tc-next.show { opacity:1 } fade it in
-      simpNext.style.pointerEvents = '';
       autoPressNext(simpNext);
-    }, DUR + 40);
+    }, DUR + 200);
   }
   window._heroMorphSimpToNext = morphSimpToNext;
 
@@ -3680,22 +3727,25 @@ window.LanternPlaying = false;
       'transition:opacity .34s ease, transform .44s cubic-bezier(.22,.7,.24,1);';
     document.body.appendChild(line);
 
-    /* progress bar — mobile only: fills 65 % → 100 % during the FLY so the
-       "mastering" arc is legible at a glance even on a small screen */
-    var pbar = null;
+    /* progress bar — mobile only: the flying chip has no ring, so its progress is
+       drawn as an inset bar along the chip's bottom edge (the clone's own static
+       ::after underline is dropped). It starts EMPTY and fills 0 → 100 % during the
+       FLY, then blinks at arrival — the bar-analogue of the desktop ring closing +
+       ring-pop. Living inside the pill, it cracks WITH the card like the ring does. */
+    var pbarFill = null;
     if (window.matchMedia('(max-width: 920px)').matches) {
-      var pbarTop = Math.min(cy + H / 2 + 20, innerHeight - 110);
-      pbar = document.createElement('div');
-      pbar.style.cssText = 'position:fixed;left:50%;top:' + pbarTop.toFixed(1) + 'px;z-index:1302;pointer-events:none;' +
-        'width:min(260px,72vw);height:5px;border-radius:3px;background:rgba(26,23,20,.10);' +
-        'transform:translateX(-50%);overflow:hidden;opacity:0;transition:opacity .25s ease;';
-      var pbarFill = document.createElement('div');
-      pbarFill.style.cssText = 'height:100%;border-radius:3px;background:var(--amber,#ef8e1c);width:65%;transition:width ' + FLY + 'ms cubic-bezier(.22,.7,.24,1);';
-      pbar.appendChild(pbarFill);
-      document.body.appendChild(pbar);
+      clone.classList.add('mr-fly');
+      var ibar = document.createElement('div');
+      ibar.style.cssText = 'position:absolute;left:11px;right:11px;bottom:6px;height:3px;border-radius:3px;' +
+        'background:rgba(26,23,20,.12);z-index:2;pointer-events:none;';
+      pbarFill = document.createElement('div');
+      pbarFill.style.cssText = 'height:100%;width:0%;border-radius:3px;background:var(--amber,#ef8e1c);' +
+        'transform-origin:50% 50%;transition:width ' + FLY + 'ms cubic-bezier(.22,.7,.24,1);';
+      ibar.appendChild(pbarFill);
+      clone.appendChild(ibar);
     }
 
-    _mr = { clone: clone, stamp: stamp, line: line, blur: blur, pbar: pbar, card: phCard, tRise: 0, t1: 0, tStamp: 0, tPhrase: 0, tExit: 0, tFlip: 0, t2: 0, tDivide: 0, sway: 0 };
+    _mr = { clone: clone, stamp: stamp, line: line, blur: blur, pbar: null, card: phCard, tRise: 0, t1: 0, tStamp: 0, tPhrase: 0, tExit: 0, tFlip: 0, t2: 0, tDivide: 0, sway: 0 };
     evCentering = true;                                    /* gate input + hold PLAY through the whole reveal */
     window.LanternBusy.set('mastery', true);
     void clone.offsetWidth;                                /* commit the start frame so beat 1 eases (no jump) */
@@ -3715,11 +3765,10 @@ window.LanternPlaying = false;
       clone.style.transition = 'transform ' + FLY + 'ms cubic-bezier(.4,0,.2,1)';
       clone.style.transform  = 'translate(' + ttX.toFixed(1) + 'px,' + ttY.toFixed(1) + 'px) scale(' + k.toFixed(4) + ')';
       if (ringC) ringC.style.strokeDashoffset = '0';        /* ring closes as the card opens */
-      /* progress bar fades in and fills to 100 % in lockstep with the fly */
-      if (pbar) {
-        pbar.style.opacity = '1';
+      /* the inset bar fills 0 → 100 % in lockstep with the fly (mobile) */
+      if (pbarFill) {
         requestAnimationFrame(function () { requestAnimationFrame(function () {
-          if (pbar && pbar.firstChild) pbar.firstChild.style.width = '100%';
+          if (pbarFill) pbarFill.style.width = '100%';
         }); });
       }
     }, RISE);
@@ -3729,6 +3778,7 @@ window.LanternPlaying = false;
     _mr.t1 = setTimeout(function () {
       if (!_mr) return;
       clone.classList.remove('ring-pop'); void clone.offsetWidth; clone.classList.add('ring-pop');   /* PB pulse — you reached it */
+      if (pbarFill) { pbarFill.classList.remove('mr-bar-blink'); void pbarFill.offsetWidth; pbarFill.classList.add('mr-bar-blink'); }   /* mobile: the inset bar blinks at 100% */
       clone.style.transition = 'none';                     /* the sway loop owns transform now */
       var t0 = performance.now();
       (function sway(now) {

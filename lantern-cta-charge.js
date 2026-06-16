@@ -48,17 +48,17 @@
   /* six features = six callbacks to the hero demos; row → port height on the button */
   function buildFeats() {
     return [
-      { n: 'Save',      c: '#ef8e1c', ic: ICON.bk,    x: 13, y: 18, s: 'l', row: 0,
+      { n: 'Save',      c: '#ef8e1c', ic: ICON.bk,    x: 87, y: 82, s: 'r', row: 2,
         prev: '<span class="dkw"><b>genre</b><i>/ˈʒɒn.rə/</i><em class="cefr-b b-green">A2</em></span><span class="dkok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>saved</span>' },
       { n: 'Simplify',  c: '#ef8e1c', ic: DOT, bare: true, x: 87, y: 18, s: 'r', row: 0,
-        prev: '<span class="dksm"><s>unprecedented commercial dominance</s><span class="ar">→</span><b>unmatched music success</b></span>' },
+        prev: '<span class="dksm"><s>commercial dominance</s><span class="ar">→</span><b>massive success</b></span>' },
       { n: 'Translate', c: '#3b6fd4', ic: TRANSLATE,  x: 11, y: 50, s: 'l', row: 1,
         prev: '<span class="dktr"><span class="s">devoted</span><span class="ar">→</span><span class="t">' + gloss('devoted', 'відданий') + '</span></span>' },
       { n: 'Discuss',   c: '#3a3a3a', ic: DISCUSS,    x: 89, y: 50, s: 'r', row: 1,
-        prev: '<span class="dkq">Cross-genre run — real or hype?</span><span class="dka">She kept every crowd through every genre shift.</span>' },
+        prev: '<span class="dkq">Cross-genre run — real or hype?</span><span class="dka">Real — she kept every crowd.</span>' },
       { n: 'Exercises', c: '#d4503b', ic: BOLT,       x: 13, y: 82, s: 'l', row: 2,
         prev: '<span class="dkcz">a cultural <span class="gap">phenomenon</span></span>' },
-      { n: 'Immerse',   c: '#7b46cf', ic: IMMERSE,    x: 87, y: 82, s: 'r', row: 2,
+      { n: 'Immerse',   c: '#7b46cf', ic: IMMERSE,    x: 13, y: 18, s: 'l', row: 0,
         prev: '<span class="dkim">a <b>' + gloss('genre', 'жанр') + '</b>-defining run of pure <b>' + gloss('devoted', 'відданість') + '</b></span>' }
     ];
   }
@@ -73,40 +73,14 @@
 
   let FEATS = [], cards = [], armed = false, pulseCleanups = [], heatLevel = 0;
 
-  /* ---- merge the two mechanics: the streak becomes the button's echo ----
-     close.js builds the days INSIDE .d1-track (button + cells in one row,
-     which pushes the button off-centre and collides with the right wires).
-     Move days 2..10 into their own compact row UNDER the button: input
-     (features) → heart (centred button) → output (the streak below). */
+  /* ---- prep the install button: the streak mechanic is gone, so the button
+     is the whole CTA. Rename it ("Add to Chrome" — the recognised install
+     idiom, matching the topbar + hero buttons) and give it the warm-touch
+     layer the wire beads trace into. ---- */
   function restructure() {
     const track = section.querySelector('.d1-track');
     if (!track || track.dataset.echoed) return;
     track.dataset.echoed = '1';
-    const echo = document.createElement('div');
-    echo.className = 'd1-echo';
-    /* name the row and anchor it: "your streak" + day 1 — otherwise the
-       detached cells read as unexplained pills starting at "2" */
-    const lab = document.createElement('span');
-    lab.className = 'd1-echo-lab';
-    lab.textContent = 'your streak starts at';
-    echo.appendChild(lab);
-    const day1 = document.createElement('span');
-    day1.className = 'd1-daycell day1';
-    day1.textContent = '1';
-    echo.appendChild(day1);
-    /* days 2..10 go in their own wrapper so the whole promise can collapse in
-       one motion when it recedes; the trailing "→" arrow is dropped — it
-       pointed at nothing */
-    const futures = document.createElement('span');
-    futures.className = 'd1-futures';
-    track.querySelectorAll('.d1-daycell').forEach(function (n) { futures.appendChild(n); });
-    echo.appendChild(futures);
-    const arrow = track.querySelector('.d1-more');
-    if (arrow) arrow.remove();
-    /* main-only: shorter label, bigger presence — "Add to Chrome" is the
-       recognised install idiom (and matches the topbar + hero buttons);
-       "Lantern" is already everywhere around it. close.js stays untouched
-       because index.html shares it. */
     const t = btn.querySelector('span:not(.d1-chrome):not(.d1-arrow)');
     if (t) t.textContent = 'Add to Chrome';
     /* the layer that hosts the warm touches, clipped to the pill */
@@ -115,7 +89,6 @@
       warm.className = 'd1-warm';
       btn.insertBefore(warm, btn.firstChild);
     }
-    track.parentNode.insertBefore(echo, track.nextSibling);
     try { window.dispatchEvent(new Event('resize')); } catch (e) {}   /* re-measure section height */
   }
   /* close.js registers its DOMContentLoaded init first (script order), so the
@@ -360,22 +333,11 @@
     startBeads(items, target);
   }
 
-  /* ---- ignition: wires land → the button lights and stays lit ---- */
+  /* ---- ignition: wires land → the button lights and stays lit. The heat ramp
+     (bead arrivals → ink→amber background) does the visible warming; this just
+     flags the charged state. ---- */
   function charge() {
     btn.classList.add('charged');
-    /* the charge spills into the streak: day 1 lights and STAYS lit (day one
-       is this click) */
-    const day1 = section.querySelector('.d1-daycell.day1');
-    if (day1) setTimeout(function () { day1.classList.add('lit'); }, RM ? 0 : 70);
-    if (RM) return;                          /* reduced motion: just the lit day 1, no wave */
-    /* days 2..10 light in a wave — the promise — then the whole row recedes,
-       leaving only day 1 as the anchor (no leftover numbers, no arrow) */
-    const echo = section.querySelector('.d1-echo');
-    const futures = section.querySelectorAll('.d1-daycell.future');
-    futures.forEach(function (f, i) {
-      setTimeout(function () { f.classList.add('lit'); }, 200 + i * 70);
-    });
-    setTimeout(function () { if (echo) echo.classList.add('faded'); }, 200 + futures.length * 70 + 900);
   }
 
   /* ---- the sequence: cards pop in + wires draw with their beads → ignition ---- */
