@@ -1386,10 +1386,13 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
     opacity: 1 !important;
     transform: translateY(0) scale(1) !important;
     pointer-events: auto !important;
+    /* pre-size to the panel's natural full height so it never grows upward as messages type in;
+       cw-body (flex:1) fills the space and scrolls — no layout shift during the chat animation */
+    height: clamp(300px, 46vh, 400px) !important;
   }
   #hero-dock .cw-body {
-    height: auto !important; flex: 1 1 auto !important;
-    min-height: 0 !important; max-height: 46vh !important; overflow-y: auto !important;
+    height: 0 !important; flex: 1 1 auto !important;
+    min-height: 0 !important; max-height: none !important; overflow-y: auto !important;
   }
   /* bottom padding must clear the 20px card radius, else the composer's
      rounded corners get sliced by the card's overflow:hidden corner */
@@ -1680,6 +1683,9 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
   /* мобайл: скасувати підйом (clip-path вже none на мобайлі) */
   #hero #hero-disc-fab { bottom: 16px; }
   body.hero-p5 #hero .hx-hud { position: relative; bottom: auto; left: auto; right: auto; }
+  /* P5: let menus + bubbles overflow above the browser frame */
+  body.hero-p5 #hero .browser { overflow: visible !important; }
+  body.hero-p5 #hero .browser .page { overflow: visible !important; }
 
   /* ── P1 word demo on mobile: un-gate the cards + the demo "cursor" ──
      lantern-v3.css hides .hw-card/.hw-cursor under 1000px; the mobile
@@ -2268,7 +2274,6 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
 </section>
 
 <div class="m-navcluster">
-  <div class="m-phase-caption" id="m-phase-caption">01 · HOME</div>
   <div class="m-scrub-row">
     <button class="m-playbtn" id="m-playbtn" type="button" aria-label="Play the story">
       <svg class="ic-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>
@@ -2281,6 +2286,7 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
       </div>
     </div>
   </div>
+  <div class="m-phase-caption" id="m-phase-caption">01 · HOME</div>
 </div>
 <div id="flame"></div>
 <script src="lantern-v3.js"></script>
