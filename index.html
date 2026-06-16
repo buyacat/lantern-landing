@@ -813,35 +813,31 @@ body.past-hero #worddeck { opacity: 0 !important; pointer-events: none !importan
   100% { max-width: 280px; opacity: 1; }
 }
 
-/* p2 copy: staggered flip-out */
-body.hero-simp #hero .hero-copy-p2 { pointer-events: none; perspective: 600px; }
-body.hero-simp #hero .hero-copy-p2 .p2-eyebrow { animation: board-out 0.2s ease-in 0s     both; transform-origin: top center; }
-body.hero-simp #hero .hero-copy-p2 h2          { animation: board-out 0.2s ease-in 0.07s   both; transform-origin: top center; }
-body.hero-simp #hero .hero-copy-p2 .p2-sub     { animation: board-out 0.2s ease-in 0.13s   both; transform-origin: top center; }
-
-/* simp-done copy */
-#hero .hero-copy-simp {
-  grid-column: 1; grid-row: 1;
-  align-self: center; min-width: 0;
+/* SIMP payoff ribbon — council change: the left explanatory copy (.hero-copy-p2) is
+   NO LONGER boarded out; it stays readable while the visitor reads it. The "living
+   dictionary" payoff is reparented to <body> and pinned to the browser's bottom edge
+   (placed in JS via _heroPlaceSimpRibbon), then crossfades into the "Next: Translate"
+   pill — one continuous gesture, no destructive in-place swap. */
+.hero-copy-simp {
+  position: fixed; left: 0; top: 0; z-index: 60;
+  transform: translateX(-50%);            /* JS sets left to the browser's centre x */
   opacity: 0; pointer-events: none;
+  transition: opacity .34s ease;
+  perspective: 600px;
 }
-body.hero-simp #hero .hero-copy-simp { opacity: 1; pointer-events: auto; perspective: 600px; }
-body.hero-simp #hero .hero-copy-simp .sc-pre { animation: board-in 0.26s cubic-bezier(.2,.8,.3,1) 0.14s both; transform-origin: bottom center; }
-body.hero-simp #hero .hero-copy-simp .sc-h   { animation: board-in 0.26s cubic-bezier(.2,.8,.3,1) 0.26s both; transform-origin: bottom center; }
+body.hero-simp .hero-copy-simp { opacity: 1; }
+body.hero-simp .hero-copy-simp .sc-h { animation: board-in 0.3s cubic-bezier(.2,.8,.3,1) 0.06s both; transform-origin: bottom center; }
 
-#hero .hero-copy-simp .sc-pre {
-  font-size: clamp(16px, 1.6vw, 22px);
-  color: var(--ink-70, rgba(26,23,20,.7));
-  margin: 0 0 20px; line-height: 1.5;
-}
-#hero .hero-copy-simp .sc-h {
-  font-weight: 700; letter-spacing: -.03em;
-  font-size: clamp(32px, 3.8vw, 52px); line-height: 1.08; margin: 0;
-  /* the copy column is a fixed ~481px (wrap caps content at 1200), and the browser
-     is pulled left 5vw over its right ~50px — "the living dictionary." is itself
-     ~481px, so it slid under the frame. Cap the headline so the long line wraps
-     ("the living" / "dictionary.") and always clears the browser. */
-  max-width: 360px;
+.hero-copy-simp .sc-h {
+  margin: 0; white-space: nowrap; text-align: center;
+  font-weight: 700; letter-spacing: -.02em;
+  font-size: clamp(17px, 1.5vw, 23px); line-height: 1.1;
+  color: var(--ink, #1a1714);
+  background: rgba(255,255,255,.9);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  border: 1px solid rgba(58,36,2,.10);
+  box-shadow: 0 20px 44px -24px rgba(58,36,2,.34), 0 4px 14px -8px rgba(26,23,20,.14);
+  padding: 11px 24px; border-radius: 999px;
 }
 
 /* verb cycle: made → built → created → invented (3 departure-board flips) */
@@ -855,13 +851,13 @@ body.hero-simp #hero .hero-copy-simp .sc-h   { animation: board-in 0.26s cubic-b
 }
 /* "made" rides in WITH the headline in plain ink (no separate wipe), then lights
    amber and departure-board flips to "invented" */
-#hero .hero-copy-simp .sc-verb {
+.hero-copy-simp .sc-verb {
   display:inline-block; vertical-align:baseline;
   color: inherit; transition: color .32s ease;
 }
-#hero .hero-copy-simp .sc-verb.amber { color: var(--amber-deep,#c96b00); }
-body.hero-simp #hero .hero-copy-simp .sc-verb.v-out { animation:verb-out     0.22s ease-in  both !important; }
-body.hero-simp #hero .hero-copy-simp .sc-verb.v-end { animation:verb-in-end  0.45s ease-out both !important; }
+.hero-copy-simp .sc-verb.amber { color: var(--amber-deep,#c96b00); }
+body.hero-simp .hero-copy-simp .sc-verb.v-out { animation:verb-out     0.22s ease-in  both !important; }
+body.hero-simp .hero-copy-simp .sc-verb.v-end { animation:verb-in-end  0.45s ease-out both !important; }
 
 /* ===== HERO PHASE 5 — In-page exercises ===== */
 
@@ -1216,8 +1212,7 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
   #hero .hero-copy-p2,
   #hero .hero-copy-p3,
   #hero .hero-copy-p4,
-  #hero .hero-copy-p5,
-  #hero .hero-copy-simp {
+  #hero .hero-copy-p5 {
     grid-column: 1 !important;
     grid-row: 1 !important;
     /* same box as the browser window below (width:90vw, centred) so the titles +
@@ -1240,16 +1235,20 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
   }
 
   /* compact copy on mobile */
-  #hero .hero-copy h1 { font-size: clamp(26px, 7.4vw, 40px) !important; line-height: 1.08; margin-bottom: 6px; }
+  /* Home title rides on ONE line ("Every word you actually use") — drop the desktop
+     <br> (the trailing space stays), leave the -webkit-box clamp, and size it to fit
+     the 90vw box down to 320px. */
+  #hero .hero-copy h1 { display: block !important; font-size: clamp(23px, 7vw, 36px) !important; line-height: 1.08; margin-bottom: 6px; white-space: nowrap; }
+  #hero .hero-copy h1 br.hero-h1-brk { display: none; }
   #hero .hero-copy .hero-eyebrow { font-size: 10px; letter-spacing: .18em; margin-bottom: 8px; }
   /* descriptive subhead under each headline — shown on mobile so every screen
-     matches the desktop copy. Practice (p5) keeps its subhead hidden: that screen
-     is intentionally left as-is. Clamped + compact so the browser + cards still fit. */
-  #hero .hero-copy-p5 .p2-sub { display: none; }
+     matches the desktop copy (Practice/p5 included). Clamped + compact so the
+     browser + cards still fit. */
   #hero .hero-copy .hsub,
   #hero .hero-copy-p2 .p2-sub,
   #hero .hero-copy-p3 .p2-sub,
-  #hero .hero-copy-p4 .p2-sub {
+  #hero .hero-copy-p4 .p2-sub,
+  #hero .hero-copy-p5 .p2-sub {
     display: -webkit-box !important; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden;
     margin: 9px auto 0 !important; max-width: none;   /* fill the 90vw copy box, matching the browser width */
     font-size: 13px !important; line-height: 1.45;
@@ -1268,8 +1267,9 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
   #hero .hero-copy-imm .p2-eyebrow,
   #hero .hero-copy-p4 .p2-eyebrow,
   #hero .hero-copy-p5 .p2-eyebrow { display: none !important; }
-  #hero .hero-copy-simp .sc-h { font-size: clamp(22px, 7vw, 36px) !important; max-width: none !important; }
-  #hero .hero-copy-simp .sc-pre { font-size: 14px; margin-bottom: 10px; }
+  /* payoff ribbon on mobile: smaller pill, still pinned to the browser's bottom edge
+     (no Next pill on mobile — the crank is the nav — so it simply fades after its dwell) */
+  #hero-simp-ribbon .sc-h { font-size: 14px !important; padding: 9px 18px !important; max-width: 90vw; }
 
   /* exit: vertical nudge instead of desktop horizontal slide */
   body.hero-p2 #hero .hero-copy { transform: translateY(-12px) !important; }
@@ -2047,7 +2047,7 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
     <!-- COLUMN 1 — phase 1 copy -->
     <div class="hero-copy">
       <div class="hero-eyebrow">Your reading tutor for the real web</div>
-      <h1 class="disp reveal-lines">Every word<br />you actually use</h1>
+      <h1 class="disp reveal-lines">Every word <br class="hero-h1-brk" />you actually use</h1>
       <p class="hsub" data-m="Save words as you read. Lantern brings them back in the next thing you read — until they stick.">Save words as you read. Lantern weaves them back into the next thing you read — until they stick.</p>
       <div class="hcta">
         <button class="btn-install">
@@ -2235,10 +2235,11 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
       <p class="p2-sub">Your saved words fly into the page as gaps — <strong>any article, any text, wired to your words</strong>. Watch it happen.</p>
     </div>
 
-    <!-- SIMP DONE COPY — departure-board reveal after word stream finishes -->
-    <div class="hero-copy-simp">
-      <p class="sc-pre">Your words come back.</p>
-      <p class="sc-h">We<span class="sc-verb">&nbsp;made</span><br>the living dictionary.</p>
+    <!-- SIMP payoff RIBBON — council change: keep the left explanatory copy (it is no
+         longer boarded out); the payoff is reparented to <body> and pinned to the
+         browser's bottom edge in JS, then crossfades into the "Next: Translate" pill -->
+    <div class="hero-copy-simp" id="hero-simp-ribbon">
+      <p class="sc-h">We<span class="sc-verb">&nbsp;made</span> the living dictionary.</p>
     </div>
 
   </div>
@@ -2579,6 +2580,10 @@ window.LanternPlaying = false;
   /* ---- simplify (phase 1) "next" pill ---- */
   var simpNext = document.getElementById('hero-simp-next');
   if (simpNext && simpNext.parentNode !== document.body) document.body.appendChild(simpNext);
+  /* ---- simplify payoff ribbon: lifted to <body> so position:fixed is viewport-
+     relative (inside the transformed .hero-stage it would anchor to the stage) ---- */
+  var simpRibbon = document.getElementById('hero-simp-ribbon');
+  if (simpRibbon && simpRibbon.parentNode !== document.body) document.body.appendChild(simpRibbon);
   /* ---- home (phase 0) + practice (phase 5) "next" pills ---- */
   var homeNext = document.getElementById('hero-home-next');
   if (homeNext && homeNext.parentNode !== document.body) document.body.appendChild(homeNext);
@@ -2899,6 +2904,21 @@ window.LanternPlaying = false;
     simpNext.style.left = Math.round(r.left + r.width / 2 - pw / 2) + 'px';
     simpNext.style.top  = Math.round(r.bottom + 14) + 'px';
   }
+  /* payoff ribbon: pinned straddling the browser's bottom edge, centred via the
+     element's own translateX(-50%) so it stays centred as the verb grows
+     (made → invented). The Next pill then takes the same zone — one continuous
+     gesture rather than a destructive in-place swap of the left copy. */
+  function placeSimpRibbon() {
+    var br = document.querySelector('#hero .browser');
+    if (!simpRibbon || !br) return;
+    var r = br.getBoundingClientRect();
+    simpRibbon.style.left = Math.round(r.left + r.width / 2) + 'px';
+    simpRibbon.style.top  = Math.round(r.bottom - 20) + 'px';
+  }
+  window._heroPlaceSimpRibbon = placeSimpRibbon;
+  window.addEventListener('resize', function () {
+    if (document.body.classList.contains('hero-simp')) placeSimpRibbon();
+  }, { passive: true });
   function showSimpNext() {
     if (!simpNext || phase !== 1) return;
     simpNext.setAttribute('aria-hidden', 'false'); simpNext.tabIndex = 0;
@@ -3805,7 +3825,7 @@ window.LanternPlaying = false;
   ];
   function fastExitCurrent() {
     var els = [];
-    if (document.body.classList.contains('hero-simp')) els.push(document.querySelector('#hero .hero-copy-simp'));
+    if (document.body.classList.contains('hero-simp')) els.push(document.querySelector('.hero-copy-simp'));
     if (phase >= 0 && phase < PHASE_SELS.length) els.push(document.querySelector(PHASE_SELS[phase]));
     els.forEach(function (e) {
       if (!e) return;
@@ -4243,8 +4263,11 @@ window.LanternPlaying = false;
     openDockFlow(gen);
   });
 
-  /* simp-done state: departure board on left copy after word stream finishes */
-  window._heroToP3 = function () { document.body.classList.add('hero-simp'); };
+  /* simp-done state: raise the payoff ribbon under the browser (the left copy stays) */
+  window._heroToP3 = function () {
+    if (window._heroPlaceSimpRibbon) window._heroPlaceSimpRibbon();   // place before it fades in
+    document.body.classList.add('hero-simp');
+  };
   window._heroToP2 = function () { document.body.classList.remove('hero-simp'); };
 
   /* verb cycle: "made" spreads in, then departure-board 3D-flips to "invented" */
@@ -4254,7 +4277,7 @@ window.LanternPlaying = false;
       var g = ++gen;
       setTimeout(function () {
         if (g !== gen) return;
-        var v = document.querySelector('#hero .hero-copy-simp .sc-verb');
+        var v = document.querySelector('.hero-copy-simp .sc-verb');
         if (!v) return;
         v.classList.add('amber');            /* "made" lights up amber */
         setTimeout(function () {
@@ -4273,7 +4296,7 @@ window.LanternPlaying = false;
     }
     function reset() {
       gen++;
-      var v = document.querySelector('#hero .hero-copy-simp .sc-verb');
+      var v = document.querySelector('.hero-copy-simp .sc-verb');
       if (!v) return;
       v.classList.remove('v-out', 'v-end', 'amber');
       v.style.cssText = '';
@@ -4749,12 +4772,9 @@ window.LanternPlaying = false;
 
   async function swapIn(spans) {
     var g = simpGen;
-    /* fire the left-copy departure board when the word stream is almost done */
-    var boardAt = Math.max(0, spans.length - 3);
     for (var i = 0; i < spans.length; i++) {
-      /* the visitor moved on mid-stream — never fire the board over another phase */
+      /* the visitor moved on mid-stream — abort the word stream cleanly */
       if (g !== simpGen) return;
-      if (i === boardAt && window._heroToP3) window._heroToP3();
       var s = spans[i];
       if (s.classList.contains('saved') && window.flyShelfCardTo && window.Shelf && window.Shelf.has(s.dataset.w)) {
         await window.flyShelfCardTo(s.dataset.w, s.getBoundingClientRect(), { scale: 0.5, settle: 0 });
@@ -4809,13 +4829,21 @@ window.LanternPlaying = false;
          The dense original comes back only when the visitor scrolls on: toP3 / toP1
          call _heroSimpRevert for a quick fade. (Translate / Immerse carry the dense
          text, which lives in the separate tr-page, so leaving this simplified is safe.) */
-      await wait(80);
+      /* COUNCIL FIX (8-1): the rewrite is FULLY done → the left explanatory copy stays
+         put (no destructive board-out), and the "We made the living dictionary" payoff
+         rises as a ribbon on the browser's bottom edge, its verb flipping made → invented.
+         Hold a real reading dwell so the payoff lands, THEN crossfade the ribbon into the
+         "Next: Translate" pill (same zone) — never two messages fighting one slot. */
+      await wait(120);
       if (g !== simpGen) { busy = false; return; }
-      if (window._heroShowSimpNext) window._heroShowSimpNext();   // raise the "Next: Translate" cue
-      /* reading dwell — hold the B2 text ~1.5s before releasing the 'simp' gate, so
-         PLAY/autoplay doesn't step on to Translate the instant the stream lands
-         (BREATH alone = 600ms, too fast to actually read the simplified sentence).
-         Scroll/manual is unaffected: the visitor paces it and the B2 text stays put. */
+      if (window._heroToP3) window._heroToP3();                   // ribbon fades in + verb cycle
+      await wait(2800);                                          // dwell: read payoff, made→invented lands
+      if (g !== simpGen) { busy = false; return; }
+      document.body.classList.remove('hero-simp');               // ribbon fades out…
+      if (window._heroShowSimpNext) window._heroShowSimpNext();  // …crossfading into the Next pill
+      /* reading dwell — hold ~1.5s before releasing the 'simp' gate, so PLAY/autoplay
+         doesn't step on to Translate the instant the pill lands. Scroll/manual is
+         unaffected: the visitor paces it and the B2 text stays put. */
       await wait(1500);
       if (g !== simpGen) { busy = false; return; }
     } else {
