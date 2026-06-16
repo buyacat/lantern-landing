@@ -646,7 +646,7 @@ body.hero-imm #hero .hero-copy-p3  { opacity: 0; transform: translateX(-120px); 
 @media (max-width: 920px) {
   #hero .hero-copy-imm { grid-column: 1 !important; grid-row: 1 !important; width: 90vw !important; max-width: none !important; margin-left: auto !important; margin-right: auto !important; padding: 0; min-width: 0; align-self: start; transform: none; }
   body.hero-imm #hero .hero-copy-imm { transform: translateY(-12px); }
-  #hero .hero-copy-imm h2 { display: -webkit-box !important; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; font-size: clamp(24px, 7vw, 38px) !important; margin-bottom: 0; line-height: 1.1; }
+  #hero .hero-copy-imm h2 { display: block !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: clamp(16px, 4.4vw, 24px) !important; margin-bottom: 0; line-height: 1.1; font-weight: 700; }
   #hero .hero-copy-imm .p2-eyebrow { font-size: 10px; letter-spacing: .18em; margin-bottom: 8px; }
   #hero .hero-copy-imm .p2-sub { display: -webkit-box !important; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; margin: 9px auto 0 !important; max-width: none; font-size: 13px !important; line-height: 1.45; }
   #hero-imm-next { display: none !important; }
@@ -839,6 +839,19 @@ body.hero-simp .hero-copy-simp .sc-h { animation: board-in 0.3s cubic-bezier(.2,
   border: 1px solid rgba(58,36,2,.10);
   box-shadow: 0 20px 44px -24px rgba(58,36,2,.34), 0 4px 14px -8px rgba(26,23,20,.14);
   padding: 11px 24px; border-radius: 999px;
+}
+/* morph clone — same visuals as .sc-h but selectable when reparented to <body> */
+[data-sc-morph] {
+  font-weight: 700; letter-spacing: -.02em;
+  font-size: clamp(17px, 1.5vw, 23px); line-height: 1.1;
+  color: var(--ink, #1a1714);
+  background: rgba(255,255,255,.9);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  border: 1px solid rgba(58,36,2,.10);
+  box-shadow: 0 20px 44px -24px rgba(58,36,2,.34), 0 4px 14px -8px rgba(26,23,20,.14);
+  padding: 11px 24px; border-radius: 999px;
+  white-space: nowrap; text-align: center;
+  box-sizing: border-box; overflow: hidden;
 }
 
 /* verb cycle: made → built → created → invented (3 departure-board flips) */
@@ -1225,15 +1238,17 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
   }
 
   /* per-phase title block rides ABOVE the browser — the message of each screen
-     ("Every word you actually use", "Read it simpler", …). The bottom scrubber
-     caption stays the progress marker; the headline carries the meaning. Kept
-     compact (rules below) + clamped to 2 lines so the browser + cards still fit. */
-  #hero .hero-copy h1,
+     ("Every word you actually use", "Read it simpler", …). Single bold line so
+     the heading is a label, not a paragraph; the subhead carries the detail. */
   #hero .hero-copy-p2 h2, #hero .hero-copy-p3 h2,
   #hero .hero-copy-p4 h2, #hero .hero-copy-p5 h2 {
-    display: -webkit-box !important; -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2; overflow: hidden;
+    display: block !important; white-space: nowrap; overflow: hidden;
+    text-overflow: ellipsis; font-weight: 700;
   }
+  /* <br> inside h2 would break the single-line rule — suppress it */
+  #hero .hero-copy-p2 h2 br, #hero .hero-copy-p3 h2 br,
+  #hero .hero-copy-p4 h2 br, #hero .hero-copy-p5 h2 br,
+  #hero .hero-copy-imm h2 br { display: none !important; }
 
   /* compact copy on mobile */
   /* Home title rides on ONE line ("Every word you actually use"). reveal-lines splits
@@ -1259,7 +1274,7 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
   #hero .hero-copy-p2 h2,
   #hero .hero-copy-p3 h2,
   #hero .hero-copy-p4 h2,
-  #hero .hero-copy-p5 h2 { font-size: clamp(24px, 7vw, 38px) !important; margin-bottom: 0; line-height: 1.1; }
+  #hero .hero-copy-p5 h2 { font-size: clamp(16px, 4.4vw, 24px) !important; margin-bottom: 0; line-height: 1.1; }
   /* the per-screen name (Simplify / Translate / Discuss / Practice / Everywhere)
      is already named by the bottom phase caption — drop the top eyebrow on mobile
      so it isn't shown twice. (P1's "Your reading tutor for the real web" tagline
@@ -1512,6 +1527,12 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
     width: auto !important; min-width: 62px !important; max-width: 132px !important;
     margin: 0 !important; padding: 7px 10px 9px !important; gap: 0 !important;
     overflow: hidden !important;
+  }
+  /* Mobile strip entrance: pop in from scale(0.85) in place — the desktop
+     translateX(16px) shifts the card rightward into the next card's space,
+     causing visible overlap in the horizontal row. Scale-in avoids that. */
+  body.hero-p2 .wd-card:not(.in):not(.preset) {
+    transform: scale(0.85) !important;
   }
   body.hero-p2 .wd-card .wd-side { display: none !important; }
   body.hero-p2 .wd-card .wd-main { width: 100% !important; }
@@ -2205,35 +2226,35 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
     <!-- PHASE 2 COPY — slides into col 1 -->
     <div class="hero-copy-p2">
       <div class="p2-eyebrow">Simplify</div>
-      <h2>Too dense?<br>Read it at your level.</h2>
+      <h2>Too dense? <br>Read it at your level.</h2>
       <p class="p2-sub" data-m="Tap the orange dot and a hard paragraph rewrites to your level — with your saved words woven back in.">Hit the orange dot and a heavy paragraph rewrites to exactly your level — weaving the words you’ve saved back in, so they resurface as you read.</p>
     </div>
 
     <!-- PHASE 3 COPY — Translate -->
     <div class="hero-copy-p3">
       <div class="p2-eyebrow">Translate</div>
-      <h2>Click a sentence.<br>Read it in yours.</h2>
+      <h2>Click a sentence. <br>Read it in yours.</h2>
       <p class="p2-sub" data-m="Lantern translates whole thoughts in context, not word by word — right in the page.">Lantern translates in context — whole thoughts, not word by word. Your language, right in the page.</p>
     </div>
 
     <!-- PHASE 3.5 COPY — Immersion -->
     <div class="hero-copy-imm">
       <div class="p2-eyebrow">Everywhere</div>
-      <h2>Your words follow you<br>into your language.</h2>
+      <h2>Your words follow you <br>into your language.</h2>
       <p class="p2-sub" data-m="Switch to your language and the words you're learning still glow violet — on any site. Your vocabulary stays with you.">Switch to your native language and the words you're building still glow violet — on any site, wherever they naturally appear. Read the news at home. Your vocabulary doesn't leave.</p>
     </div>
 
     <!-- PHASE 4 COPY — Analysis -->
     <div class="hero-copy-p4">
       <div class="p2-eyebrow">Discuss</div>
-      <h2>Click Discuss.<br>The page talks back.</h2>
+      <h2>Click Discuss. <br>The page talks back.</h2>
       <p class="p2-sub" data-m="One click and Lantern reads the whole article — a short summary at your level, then ask it anything on the page.">One click and Lantern has read the whole article. You get a short summary at your level — then ask about any fact on the page, with your saved words woven back in.</p>
     </div>
 
     <!-- PHASE 5 COPY — Practice -->
     <div class="hero-copy-p5">
       <div class="p2-eyebrow" style="font-family:var(--mono,'JetBrains Mono',monospace);font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber-deep,#c96b00);margin-bottom:32px">Practice</div>
-      <h2 style="font-weight:700;letter-spacing:-.035em;font-size:clamp(36px,4vw,56px);line-height:1.04;margin:0 0 34px">Any text.<br>Instant exercises.</h2>
+      <h2 style="font-weight:700;letter-spacing:-.035em;font-size:clamp(36px,4vw,56px);line-height:1.04;margin:0 0 34px">Any text. <br>Instant exercises.</h2>
       <p class="p2-sub">Your saved words fly into the page as gaps — <strong>any article, any text, wired to your words</strong>. Watch it happen.</p>
     </div>
 
@@ -2944,45 +2965,70 @@ window.LanternPlaying = false;
      crossfades content in a single pass. Root is excluded so the live hero keeps
      animating underneath. Falls back to the plain show on Firefox / reduced-motion /
      mobile (no pill there — the crank is the nav). */
-  var SIMP_VT = !matchMedia('(prefers-reduced-motion: reduce)').matches
-             && typeof document.startViewTransition === 'function';
   function morphSimpToNext() {
-    var canMorph = SIMP_VT && simpNext && simpRibbon && phase === 1 && window.innerWidth > 920;
-    if (!canMorph) {                                   // fallback: drop the ribbon, raise the pill
-      document.body.classList.remove('hero-simp');
-      showSimpNext();
-      return;
+    var canMorph = simpNext && simpRibbon && phase === 1 && window.innerWidth > 920;
+    if (!canMorph || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      document.body.classList.remove('hero-simp'); showSimpNext(); return;
     }
-    var NAME = 'simp-morph';
-    var st = document.getElementById('simp-morph-style');
-    if (!st) { st = document.createElement('style'); st.id = 'simp-morph-style'; document.head.appendChild(st); }
-    st.textContent =
-      ':root{view-transition-name:none}' +
-      '::view-transition-group(' + NAME + '){animation-duration:.52s;animation-timing-function:cubic-bezier(.33,0,.2,1)}' +
-      '::view-transition-old(' + NAME + '),::view-transition-new(' + NAME + '){animation-duration:.4s}';
-    simpRibbon.style.viewTransitionName = NAME;        // OLD snapshot: the ribbon carries the name
-    function cleanup() {
-      simpRibbon.style.viewTransitionName = '';
+    var scH = simpRibbon.querySelector('.sc-h');
+    if (!scH) { document.body.classList.remove('hero-simp'); showSimpNext(); return; }
+
+    // 1. Snapshot ribbon pill in viewport coords (getBCR accounts for translateX(-50%))
+    var r0 = scH.getBoundingClientRect();
+
+    // 2. Place simpNext invisibly to measure its target rect
+    simpNext.setAttribute('aria-hidden', 'false'); simpNext.tabIndex = 0;
+    simpNext.classList.add('show');
+    simpNext.style.opacity = '0';
+    simpNext.style.transition = 'none';
+    simpNext.style.pointerEvents = 'none';
+    placeSimpNext();
+    var r1 = simpNext.getBoundingClientRect();
+
+    // 3. Clone the pill; [data-sc-morph] restores visual styles outside .hero-copy-simp
+    var clone = scH.cloneNode(true);
+    clone.setAttribute('data-sc-morph', '');
+    clone.style.cssText =
+      'position:fixed;margin:0;transform:none;z-index:300;overflow:hidden;box-sizing:border-box;' +
+      'left:' + Math.round(r0.left) + 'px;top:' + Math.round(r0.top) + 'px;' +
+      'width:' + Math.round(r0.width) + 'px;min-width:0;transition:none;';
+    document.body.appendChild(clone);
+
+    // 4. Hide original ribbon instantly — clone is the visual now
+    document.body.classList.remove('hero-simp');
+    simpRibbon.style.transition = 'none';
+    simpRibbon.style.opacity = '0';
+
+    // 5. Force layout, then FLIP: animate clone from ribbon rect → Next pill rect
+    void clone.getBoundingClientRect();
+    var DUR = 600;
+    var ease = 'cubic-bezier(.4,0,.2,1)';
+    clone.style.transition =
+      'left '  + DUR + 'ms ' + ease +
+      ',top '  + DUR + 'ms ' + ease +
+      ',width ' + DUR + 'ms ' + ease;
+
+    requestAnimationFrame(function () { requestAnimationFrame(function () {
+      clone.style.left  = Math.round(r1.left)  + 'px';
+      clone.style.top   = Math.round(r1.top)   + 'px';
+      clone.style.width = Math.round(r1.width) + 'px';
+    }); });
+
+    // 6. Fade text to transparent early — viewer sees the shape moving, not clashing text
+    setTimeout(function () {
+      clone.style.transition += ',color 220ms ease';
+      clone.style.color = 'transparent';
+    }, 60);
+
+    // 7. Morph done: remove clone, reveal real pill via its CSS opacity transition
+    setTimeout(function () {
+      if (clone.parentNode) clone.parentNode.removeChild(clone);
       simpRibbon.style.opacity = ''; simpRibbon.style.transition = '';
-      simpNext.style.viewTransitionName = '';
-      if (st && st.parentNode) st.parentNode.removeChild(st);
-    }
-    var vt;
-    try {
-      vt = document.startViewTransition(function () {
-        /* NEW state — all synchronous so it's captured in one snapshot:
-           the ribbon is gone, the pill is its morph target. */
-        document.body.classList.remove('hero-simp');
-        simpRibbon.style.transition = 'none';          // hide instantly (no ghost fading beside the morph)
-        simpRibbon.style.opacity = '0';
-        simpRibbon.style.viewTransitionName = '';
-        simpNext.setAttribute('aria-hidden', 'false'); simpNext.tabIndex = 0;
-        placeSimpNext();
-        simpNext.classList.add('show');
-        simpNext.style.viewTransitionName = NAME;       // NEW snapshot: the pill carries the name
-      });
-    } catch (e) { cleanup(); document.body.classList.remove('hero-simp'); showSimpNext(); return; }
-    vt.finished.then(function () { cleanup(); autoPressNext(simpNext); }, cleanup);
+      simpNext.style.transition = '';   // restore .tc-next transition: opacity .3s ease
+      simpNext.style.opacity = '';      // let .tc-next.show { opacity:1 } fade it in
+      simpNext.style.pointerEvents = '';
+      autoPressNext(simpNext);
+    }, DUR + 40);
   }
   window._heroMorphSimpToNext = morphSimpToNext;
 
@@ -3571,6 +3617,7 @@ window.LanternPlaying = false;
     if (_mr.line  && _mr.line.parentNode)  _mr.line.remove();
     if (_mr.blur  && _mr.blur.parentNode)  _mr.blur.remove();
     if (_mr.clone && _mr.clone.parentNode) _mr.clone.remove();
+    if (_mr.pbar  && _mr.pbar.parentNode)  _mr.pbar.remove();
     if (_mr.card) _mr.card.style.visibility = '';
     _mr = null;
     evCentering = false;
@@ -3633,7 +3680,22 @@ window.LanternPlaying = false;
       'transition:opacity .34s ease, transform .44s cubic-bezier(.22,.7,.24,1);';
     document.body.appendChild(line);
 
-    _mr = { clone: clone, stamp: stamp, line: line, blur: blur, card: phCard, tRise: 0, t1: 0, tStamp: 0, tPhrase: 0, tExit: 0, tFlip: 0, t2: 0, tDivide: 0, sway: 0 };
+    /* progress bar — mobile only: fills 65 % → 100 % during the FLY so the
+       "mastering" arc is legible at a glance even on a small screen */
+    var pbar = null;
+    if (window.matchMedia('(max-width: 920px)').matches) {
+      var pbarTop = Math.min(cy + H / 2 + 20, innerHeight - 110);
+      pbar = document.createElement('div');
+      pbar.style.cssText = 'position:fixed;left:50%;top:' + pbarTop.toFixed(1) + 'px;z-index:1302;pointer-events:none;' +
+        'width:min(260px,72vw);height:5px;border-radius:3px;background:rgba(26,23,20,.10);' +
+        'transform:translateX(-50%);overflow:hidden;opacity:0;transition:opacity .25s ease;';
+      var pbarFill = document.createElement('div');
+      pbarFill.style.cssText = 'height:100%;border-radius:3px;background:var(--amber,#ef8e1c);width:65%;transition:width ' + FLY + 'ms cubic-bezier(.22,.7,.24,1);';
+      pbar.appendChild(pbarFill);
+      document.body.appendChild(pbar);
+    }
+
+    _mr = { clone: clone, stamp: stamp, line: line, blur: blur, pbar: pbar, card: phCard, tRise: 0, t1: 0, tStamp: 0, tPhrase: 0, tExit: 0, tFlip: 0, t2: 0, tDivide: 0, sway: 0 };
     evCentering = true;                                    /* gate input + hold PLAY through the whole reveal */
     window.LanternBusy.set('mastery', true);
     void clone.offsetWidth;                                /* commit the start frame so beat 1 eases (no jump) */
@@ -3653,6 +3715,13 @@ window.LanternPlaying = false;
       clone.style.transition = 'transform ' + FLY + 'ms cubic-bezier(.4,0,.2,1)';
       clone.style.transform  = 'translate(' + ttX.toFixed(1) + 'px,' + ttY.toFixed(1) + 'px) scale(' + k.toFixed(4) + ')';
       if (ringC) ringC.style.strokeDashoffset = '0';        /* ring closes as the card opens */
+      /* progress bar fades in and fills to 100 % in lockstep with the fly */
+      if (pbar) {
+        pbar.style.opacity = '1';
+        requestAnimationFrame(function () { requestAnimationFrame(function () {
+          if (pbar && pbar.firstChild) pbar.firstChild.style.width = '100%';
+        }); });
+      }
     }, RISE);
 
     /* arrival (achieved): the progress RING pulses first, and a gentle 3-D sway
@@ -3712,7 +3781,7 @@ window.LanternPlaying = false;
       clone.style.transform  = 'translate(' + ttX.toFixed(1) + 'px,' + ttY.toFixed(1) + 'px) scale(' + k.toFixed(4) + ')';
       _mr.tDivide = setTimeout(function () {
         if (!_mr || phase !== 6) { abortMastery(); return; }
-        var c = clone, b = blur, ln = line;
+        var c = clone, b = blur, ln = line, pb = _mr.pbar;
         clone.style.transition = 'none';
         if (stamp.parentNode) stamp.remove();              /* badge already gone */
         /* 5) the phrase fades out IN LOCKSTEP with the split — card + phrase vanish together */
@@ -3720,6 +3789,7 @@ window.LanternPlaying = false;
         ln.style.transform = linePos + ' translateY(-8px)';
         ln.style.opacity = '0';
         setTimeout(function () { if (ln.parentNode) ln.remove(); }, 520);
+        if (pb) { pb.style.opacity = '0'; setTimeout(function () { if (pb.parentNode) pb.remove(); }, 320); }
         _mr = null;
         closeTPanel(); leaveDiscuss();                     /* reset the chat (it divides into the media now) */
         if (le.backToWall) le.backToWall();

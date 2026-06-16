@@ -268,6 +268,8 @@ function flyWordToShelf(srcRect, lemma, onDone) {
   const card = Shelf.add(lemma, { preset: true });          // holds its final slot, invisible
   // if the deck rail is hidden (narrow viewport), there's nowhere to fly — just settle the card
   if (card.getBoundingClientRect().width < 2) { card.classList.add('in'); onDone && onDone(); return; }
+  // mobile strip: snap scroll so the new (preset) card is visible before the ghost destination is measured
+  if (window.innerWidth <= 920) Shelf.stackEl.scrollLeft = Shelf.stackEl.scrollWidth;
   const ghostCls = CEFR_CLS[d.lvl] || 'b-blue';
   const ghost = el('fly-word ' + ghostCls);
   ghost.innerHTML = '<span class="fw-w">' + d.w + '</span><span class="fw-meta"><span></span><span class="cefr-b ' + ghostCls + '">' + d.lvl + '</span></span>';
