@@ -1499,8 +1499,35 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
     padding: 3px 14px 4px 0;
   }
   body.hero-p2 #wd-stack::-webkit-scrollbar { display: none; }
+  /* chip = the word at full chip-width + its gloss; the desktop progress RING
+     (.wd-side) is dropped from the strip — on an 86px chip it stole ~32px and
+     crushed long words ("phenomenon"). Progress is kept (parity) but re-drawn as
+     a 2px amber underline via ::after, fed by --wd-prog-frac set in lantern-v3.js.
+     Width fits the word (min 62 / max 132) so short words stay compact and long
+     ones get the room they need; the strip scrolls horizontally past the screen. */
   body.hero-p2 .wd-card {
-    flex: 0 0 auto !important; width: 86px !important; min-width: 86px !important; margin: 0 !important;
+    flex: 0 0 auto !important;
+    width: auto !important; min-width: 62px !important; max-width: 132px !important;
+    margin: 0 !important; padding: 7px 10px 9px !important; gap: 0 !important;
+    overflow: hidden !important;
+  }
+  body.hero-p2 .wd-card .wd-side { display: none !important; }
+  body.hero-p2 .wd-card .wd-main { width: 100% !important; }
+  body.hero-p2 .wd-card .wd-w {
+    font-size: 12.5px !important; line-height: 1.1 !important;
+    white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important;
+    display: block !important;
+  }
+  body.hero-p2 .wd-card .wd-tr {
+    font-size: 10.5px !important; line-height: 1.15 !important; margin-top: 2px !important;
+    white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important;
+  }
+  /* progress underline — keeps the desktop ring's signal without the horizontal cost */
+  body.hero-p2 .wd-card::after {
+    content: ''; position: absolute; left: 10px; right: 10px; bottom: 4px; height: 2px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, var(--amber, #F07010) calc(var(--wd-prog-frac, 0) * 100%),
+                                       rgba(26,23,20,.12) calc(var(--wd-prog-frac, 0) * 100%));
   }
   /* keep the desktop rail's faint scatter so the strip reads as a collectible deck
      (the deck rests still by design -- the bob lives on the hero word-cards). */
@@ -1747,6 +1774,9 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
      lantern-v3.css hides .hw-card/.hw-cursor under 1000px; the mobile
      demo (lantern-hero-words.js MOBILE mode) needs both back */
   .hw-card { display: block !important; }
+  /* mobile word-cards are small from the start → no idle bob; they sit still.
+     (lantern-hero-words.js already skips .rested on mobile; this is the net.) */
+  #hero .hw-card.rested { animation: none !important; }
   .hw-cursor { display: block !important; }
   /* the pointer is a fingertip, not a mouse arrow */
   .hw-cursor .hwc-ico svg { display: none; }
@@ -5310,6 +5340,26 @@ window.LanternPlaying = false;
     var pad  = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
     var extra = cs.boxSizing === 'border-box' ? pad : 0;
     var h = Math.ceil(L.offsetHeight + extra);
+
+    /* HARD CAP — the hero is ONE screen: the browser window, the My-Vocab strip
+       and the scrubber are three stacked bands that must never overlap. The text
+       height alone can exceed a short phone (the window then rode down OVER the
+       vocab strip and scrubber). Clamp .page so the window's bottom stays a gap
+       above whichever fixed band sits below it (vocab strip when shown, else the
+       scrubber). The article is bottom-anchored on these phases, so the clamp just
+       clips more of the title off the TOP — never the payoff. */
+    var GAP = 14;
+    var deck = document.getElementById('worddeck');
+    var nav  = document.querySelector('.m-navcluster');
+    var limit = window.innerHeight;
+    if (deck && deck.classList.contains('show') && getComputedStyle(deck).display !== 'none') {
+      limit = deck.getBoundingClientRect().top;
+    } else if (nav) {
+      limit = nav.getBoundingClientRect().top;
+    }
+    var maxH = Math.floor(limit - GAP - p.getBoundingClientRect().top);
+    if (maxH > 120) h = Math.min(h, maxH);
+
     p.style.setProperty('min-height', h + 'px', 'important');
   }
 

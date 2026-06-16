@@ -212,6 +212,9 @@ const Shelf = (function () {
       '</svg>';
     const cls = CEFR_CLS[d.lvl] || 'b-blue';
     const card = el('wd-card ' + cls); card.dataset.w = lemma;
+    /* mobile strip re-draws progress as a 2px underline (the ring is dropped to
+       free width for the word); CSS reads this fraction via ::after. Harmless on desktop. */
+    card.style.setProperty('--wd-prog-frac', prog.toFixed(3));
     const trCls = 't-' + cls.replace(/^b-/, '');
     card.innerHTML =
       '<div class="wd-main"><span class="wd-w">' + d.w + '</span>' +

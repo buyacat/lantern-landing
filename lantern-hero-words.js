@@ -32,7 +32,11 @@
     var hero = document.getElementById('hero');
     var browser = hero && hero.querySelector('.browser');
     if (!hero || !browser) return;
-    var MOBILE = window.innerWidth < 1000;
+    /* mobile = the page's own layout breakpoint (≤920). It used to be <1000,
+       which split 921–999px into a broken band: JS built the small mobile cards
+       but the ≤920 CSS that sizes/places/un-hides them never applied, so they
+       rendered with desktop sizing (big) or stayed hidden. One line now. */
+    var MOBILE = window.innerWidth <= 920;
 
     var words = Array.prototype.slice.call(browser.querySelectorAll('.hl')).filter(function (w) {
       return !w.closest('#hero-simp-body') && !w.dataset.nondemo;
@@ -105,7 +109,18 @@
     function slotTop(slot) {
       if (!MOBILE) return slot.yp * hero.offsetHeight;
       var hr = hero.getBoundingClientRect(), br = browser.getBoundingClientRect();
-      return (br.bottom - hr.top) + slot.yp;
+      var top = (br.bottom - hr.top) + slot.yp;
+      /* safety belt for short viewports: never let the row fall onto the bottom
+         "Send to yourself" CTA + scrubber. Clamp it to float just above the CTA
+         (the per-slot yp stagger is kept — added to both candidates, so min()
+         preserves it). The real cure is repositionMobileCards() re-pinning the
+         row after the frame settles; this only catches the extreme-short case. */
+      var cta = hero.querySelector('.hcta-m');
+      if (cta) {
+        var maxTop = (cta.getBoundingClientRect().top - hr.top) - 64 + slot.yp;
+        if (top > maxTop) top = maxTop;
+      }
+      return top;
     }
 
     var CARD_DURS = ['4.2s', '5.1s', '4.7s'];
@@ -217,7 +232,9 @@
       var slot = slots[slotI % slots.length]; slotI++;
       var card = buildCard(word, slot);
       card.style.opacity = '1';
-      card.classList.add('rested');
+      /* mobile: cards sit STILL — they're already small from the start, so the
+         idle card-bob just read as the old "jumping". Desktop keeps the bob. */
+      if (!MOBILE) card.classList.add('rested');
       markSaved(word);
     }
 
