@@ -1613,8 +1613,12 @@ body.tx-off .close-flame,body.tx-off.close-lit footer .lmark::before{animation:n
 body.hw-invite:not(.hero-p2) #hero .browser .word.cand:not(.is-saved),
 body.hw-invite:not(.hero-p2) #hero .browser .hl.cand:not(.saved){
   box-shadow:inset 0 -2px 0 rgba(239,142,28,.5);
-  animation:candpulse 1.7s ease-in-out 4;
+  animation:heroCandGlow 2.6s ease-in-out infinite;
 }
+/* gentle, never-naggy yellow shimmer on the candidate words — softer than the
+   full candpulse wash and runs continuously so a returning visitor still sees
+   the invite (the 4×-then-settle version vanished on the way back to Home) */
+@keyframes heroCandGlow{0%,100%{background:transparent}50%{background:rgba(255,217,138,.5)}}
 body.hw-invite:not(.hero-p2) #hero .browser .word.cand:not(.is-saved):hover,
 body.hw-invite:not(.hero-p2) #hero .browser .hl.cand:not(.saved):hover{background:var(--highlight)}
 .hw-card{position:absolute;z-index:6;opacity:0;transform-origin:center;will-change:transform,opacity;transition:transform .72s cubic-bezier(.2,.85,.25,1),opacity .42s ease}

@@ -111,13 +111,18 @@
       var hr = hero.getBoundingClientRect(), br = browser.getBoundingClientRect();
       var top = (br.bottom - hr.top) + slot.yp;
       /* safety belt for short viewports: never let the row fall onto the bottom
-         "Send to yourself" CTA + scrubber. Clamp it to float just above the CTA
-         (the per-slot yp stagger is kept — added to both candidates, so min()
-         preserves it). The real cure is repositionMobileCards() re-pinning the
-         row after the frame settles; this only catches the extreme-short case. */
+         dock — clamp the card's BOTTOM to clear whichever band sits higher (the
+         "Send to yourself" CTA note or the scrubber cluster). The yp stagger is
+         dropped once clamped (on a cramped screen there's no room for it). The
+         real cure is repositionMobileCards() re-pinning the row after the frame
+         settles; this only catches the extreme-short case. */
       var cta = hero.querySelector('.hcta-m');
-      if (cta) {
-        var maxTop = (cta.getBoundingClientRect().top - hr.top) - 64 + slot.yp;
+      var nav = document.querySelector('.m-navcluster');
+      var floor = Infinity;
+      if (cta) floor = Math.min(floor, cta.getBoundingClientRect().top);
+      if (nav) floor = Math.min(floor, nav.getBoundingClientRect().top);
+      if (isFinite(floor)) {
+        var maxTop = (floor - hr.top) - 64;     /* ~56px card + 8px breathing gap */
         if (top > maxTop) top = maxTop;
       }
       return top;
