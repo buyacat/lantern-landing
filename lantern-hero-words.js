@@ -238,6 +238,20 @@
       markSaved(word);
     }
 
+    /* mobile cards are absolutely placed below the browser frame, but that frame
+       settles LATE — web-font reflow, the fitMobileBrowser height morph, or an
+       orientation change all move browser.bottom after the cards were placed, so
+       their stale Y can drift onto the bottom CTA/scrubber (worst on short, wide
+       phones). Re-derive every rested card's slot position from the live layout. */
+    function repositionMobileCards() {
+      if (!MOBILE || folded || !rested.length) return;
+      rested.forEach(function (rc, i) {
+        var slot = slots[i % slots.length];
+        rc.card.style.left = (slot.xp * hero.offsetWidth) + 'px';
+        rc.card.style.top  = slotTop(slot) + 'px';
+      });
+    }
+
     // ---- as the reader scrolls off the hero, the big floating cards fold neatly
     //      into the "My vocab" deck (each glides to its deck slot and shrinks in) ----
     var folded = false;
@@ -744,6 +758,14 @@
       words.forEach(restCard);
       buildPill();
       attachScatter();
+      /* keep the cards pinned to the frame as it settles after first paint */
+      window._repositionHeroCards = repositionMobileCards;
+      if (window.whenFontsReady) window.whenFontsReady(repositionMobileCards);
+      setTimeout(repositionMobileCards, 1200);   /* after the load-time height morph */
+      var rzT;
+      window.addEventListener('resize', function () {
+        clearTimeout(rzT); rzT = setTimeout(repositionMobileCards, 120);
+      });
       return;
     }
 

@@ -5361,7 +5361,15 @@ window.LanternPlaying = false;
     if (maxH > 120) h = Math.min(h, maxH);
 
     p.style.setProperty('min-height', h + 'px', 'important');
+
+    /* the Home word-cards are pinned to browser.bottom; the height set above
+       transitions over ~1s, so re-pin them once the frame stops moving */
+    if (window._repositionHeroCards) {
+      clearTimeout(repinT);
+      repinT = setTimeout(window._repositionHeroCards, 1050);
+    }
   }
+  var repinT = 0;
 
   /* coalesce bursts of observer callbacks into one measure per frame */
   var raf = 0;
