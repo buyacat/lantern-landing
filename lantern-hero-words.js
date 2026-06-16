@@ -335,7 +335,9 @@
     window.HeroWords = {
       foldToDeck: function () { foldCardsToDeck(true); },
       finishDemo: finalizeDemo,            /* snap the cursor demo to its end-state (cursor gone, all 4 saved) */
-      pending: function () { return !folded && rested.length > 0; }
+      pending: function () { return !folded && rested.length > 0; },
+      wireWord: wireWord,
+      tokenizeWords: tokenizeWords
     };
 
     // Save action — one button, two outcomes by screen:
@@ -412,7 +414,7 @@
     });
     document.addEventListener('click', function (e) {
       if (!popup.classList.contains('show')) return;
-      if (popup.contains(e.target) || e.target.closest('.word') || e.target.closest('.hl')) return;
+      if (popup.contains(e.target) || e.target.closest('.word') || e.target.closest('.hl') || e.target.closest('.imm-w') || e.target.closest('.simp-w')) return;
       closePopup();
     });
 
@@ -463,6 +465,11 @@
     var extraWords = tokenizeWords(mainPara).concat(tokenizeWords(simpBody)).concat(simpHls);
 
     words.concat(extraWords).concat(nondemoHls).forEach(wireWord);
+
+    // P5 (ex-page): tokenize plain text in each paragraph (skips .exw/.art-gap elements automatically)
+    Array.prototype.slice.call(browser.querySelectorAll('.ex-page p')).forEach(function (p) {
+      tokenizeWords(p).forEach(wireWord);
+    });
 
     /* council follow-up: the auto-demo only saves the 4 .hl words, so visitors
        rarely realise THEY can save more. Tag a few good words in the lead para

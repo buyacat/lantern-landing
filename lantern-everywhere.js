@@ -574,9 +574,13 @@
     if (lv) { badge.textContent = lv; badge.setAttribute('data-lv', lv); }   /* recolour to the new level */
     badge.classList.remove('morph'); void badge.offsetWidth; badge.classList.add('morph');
   }
+  var simplifiedCount = 0;
   function rewriteCard(pg) {
     if (pg.dataset.done) return;
     pg.dataset.done = '1';
+    /* once enough of the wall has been simplified, the "click anywhere" cue grows
+       + darkens to pull the eye to the next step */
+    if (++simplifiedCount >= 4 && cue) cue.classList.add('lit');
     var easy = pg.querySelector('.t-easy');
     var txt  = easy.getAttribute('data-text') || '';
     if (REDUCED) { easy.textContent = txt; pg.classList.add('rewritten'); morphBadge(pg); return; }

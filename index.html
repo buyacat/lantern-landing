@@ -1175,7 +1175,7 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
     grid-template-columns: 1fr !important;
     grid-template-rows: auto auto auto 1fr !important;  /* copy · browser · CTA · spacer */
     align-items: start !important;
-    gap: 14px !important;
+    gap: 10px !important;
     height: 100% !important;
   }
 
@@ -1248,7 +1248,10 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
     box-sizing: border-box !important;
     align-self: stretch !important;
     min-height: calc(100vh - var(--nav, 56px));
-    padding: calc(var(--nav, 56px) + 10px) 0 calc(env(safe-area-inset-bottom,0px) + 120px) !important;
+    /* lifted ~22px: copies overlay in one grid row (height = tall HOME copy) and the
+       bottom cluster is position:fixed, so trimming the top padding raises the browser
+       toward viewport-centre AND widens the clean gap below it (kills the "каша"). */
+    padding: calc(var(--nav, 56px) - 8px) 0 calc(env(safe-area-inset-bottom,0px) + 120px) !important;
   }
 
   /* float: lantern-v3.css sets display:none at 920px — un-hide and make static */
@@ -1296,6 +1299,23 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
      clips the simplify demo mid-sentence */
   #hero .browser .page { transition: min-height 1s cubic-bezier(.4,0,.2,1) 0.12s; }
   body.hero-p2 #hero .browser .page { min-height: 330px !important; }
+
+  /* COUNCIL verdict (7/0, Option A): the in-browser article is taller than the
+     fixed ~330px window on mobile, so something must clip. Anchor every article
+     layer to the BOTTOM of the window so each phase's PAYOFF stays whole — the
+     simplified card, the translated sentence, the exercises — and the article's
+     own title + intro clip off the TOP instead. The marketing headline above the
+     browser already carries each phase's meaning, so the clipped title costs no
+     story. (.page is overflow:hidden + position:relative, so bottom:0 children
+     overflow upward and clip cleanly under the address bar.)
+     Scoped to body.hero-p2 (present SIMPLIFY→Practice, absent on Home/Install): on
+     Home the only content is the title + intro — its payoff is at the TOP and the
+     reserved 2nd-paragraph space sits at the bottom, so bottom-anchoring there would
+     clip the title instead. Those intro screens keep the default top-anchor. */
+  body.hero-p2 #hero .browser .page-en,
+  body.hero-p2 #hero .browser .tr-page,
+  body.hero-p2 #hero .browser .ex-page,
+  body.hero-p2 #hero .browser .imm-page { top: auto !important; bottom: 0 !important; }
 
   /* words pre-highlighted on mobile (no interactive demo; show saved state by default) */
   #hero .browser .hl { border-radius: 4px; padding: 0 2px; background: #e3edfd; color: #2f6fd6; }
@@ -1895,9 +1915,9 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
     <span class="m-nav-slot"><span class="m-dot"></span><svg class="m-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 8 6 6"/><path d="M4 14l6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="M22 22 17 12l-5 10"/><path d="M14 18h6"/></svg></span>
     <span class="m-dot-lbl">Translate</span>
   </button>
-  <button class="m-dot-wrap" id="m-dot-imm" aria-label="Immerse">
+  <button class="m-dot-wrap" id="m-dot-imm" aria-label="Everywhere">
     <span class="m-nav-slot"><span class="m-dot"></span><svg class="m-icon" viewBox="0 0 24 24" aria-hidden="true"><polyline points="21 3 21 8 16 8"/><polyline points="3 21 3 16 8 16"/><path d="M19.4 9a7.5 7.5 0 0 0-12.5-2.8L3 8"/><path d="M4.6 15a7.5 7.5 0 0 0 12.5 2.8L21 16"/></svg></span>
-    <span class="m-dot-lbl">Immerse</span>
+    <span class="m-dot-lbl">Everywhere</span>
   </button>
   <button class="m-dot-wrap" id="m-dot-4" aria-label="Discuss">
     <span class="m-nav-slot"><span class="m-dot"></span><svg class="m-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
@@ -2004,7 +2024,7 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
 
             <!-- Phase 3.5 — Immersion: the ↻ control flips the whole article into the
                  reader's chosen language (the gloss language) -->
-            <button class="disc-fab imm-fab" id="hero-imm-fab" type="button" aria-hidden="true" tabindex="-1"><span class="dc-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h18"/><path d="M17 4l4 4-4 4"/><path d="M21 16H3"/><path d="M7 12l-4 4 4 4"/></svg></span><span class="imm-fab-lbl">Read in your language</span></button>
+            <button class="disc-fab imm-fab" id="hero-imm-fab" type="button" aria-hidden="true" tabindex="-1"><span class="dc-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h18"/><path d="M17 4l4 4-4 4"/><path d="M21 16H3"/><path d="M7 12l-4 4 4 4"/></svg></span><span class="imm-fab-lbl">Browse in your language</span></button>
 
             <!-- Phase 4 — "Discuss the article" pill + side panel docked inside the
                  browser frame, the way the real extension opens -->
@@ -2056,7 +2076,7 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
       <button class="tc-next" id="hero-simp-next" type="button" aria-hidden="true" tabindex="-1">Next: Translate <span class="arr" aria-hidden="true">→</span></button>
       <!-- "go next" pill — fades in under the translate card once the translation
            has played; reparented to <body> in JS (viewport-fixed, like the card) -->
-      <button class="tc-next" id="hero-tc-next" type="button" aria-hidden="true" tabindex="-1">Next: Immerse <span class="arr" aria-hidden="true">→</span></button>
+      <button class="tc-next" id="hero-tc-next" type="button" aria-hidden="true" tabindex="-1">Next: Everywhere <span class="arr" aria-hidden="true">→</span></button>
       <!-- "go next" pill for Immersion — fades in under the browser once it has flipped -->
       <button class="tc-next" id="hero-imm-next" type="button" aria-hidden="true" tabindex="-1">Next: Practice <span class="arr" aria-hidden="true">→</span></button>
       <!-- same "go next" pill for Discuss — fades in under the chat once it has played -->
@@ -2093,9 +2113,9 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
 
     <!-- PHASE 3.5 COPY — Immersion -->
     <div class="hero-copy-imm">
-      <div class="p2-eyebrow">Immerse</div>
-      <h2>Flip the page.<br>Read it all in yours.</h2>
-      <p class="p2-sub">One tap turns the whole article into your language — your saved words stay marked, so you read fluently and still see what you're learning.</p>
+      <div class="p2-eyebrow">Everywhere</div>
+      <h2>Your words follow you<br>into your language.</h2>
+      <p class="p2-sub">Switch to your native language and the words you're building still glow violet — on any site, wherever they naturally appear. Read the news at home. Your vocabulary doesn't leave.</p>
     </div>
 
     <!-- PHASE 4 COPY — Analysis -->
@@ -2569,6 +2589,19 @@ window.LanternPlaying = false;
     if (f2) f2.innerHTML = immRender(IMM.en.p2);
     if (b1) b1.innerHTML = immRender(back.p1);
     if (b2) b2.innerHTML = immRender(back.p2);
+    // only wire English front face — back face is in the user's language, no popup needed
+    if (window.HeroWords && window.HeroWords.wireWord) {
+      [f1, f2].forEach(function (el) {
+        if (!el) return;
+        Array.prototype.slice.call(el.querySelectorAll('.imm-word')).forEach(function (iw) {
+          window.HeroWords.tokenizeWords(iw).forEach(window.HeroWords.wireWord);
+        });
+        Array.prototype.slice.call(el.querySelectorAll('.imm-w')).forEach(function (iw) {
+          if (!iw.dataset.w) iw.dataset.w = (iw.textContent || '').toLowerCase().replace(/[^a-z'']/g, '');
+          if (iw.dataset.w) window.HeroWords.wireWord(iw);
+        });
+      });
+    }
   }
   function showImmFab() {
     if (!immFab) return;
@@ -4149,6 +4182,16 @@ window.LanternPlaying = false;
   if (dot6)  dot6.addEventListener('click', function () { toCTA(); });           /* phase 7 */
   if (navHome)     navHome.addEventListener('click', function (e) { e.preventDefault(); toP1(); });
   if (navSimplify) navSimplify.addEventListener('click', function (e) { e.preventDefault(); toP2(); });
+  /* the brand logo returns to the hero (it already shows cursor:pointer) — works
+     from any phase since toP1 → exitOverlays() tears down ph-ev/ph-cta + mastery */
+  var brandLogo = document.querySelector('.brand');
+  if (brandLogo) {
+    brandLogo.setAttribute('role', 'button');
+    brandLogo.setAttribute('tabindex', '0');
+    brandLogo.setAttribute('aria-label', 'Lantern — back to start');
+    brandLogo.addEventListener('click', function () { toP1(); });
+    brandLogo.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toP1(); } });
+  }
 
   /* tpanel lang pill: click cycles translation language */
   var LANG_CYCLE = ['uk', 'es', 'fr', 'de', 'pt'];
@@ -4627,6 +4670,12 @@ window.LanternPlaying = false;
       await wait(188);
       if (g !== simpGen) { busy = false; return; }   // phase changed mid-fade
       var spans = buildSimpleSpans();
+      if (window.HeroWords && window.HeroWords.wireWord) {
+        spans.forEach(function (s) {
+          if (!s.dataset.w) s.dataset.w = (s.textContent || '').toLowerCase().replace(/[^a-z'']/g, '');
+          if (s.dataset.w) window.HeroWords.wireWord(s);
+        });
+      }
       fitPage();                                 // grow the frame to the simplified text before it reveals
       body.classList.remove('fade');
       await wait(160);                           // brief hold so C1 reads before it ticks
