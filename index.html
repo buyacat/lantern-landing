@@ -644,11 +644,11 @@ body.hero-imm #hero .hero-copy-p3  { opacity: 0; transform: translateX(-120px); 
 #hero .hero-copy-imm .p2-sub { font-size: clamp(15px, 1.5vw, 18px); color: var(--ink-70, rgba(26,23,20,.7)); line-height: 1.58; max-width: 36ch; margin: 0; }
 
 @media (max-width: 920px) {
-  #hero .hero-copy-imm { grid-column: 1 !important; grid-row: 1 !important; padding: 0 16px; min-width: 0; max-width: none; align-self: start; transform: none; }
+  #hero .hero-copy-imm { grid-column: 1 !important; grid-row: 1 !important; width: 90vw !important; max-width: none !important; margin-left: auto !important; margin-right: auto !important; padding: 0; min-width: 0; align-self: start; transform: none; }
   body.hero-imm #hero .hero-copy-imm { transform: translateY(-12px); }
   #hero .hero-copy-imm h2 { display: -webkit-box !important; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; font-size: clamp(24px, 7vw, 38px) !important; margin-bottom: 0; line-height: 1.1; }
   #hero .hero-copy-imm .p2-eyebrow { font-size: 10px; letter-spacing: .18em; margin-bottom: 8px; }
-  #hero .hero-copy-imm .p2-sub { display: -webkit-box !important; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; margin: 9px auto 0 !important; max-width: 32ch; font-size: 13px !important; line-height: 1.45; }
+  #hero .hero-copy-imm .p2-sub { display: -webkit-box !important; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; margin: 9px auto 0 !important; max-width: none; font-size: 13px !important; line-height: 1.45; }
   #hero-imm-next { display: none !important; }
   body.hero-imm #hero .browser .page { min-height: 380px !important; }
   /* the flip-card article is authored at desktop sizes (26/32 padding, 21px title)
@@ -1220,7 +1220,11 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
   #hero .hero-copy-simp {
     grid-column: 1 !important;
     grid-row: 1 !important;
-    padding: 0 16px;
+    /* same box as the browser window below (width:90vw, centred) so the titles +
+       slogans align edge-to-edge with the frame instead of running wider */
+    width: 90vw !important; max-width: none !important;
+    margin-left: auto !important; margin-right: auto !important;
+    padding: 0;
     min-width: 0;
   }
 
@@ -1247,7 +1251,7 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
   #hero .hero-copy-p3 .p2-sub,
   #hero .hero-copy-p4 .p2-sub {
     display: -webkit-box !important; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden;
-    margin: 9px auto 0 !important; max-width: 32ch;
+    margin: 9px auto 0 !important; max-width: none;   /* fill the 90vw copy box, matching the browser width */
     font-size: 13px !important; line-height: 1.45;
   }
   #hero .hero-copy .hcta { margin-top: 10px; }
@@ -1326,14 +1330,16 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
   #hero .browser .ex-page { padding: 18px 20px !important; }
   #hero .browser .page > p:first-child,
   #hero .browser .page h3 { font-size: 15px !important; }
-  /* reserve the 2nd-paragraph height from the start (phase 1) so the window is
-     already sized for it — the simplify para fits fully on screen 2, no clip.
-     Bumped for the narrower 90% browser, where the text wraps to more lines. */
-  #hero .hero-extra { max-height: 250px !important; }
+  /* The 2nd paragraph used to be RESERVED from the start (max-height:250) so the
+     Home window was pre-sized for Simplify and didn't jump. We no longer reserve:
+     fitMobileBrowser() (bottom of body) measures the live text on every screen and
+     drives .page min-height with the 1s transition below, so the window MORPHS to
+     fit each phase — Home stays short (one paragraph), Simplify grows for the second.
+     hero-extra falls back to its base rule: max-height:0 on Home, 500 on hero-p2. */
 
-  /* the page children are position:absolute, so .page never grows on its own —
-     grow the window WITH the extra paragraph reveal or .browser overflow:hidden
-     clips the simplify demo mid-sentence */
+  /* the page children are position:absolute, so .page never grows on its own.
+     fitMobileBrowser() sets an inline min-height (important) per screen; these
+     CSS values are only the pre-JS fallback. The transition makes the morph. */
   #hero .browser .page { transition: min-height 1s cubic-bezier(.4,0,.2,1) 0.12s; }
   body.hero-p2 #hero .browser .page { min-height: 330px !important; }
 
@@ -1638,6 +1644,16 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
   /* topbar is hidden on P7 — reclaim its padding-top for content room */
   body.ph-cta #ev-close { padding-top: 0 !important; }
 
+  /* ── 7→8 seam: the EVERYWHERE wall and the INSTALL chrome share the top zone,
+     so the default simultaneous .55s cross-fade ghosts one headline through the
+     other — that's the "скачок". During the flip we instead clear the wall fast,
+     then ease the install chrome in AS the six cards dock (~760ms), so the screen
+     forms AROUND the landing cards instead of flashing in over them. Scoped to
+     .m-cta-flip (added by toCTAmobile, dropped on land) so back-nav off the CTA
+     still uses the plain symmetric fade — no laggy exit. */
+  body.m-cta-flip #finale   { transition: opacity .3s ease; }
+  body.m-cta-flip #ev-close { transition: opacity .46s ease .3s; }
+
   /* P1 inline share prompt */
   .m-hcta-note {
     font-size: 12px; margin: 0 0 10px;
@@ -1887,7 +1903,11 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
   #ev-close .dk-card {
     position: relative !important;
     left: auto !important; top: auto !important;
-    width: auto !important;
+    /* fit the 1fr cell: content-width (width:auto) let the wide cards (Translate,
+       Save) spill past their column and off the right screen edge (~394px on a
+       390px phone — "Immerse" clipped). min-width:0 defeats the grid item's auto
+       minimum so the cell can actually constrain it. */
+    width: 100% !important; min-width: 0; box-sizing: border-box;
   }
   #ev-close .dk-card.in {
     animation: dkfloatM var(--fd, 8s) ease-in-out var(--fdelay, 0s) infinite;
@@ -1996,7 +2016,7 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
 
     <!-- COLUMN 1 — phase 1 copy -->
     <div class="hero-copy">
-      <div class="hero-eyebrow">The living dictionary</div>
+      <div class="hero-eyebrow">Your reading tutor for the real web</div>
       <h1 class="disp reveal-lines">Every word<br />you actually use</h1>
       <p class="hsub" data-m="Save words as you read. Lantern brings them back in the next thing you read — until they stick.">Save words as you read. Lantern weaves them back into the next thing you read — until they stick.</p>
       <div class="hcta">
@@ -3413,7 +3433,7 @@ window.LanternPlaying = false;
     abortMastery();                                            /* drop any in-flight mastery reveal */
     clearEvCentering();                                        /* drop any centred-window transform from the Everywhere split */
     var le = LE(); if (le && le.backToWall) le.backToWall();   /* removes ph-cta + un-hides wall */
-    document.body.classList.remove('ph-ev', 'ph-cta');
+    document.body.classList.remove('ph-ev', 'ph-cta', 'm-cta-flip');   /* drop the flip-stagger class if a back-nav abandons the dock flip mid-flight */
     /* a completed mastery reveal leaves the rail "phenomenon" card hidden (the
        clone did the flying) — restore it as the deck slides back into view */
     var pc = window.Shelf && window.Shelf.cardEl('phenomenon');
@@ -3699,6 +3719,15 @@ window.LanternPlaying = false;
       if (le && le.presentCTA) le.presentCTA();
       else document.body.classList.add('ph-cta');
       return;
+    }
+    /* mobile: arm the staggered fade BEFORE ph-cta. ph-cta is what triggers the
+       #ev-close/#finale opacity change, and a transition reads its timing at the
+       frame it starts — so m-cta-flip must already be on the body, or the default
+       .55s cross-fade wins and the two headlines ghost through each other. Cleared
+       on land (toCTAmobile) + a fallback timer so back-nav exits with the plain fade. */
+    if (window.innerWidth <= 920) {
+      document.body.classList.add('m-cta-flip');
+      setTimeout(function () { document.body.classList.remove('m-cta-flip'); }, 820);
     }
     document.body.classList.add('ph-cta');
     if (le && le.toCTA) le.toCTA();
@@ -4747,6 +4776,12 @@ window.LanternPlaying = false;
       await wait(80);
       if (g !== simpGen) { busy = false; return; }
       if (window._heroShowSimpNext) window._heroShowSimpNext();   // raise the "Next: Translate" cue
+      /* reading dwell — hold the B2 text ~1.5s before releasing the 'simp' gate, so
+         PLAY/autoplay doesn't step on to Translate the instant the stream lands
+         (BREATH alone = 600ms, too fast to actually read the simplified sentence).
+         Scroll/manual is unaffected: the visitor paces it and the B2 text stays put. */
+      await wait(1500);
+      if (g !== simpGen) { busy = false; return; }
     } else {
       simplified = false;
       para.classList.remove('simplified');
@@ -5215,6 +5250,96 @@ window.LanternPlaying = false;
   apply();
   if (mq.addEventListener) mq.addEventListener('change', apply);
   else if (mq.addListener) mq.addListener(apply);
+})();
+</script>
+<script>
+/* ════════════════════════════════════════════════════════════════════
+   MOBILE — ADAPTIVE WINDOW HEIGHT (screens 1–6: Home → Practice)
+
+   The browser's content layers (.page-en / .tr-page / .imm-page / .ex-page)
+   are position:absolute, so .page can't grow to its own text — every screen
+   used to lean on a hand-tuned min-height, and the instant the copy changed
+   (simplify swap, immerse flip, exercise reveal) something clipped.
+
+   Instead: measure the LIVE active layer and drive .page min-height from it,
+   so the window is exactly as tall as the text on each screen, with the page's
+   own padding as breathing room. The 1s min-height transition makes it MORPH
+   between screens. Observers re-fit on every in-phase content change, so it
+   tracks the text continuously and nothing is ever cut.
+
+   Discuss (hero-p4) is skipped — the chat floats over the frame, which is a
+   sized backdrop; Everywhere / Install (ph-ev / ph-cta) aren't article screens.
+   ════════════════════════════════════════════════════════════════════ */
+(function () {
+  var mq = matchMedia('(max-width: 920px)');
+
+  function page()  { return document.querySelector('#hero .browser .page'); }
+  function layer() {
+    var b = document.body.classList;
+    var sel = b.contains('hero-imm') ? '.imm-page'
+            : b.contains('hero-p5')  ? '.ex-page'
+            : b.contains('hero-p3')  ? '.tr-page'
+            : '.page-en';                       /* Home + Simplify share page-en */
+    return document.querySelector('#hero .browser .page ' + sel);
+  }
+
+  function fit() {
+    var p = page();
+    if (!p) return;
+    /* off mobile, or on a non-article screen → hand height back to the stylesheet */
+    var b = document.body.classList;
+    if (!mq.matches || b.contains('hero-p4') || b.contains('ph-ev') || b.contains('ph-cta')) {
+      p.style.removeProperty('min-height');
+      return;
+    }
+    var L = layer();
+    if (!L) return;
+    /* offsetHeight = the layer's laid-out box height (its content + own padding).
+       We use the LAYOUT box, not scrollHeight: on Home the 2nd paragraph is folded
+       to max-height:0 but spills via overflow:visible, so scrollHeight would count
+       it and keep Home tall — offsetHeight ignores the spill and Home stays short.
+       Add the page's own padding so the text clears the window top/bottom by that
+       margin. Inline min-height (important) beats the stylesheet's !important rules. */
+    var cs   = getComputedStyle(p);
+    var pad  = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
+    var extra = cs.boxSizing === 'border-box' ? pad : 0;
+    var h = Math.ceil(L.offsetHeight + extra);
+    p.style.setProperty('min-height', h + 'px', 'important');
+  }
+
+  /* coalesce bursts of observer callbacks into one measure per frame */
+  var raf = 0;
+  function schedule() { if (!raf) raf = requestAnimationFrame(function () { raf = 0; fit(); }); }
+
+  window._fitMobileBrowser = schedule;
+
+  function wire() {
+    /* phase changes flip body classes (hero-p2/p3/imm/p5…) → re-pick the layer */
+    new MutationObserver(schedule).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+
+    /* in-phase content reflow (simplify rewrite, immerse text fill, exercise
+       reveal) changes the active layer's height → re-fit while staying on screen */
+    if (window.ResizeObserver) {
+      var ro = new ResizeObserver(schedule);
+      ['.page-en', '.tr-page', '.imm-page', '.ex-page'].forEach(function (s) {
+        var el = document.querySelector('#hero .browser .page ' + s);
+        if (el) ro.observe(el);
+      });
+    }
+
+    if (mq.addEventListener) mq.addEventListener('change', schedule);
+    else if (mq.addListener) mq.addListener(schedule);
+    window.addEventListener('resize', schedule);
+    window.addEventListener('orientationchange', function () { setTimeout(schedule, 120); });
+
+    schedule();
+    /* fonts land after first paint → wrap counts shift; re-measure once settled */
+    setTimeout(schedule, 400);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(schedule);
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire);
+  else wire();
 })();
 </script>
 </body>
