@@ -4440,6 +4440,12 @@ window.LanternPlaying = false;
        direction, not speed. */
     if (Math.abs(dy) < 40) return;
     if (dx > Math.abs(dy)) return;   /* reject only clearly-horizontal drags (thumb swipes arc) */
+    /* leaving the HOME screen must be a DELIBERATE swipe, never an accidental
+       brush: a 40px flick on the hero used to auto-jump to Simplify (the
+       "screen 1→2 happens by itself" bug). Demand a clearly intentional
+       vertical throw — ~16% of the viewport — before stepping off Home. Later
+       screens keep the light 40px gate (the user is already engaged there). */
+    if (phase === 0 && dy > 0 && dy < Math.max(120, window.innerHeight * 0.16)) return;
     /* don't capture swipes inside a scrollable chat body */
     var cw = e.target && e.target.closest ? e.target.closest('.cw-body') : null;
     if (cw && cw.scrollHeight > cw.clientHeight + 1) {
