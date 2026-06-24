@@ -1668,24 +1668,23 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
      way there at a capped speed. Generous vertical padding = fat hit target. */
   /* play + scrub on one media-player row; track stays the truth, play is opt-in */
   .m-scrub-row {
-    display: flex; align-items: center; gap: 12px;
-    width: min(94vw, 440px);       /* wide enough to seat play at the LEFT and the advance arrow at the RIGHT, scrubber filling the middle */
+    display: flex; align-items: center; gap: 16px;
+    width: min(86vw, 360px);       /* narrower row = ticks sit closer together; play (LEFT) + advance (RIGHT) flank a tighter scrubber */
     pointer-events: none;          /* children re-enable; cluster stays click-through */
   }
+  /* play = a BARE triangle, twin to the bare advance chevron on the right (no
+     border/box). The play↔stop icon swap is the only "playing" cue it needs. */
   .m-playbtn {
     pointer-events: auto; flex-shrink: 0;
-    width: 34px; height: 34px; border-radius: 50%;
-    border: 1.5px solid rgba(26,23,20,.22); box-sizing: border-box;
-    background: var(--paper, #f7f6f3);
-    box-shadow: 0 2px 8px rgba(26,23,20,.14);
+    width: 34px; height: 34px;
+    background: none; border: none; box-shadow: none;
     display: flex; align-items: center; justify-content: center;
     padding: 0; cursor: pointer; -webkit-tap-highlight-color: transparent;
-    transition: border-color .18s ease, background .18s ease, transform .12s ease;
+    transition: transform .12s ease;
   }
   .m-playbtn:active { transform: scale(.92); }
-  .m-playbtn svg { width: 18px; height: 18px; fill: var(--amber-deep, #c96b00); }
+  .m-playbtn svg { width: 24px; height: 24px; fill: var(--amber-deep, #c96b00); }
   .m-playbtn .ic-stop { display: none; }
-  .m-playbtn.playing { border-color: var(--amber, #ef8e1c); background: rgba(239,142,28,.10); }
   .m-playbtn.playing .ic-play { display: none; }
   .m-playbtn.playing .ic-stop { display: block; }
 
