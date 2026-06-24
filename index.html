@@ -1201,6 +1201,9 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
    swipe-navigable phases, bottom progress dots
    ═══════════════════════════════════════════════════════ */
 @media (max-width: 920px) {
+  /* single spacing token — all gaps/paddings above and below the browser derive from this */
+  :root { --m-vgap: 12px; }
+
   .m-only { display: block; }
   .d-only { display: none; }
   /* inline-safe mobile hide: stays inline on desktop (no rule there), drops out
@@ -1230,7 +1233,7 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
     grid-template-columns: 1fr !important;
     grid-template-rows: auto auto auto 1fr !important;  /* copy · browser · CTA · spacer */
     align-items: start !important;
-    gap: 10px !important;
+    gap: var(--m-vgap) !important;
     height: 100% !important;
   }
 
@@ -1280,8 +1283,8 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
   #hero .hero-copy-p4 .p2-sub,
   #hero .hero-copy-p5 .p2-sub {
     display: -webkit-box !important; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden;
-    margin: 9px auto 0 !important; max-width: none;   /* fill the 90vw copy box, matching the browser width */
-    font-size: 13px !important; line-height: 1.45;
+    margin: var(--m-vgap) auto 0 !important; max-width: none;   /* fill the 90vw copy box, matching the browser width */
+    font-size: 15px !important; line-height: 1.45;
   }
   #hero .hero-copy .hcta { margin-top: 10px; }
   #hero .hero-copy-p2 h2,
@@ -2405,7 +2408,7 @@ body.hero-p5 #hero .hx-hud { position: absolute; bottom: 0; left: 0; right: 0; z
     </div>
     <div class="d1-fine d-only">Free to start · no account needed · works on any site</div>
     <div class="m-only m-close-cta">
-      <p class="m-close-note">Lantern is a Chrome extension —<br>open on your Mac or PC to install.</p>
+      <p class="m-close-note">Chrome extension — opens on Mac or PC.</p>
       <button class="m-share-btn" data-m-share aria-label="Send to desktop">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
         <span>Send to desktop</span>
