@@ -1833,6 +1833,8 @@ body.lantern-light #hero .floatwrap{
 /* enough of the wall simplified → the cue grows + darkens to pull the eye onward */
 .ev-cue.lit{opacity:1;color:var(--ink);font-size:13.5px;letter-spacing:.16em}
 @keyframes evCueBreathe{0%,100%{transform:translateY(0)}50%{transform:translateY(3px)}}
+/* swipe-to-simplify hint — touch only; desktop simplifies on hover, so hidden there */
+.ev-swipe{display:none}
 /* flame courier */
 #flame{position:fixed;width:18px;height:18px;border-radius:50%;background:var(--amber);box-shadow:0 0 20px 5px rgba(239,142,28,.55);pointer-events:none;display:none;z-index:9999;transform:translate(-50%,-50%)}
 @media(max-width:920px){.ev-wall{max-width:720px}.pg{width:clamp(280px,46vw,348px)}}
