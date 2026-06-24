@@ -101,7 +101,10 @@ body.at-hero .pill{opacity:0;visibility:hidden;pointer-events:none}
 .hero-copy{min-width:0}
 .hero-eyebrow{font-family:var(--mono);font-size:13px;letter-spacing:.3em;text-transform:uppercase;color:var(--amber-deep);margin-bottom:36px}
 .hero h1{font-weight:700;letter-spacing:-.04em;font-size:clamp(50px,9vw,118px);line-height:.96}
-.hero-copy h1{font-size:clamp(40px,4.4vw,64px)}
+/* "Your reading tutor for the real web" (COUNCIL Option C) is longer than the old
+   headline — sized a step down so "Your reading tutor" fits line 1 and it breaks to a
+   clean 2 lines (was 64px, which orphaned "tutor" onto its own line). */
+.hero-copy h1{font-size:clamp(38px,3.5vw,52px)}
 .hero .hsub{margin:42px auto 0;max-width:40ch;font-size:clamp(16px,1.6vw,20px);color:var(--ink-70);line-height:1.55}
 .hero-copy .hsub{margin-left:0;margin-right:0}
 .hero .hcta{margin-top:50px;display:flex;gap:16px;justify-content:center;align-items:center;flex-wrap:wrap}
@@ -960,7 +963,11 @@ body.tx-off [data-reveal],body.tx-off .reveal-lines .ln>.i,body.tx-off .mini-lis
 .act-sep{width:40px;height:1px;background:var(--line)}
 
 /* ---- word DECK — saved words as plain cards, a calm rail on the right ---- */
-#worddeck{position:fixed;right:20px;top:50%;transform:translateY(-45%);z-index:64;width:162px;display:none;pointer-events:none;transition:opacity .35s ease}
+/* right edge TRACKS the centred .wrap (not the raw viewport): at <=1520 it rests
+   at 20px from the edge (unchanged), but on wider screens it pulls inward to stay
+   beside the browser instead of stranding in the far corner. 140px = maxw/2 + deck
+   overhang past the wrap edge, tuned so 1520 lands exactly on the old 20px. */
+#worddeck{position:fixed;right:max(20px, calc(50vw - var(--maxw)/2 - 140px));top:50%;transform:translateY(-45%);z-index:64;width:162px;display:none;pointer-events:none;transition:opacity .35s ease}
 #worddeck.show{display:block;pointer-events:auto}
 body.ev-active #worddeck,body.at-hero #worddeck,body.at-close #worddeck{opacity:0;pointer-events:none}
 .wd-label{font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:rgba(26,23,20,.4);margin-bottom:5px;padding-left:3px}

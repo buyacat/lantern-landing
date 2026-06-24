@@ -283,12 +283,26 @@
       playBtn.addEventListener('click', function () { if (playing) stopPlay(); else startPlay(); });
       var userInterrupt = function (e) {
         if (!playing) return;
-        if (e && e.target && e.target.closest && e.target.closest('.m-playbtn')) return;
+        if (e && e.target && e.target.closest && e.target.closest('.m-playbtn, .m-advance')) return;
         stopPlay();
       };
       window.addEventListener('touchstart', userInterrupt, { passive: true });
       window.addEventListener('wheel', userInterrupt, { passive: true });
       window.addEventListener('keydown', userInterrupt);
+    }
+
+    /* advance arrow — the single onward control on the scrubber row: step to the next
+       screen (loops home at the end). The phase change notifies LanternCrank, which
+       brings the scroll runway along so the next flick continues from the right spot. */
+    var advBtn = document.getElementById('m-advance');
+    if (advBtn) {
+      advBtn.addEventListener('click', function () {
+        if (playing) stopPlay();
+        if (LP.pos() >= N - 1) { if (LP.jump) LP.jump(0); }
+        else if (LP.step) LP.step(1);
+        target = expected = LP.get();
+        render();
+      });
     }
 
     render();

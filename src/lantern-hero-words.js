@@ -109,23 +109,26 @@
     function slotTop(slot) {
       if (!MOBILE) return slot.yp * hero.offsetHeight;
       var hr = hero.getBoundingClientRect(), br = browser.getBoundingClientRect();
-      var top = (br.bottom - hr.top) + slot.yp;
-      /* safety belt for short viewports: never let the row fall onto the bottom
-         dock — clamp the card's BOTTOM to clear whichever band sits higher (the
-         "Send to yourself" CTA note or the scrubber cluster). The yp stagger is
-         dropped once clamped (on a cramped screen there's no room for it). The
-         real cure is repositionMobileCards() re-pinning the row after the frame
-         settles; this only catches the extreme-short case. */
+      var bandTop = br.bottom - hr.top;          /* just under the browser frame */
+      /* the cards live in the GAP between the browser frame and whatever sits
+         below it (the "send to yourself" CTA note, else the scrubber cluster).
+         Centre the row in that band instead of hugging the frame, so it reads as
+         "between the window and the bottom text". */
       var cta = hero.querySelector('.hcta-m');
       var nav = document.querySelector('.m-navcluster');
       var floor = Infinity;
       if (cta) floor = Math.min(floor, cta.getBoundingClientRect().top);
       if (nav) floor = Math.min(floor, nav.getBoundingClientRect().top);
+      var CARD_H = 58;
+      var top;
       if (isFinite(floor)) {
-        var maxTop = (floor - hr.top) - 64;     /* ~56px card + 8px breathing gap */
-        if (top > maxTop) top = maxTop;
+        var bandBottom = (floor - hr.top) - 14;  /* breathing gap above the CTA/nav */
+        var centre = bandTop + (bandBottom - bandTop - CARD_H) / 2;
+        top = centre < bandTop + 6 ? bandTop + 6 : centre;   /* never ride over the frame */
+      } else {
+        top = bandTop + 16;
       }
-      return top;
+      return top + (slot.yp - 11) * 0.5;         /* keep a whisper of the original stagger */
     }
 
     var CARD_DURS = ['4.2s', '5.1s', '4.7s'];
@@ -184,6 +187,7 @@
       card.style.top = slotTop(slot) + 'px';
       hero.appendChild(card);
       rested.push({ card: card, word: word });
+      if (MOBILE) scheduleSettle();   /* centre the row once all fly-ins have landed */
       return card;
     }
 
@@ -237,9 +241,10 @@
       var slot = slots[slotI % slots.length]; slotI++;
       var card = buildCard(word, slot);
       card.style.opacity = '1';
-      /* mobile: cards sit STILL — they're already small from the start, so the
-         idle card-bob just read as the old "jumping". Desktop keeps the bob. */
-      if (!MOBILE) card.classList.add('rested');
+      /* rest = idle: both desktop and mobile get .rested so the card breathes
+         (mobile uses the gentler card-bob-m; see index.html). Covers this snap
+         path as well as doFly, so the float shows however the card landed. */
+      card.classList.add('rested');
       markSaved(word);
     }
 
@@ -255,7 +260,31 @@
         rc.card.style.left = (slot.xp * hero.offsetWidth) + 'px';
         rc.card.style.top  = slotTop(slot) + 'px';
       });
+      centreMobileRow();
     }
+    /* the slot xp's fit a phone edge-to-edge, so on wider (tablet) viewports the
+       fixed-width cards leave all their slack on the RIGHT and the row reads
+       left-heavy (the first card kisses the edge). Measure the laid-out row and
+       shift every card by one delta so the whole strip sits centred under the
+       browser — proportional gaps preserved, just no longer pinned to the left. */
+    function centreMobileRow() {
+      if (!MOBILE || !rested.length) return;
+      var hw = hero.offsetWidth, minL = Infinity, maxR = -Infinity;
+      rested.forEach(function (rc) {
+        var l = parseFloat(rc.card.style.left) || 0, w = rc.card.offsetWidth;
+        if (l < minL) minL = l;
+        if (l + w > maxR) maxR = l + w;
+      });
+      var shift = (hw - (maxR - minL)) / 2 - minL;
+      if (Math.abs(shift) < 0.5) return;
+      rested.forEach(function (rc) {
+        rc.card.style.left = ((parseFloat(rc.card.style.left) || 0) + shift) + 'px';
+      });
+    }
+    /* re-centre once the demo's fly-ins have all landed (debounced past the
+       ~770ms flight) so the settled row is centred without shifting a card mid-flight */
+    var settleT = 0;
+    function scheduleSettle() { if (!MOBILE) return; clearTimeout(settleT); settleT = setTimeout(repositionMobileCards, 820); }
 
     // ---- as the reader scrolls off the hero, the big floating cards fold neatly
     //      into the "My vocab" deck (each glides to its deck slot and shrinks in) ----
@@ -761,6 +790,10 @@
     // mobile → static cards immediately, no auto-demo
     if (MOBILE) {
       words.forEach(restCard);
+      /* mobile has no demo to end, so light the candidate words right away —
+         same amber invite as desktop's post-demo state (branch out·audience·
+         losing already carry .cand and are wired for tap). */
+      document.body.classList.add('hw-invite');
       buildPill();
       attachScatter();
       /* keep the cards pinned to the frame as it settles after first paint */
