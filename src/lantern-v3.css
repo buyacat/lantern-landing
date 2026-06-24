@@ -1608,8 +1608,10 @@ body.tx-off .close-flame,body.tx-off.close-lit footer .lmark::before{animation:n
 .hero .hl.picking{background:#ffe6a0;color:#b86a00;box-shadow:0 0 0 3px rgba(239,142,28,.3)}
 .hero .hl.saved{background:#e3edfd;color:#2f6fd6}
 .hero .hl.saved:hover{background:#d2e2fb;color:#2560c4}
-#hero .browser .word.is-saved{box-shadow:inset 0 -2px 0 var(--blue);transition:background .18s,box-shadow .18s}
-#hero .browser .word.is-saved:hover{background:#eaf1fd;box-shadow:inset 0 -2px 0 #2560c4}
+/* saved plain words take the SAME blue chip as the .hl saved words (genre/devoted/
+   branch out) — one saved look, not an underline-vs-chip split */
+#hero .browser .word.is-saved{background:#e3edfd;color:#2f6fd6;border-radius:4px;padding:0 3px;box-shadow:none;transition:background .25s,color .25s}
+#hero .browser .word.is-saved:hover{background:#d2e2fb;color:#2560c4}
 /* candidate words (council follow-up): once the auto-demo ends (body.hw-invite)
    and we're still on HOME (not hero-p2+), a few good words show a soft amber
    underline + a gentle pulse so the visitor learns they can save more too. The

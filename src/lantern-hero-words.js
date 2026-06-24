@@ -102,33 +102,31 @@
     var slotI = 0;
     var rested = [];
     /* the hero is a demonstration, not a real shelf — cap how many cards may rest
-       here so they never run out of slots and pile up. Desktop = the 7 slots above;
-       mobile keeps its prior behaviour (its .hw-cards are display:none under 1000px). */
-    var MAX_CARDS = MOBILE ? Infinity : slots.length;
+       here so they never run out of room and pile up. 7 on both: desktop = its 7
+       slots; mobile = the same cap, after which the "that's plenty for a demo"
+       note shows instead of an 8th card (the strip wraps to 2 rows up to there). */
+    var MAX_CARDS = MOBILE ? 7 : slots.length;
 
-    function slotTop(slot) {
-      if (!MOBILE) return slot.yp * hero.offsetHeight;
+    /* the cards live in the GAP between the browser frame and whatever sits
+       below it (the "send to yourself" CTA note, else the scrubber cluster) —
+       returns that band's top (just under the frame) and bottom (above the CTA),
+       so the strip can be centred in it. */
+    function mobileBand() {
       var hr = hero.getBoundingClientRect(), br = browser.getBoundingClientRect();
-      var bandTop = br.bottom - hr.top;          /* just under the browser frame */
-      /* the cards live in the GAP between the browser frame and whatever sits
-         below it (the "send to yourself" CTA note, else the scrubber cluster).
-         Centre the row in that band instead of hugging the frame, so it reads as
-         "between the window and the bottom text". */
+      var top = br.bottom - hr.top;              /* just under the browser frame */
       var cta = hero.querySelector('.hcta-m');
       var nav = document.querySelector('.m-navcluster');
       var floor = Infinity;
       if (cta) floor = Math.min(floor, cta.getBoundingClientRect().top);
       if (nav) floor = Math.min(floor, nav.getBoundingClientRect().top);
-      var CARD_H = 58;
-      var top;
-      if (isFinite(floor)) {
-        var bandBottom = (floor - hr.top) - 14;  /* breathing gap above the CTA/nav */
-        var centre = bandTop + (bandBottom - bandTop - CARD_H) / 2;
-        top = centre < bandTop + 6 ? bandTop + 6 : centre;   /* never ride over the frame */
-      } else {
-        top = bandTop + 16;
-      }
-      return top + (slot.yp - 11) * 0.5;         /* keep a whisper of the original stagger */
+      var bottom = isFinite(floor) ? (floor - hr.top) - 14 : top + 200;   /* breathing gap above the CTA/nav */
+      return { top: top, bottom: bottom };
+    }
+    function slotTop(slot) {
+      if (!MOBILE) return slot.yp * hero.offsetHeight;
+      var b = mobileBand(), CARD_H = 58;
+      var centre = b.top + Math.max(6, (b.bottom - b.top - CARD_H) / 2);
+      return centre + (slot.yp - 11) * 0.5;      /* whisper of the original stagger */
     }
 
     var CARD_DURS = ['4.2s', '5.1s', '4.7s'];
@@ -183,11 +181,14 @@
             '<span class="cefr-b b-' + c + '">' + m.cefr + '</span></div>' +
             '<div class="tr t-' + c + '">' + m.gloss + '</div></div>';
       }
-      card.style.left = (slot.xp * hero.offsetWidth) + 'px';
-      card.style.top = slotTop(slot) + 'px';
       hero.appendChild(card);
       rested.push({ card: card, word: word });
-      if (MOBILE) scheduleSettle();   /* centre the row once all fly-ins have landed */
+      if (MOBILE) {
+        layoutMobileRow();            /* re-flow the centred strip so this card takes a fresh slot, never overlapping */
+      } else {
+        card.style.left = (slot.xp * hero.offsetWidth) + 'px';
+        card.style.top = slotTop(slot) + 'px';
+      }
       return card;
     }
 
@@ -216,9 +217,11 @@
     }
     function doFly(word) {
       var slot = slots[slotI % slots.length]; slotI++;
-      var sx = slot.xp * hero.offsetWidth, sy = slotTop(slot);
       var card = buildCard(word, slot);
       var cw = card.offsetWidth, ch = card.offsetHeight;
+      /* fly in from the word to the card's just-assigned rest spot (mobile: its
+         place in the re-flowed strip; desktop: the slot) */
+      var sx = parseFloat(card.style.left) || 0, sy = parseFloat(card.style.top) || 0;
       var hr = hero.getBoundingClientRect(), wr = word.getBoundingClientRect();
       var dx = (wr.left + wr.width / 2 - hr.left) - (sx + cw / 2);
       var dy = (wr.top + wr.height / 2 - hr.top) - (sy + ch / 2);
@@ -253,38 +256,46 @@
        orientation change all move browser.bottom after the cards were placed, so
        their stale Y can drift onto the bottom CTA/scrubber (worst on short, wide
        phones). Re-derive every rested card's slot position from the live layout. */
+    /* mobile: lay every rested card out as a centred, packed left→right strip
+       (real card widths + a fixed gap, no fixed slots), wrapping to a second row
+       when the first is full. Re-running it on each save re-flows the whole strip
+       so a new word takes a FRESH slot — the existing cards slide over via the CSS
+       left/top transition — instead of the 5th card landing on top of the 1st
+       (the old fixed-4-slot scheme wrapped slot 5's index back onto slot 1). */
+    var M_GAP = 7, M_RGAP = 8, M_CARD_H = 58, M_STAG = [-1.5, 2.5, -2.5, 1.5];
+    function layoutMobileRow() {
+      if (!MOBILE || !rested.length) return;
+      var W = hero.offsetWidth, avail = W - 8;            /* 4px breathing each edge */
+      var widths = rested.map(function (rc) { return rc.card.offsetWidth || 84; });
+      /* greedy wrap into rows */
+      var rows = [], cur = [], curW = 0;
+      rested.forEach(function (rc, i) {
+        var w = widths[i], add = (cur.length ? M_GAP : 0) + w;
+        if (cur.length && curW + add > avail) { rows.push({ items: cur, w: curW }); cur = []; curW = 0; add = w; }
+        cur.push({ rc: rc, i: i, w: w }); curW += add;
+      });
+      if (cur.length) rows.push({ items: cur, w: curW });
+      var band = mobileBand();
+      var blockH = rows.length * M_CARD_H + (rows.length - 1) * M_RGAP;
+      var startTop = band.top + Math.max(6, (band.bottom - band.top - blockH) / 2);
+      rows.forEach(function (row, r) {
+        var x = (W - row.w) / 2; if (x < 6) x = 6;
+        var top = startTop + r * (M_CARD_H + M_RGAP);
+        row.items.forEach(function (it) {
+          it.rc.card.style.left = x + 'px';
+          it.rc.card.style.top = (top + M_STAG[it.i % M_STAG.length]) + 'px';
+          x += it.w + M_GAP;
+        });
+      });
+    }
+    /* mobile cards are absolutely placed below the browser frame, but that frame
+       settles LATE — web-font reflow, the fitMobileBrowser height morph, or an
+       orientation change all move browser.bottom after the cards were placed, so
+       their stale Y can drift onto the bottom CTA/scrubber. Re-flow from live layout. */
     function repositionMobileCards() {
       if (!MOBILE || folded || !rested.length) return;
-      rested.forEach(function (rc, i) {
-        var slot = slots[i % slots.length];
-        rc.card.style.left = (slot.xp * hero.offsetWidth) + 'px';
-        rc.card.style.top  = slotTop(slot) + 'px';
-      });
-      centreMobileRow();
+      layoutMobileRow();
     }
-    /* the slot xp's fit a phone edge-to-edge, so on wider (tablet) viewports the
-       fixed-width cards leave all their slack on the RIGHT and the row reads
-       left-heavy (the first card kisses the edge). Measure the laid-out row and
-       shift every card by one delta so the whole strip sits centred under the
-       browser — proportional gaps preserved, just no longer pinned to the left. */
-    function centreMobileRow() {
-      if (!MOBILE || !rested.length) return;
-      var hw = hero.offsetWidth, minL = Infinity, maxR = -Infinity;
-      rested.forEach(function (rc) {
-        var l = parseFloat(rc.card.style.left) || 0, w = rc.card.offsetWidth;
-        if (l < minL) minL = l;
-        if (l + w > maxR) maxR = l + w;
-      });
-      var shift = (hw - (maxR - minL)) / 2 - minL;
-      if (Math.abs(shift) < 0.5) return;
-      rested.forEach(function (rc) {
-        rc.card.style.left = ((parseFloat(rc.card.style.left) || 0) + shift) + 'px';
-      });
-    }
-    /* re-centre once the demo's fly-ins have all landed (debounced past the
-       ~770ms flight) so the settled row is centred without shifting a card mid-flight */
-    var settleT = 0;
-    function scheduleSettle() { if (!MOBILE) return; clearTimeout(settleT); settleT = setTimeout(repositionMobileCards, 820); }
 
     // ---- as the reader scrolls off the hero, the big floating cards fold neatly
     //      into the "My vocab" deck (each glides to its deck slot and shrinks in) ----
